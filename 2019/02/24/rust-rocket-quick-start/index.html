@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Web,Rust,Rocket,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言Rocket 框架 是 Rust 生态中比较流行的 Web 框架之一，其最大的特点是拥有类似 Flask 那样比较简洁的写法，可以非常轻松地编写 RESTful API，同时还支持中间件等机制，易于扩展。当然，目前该框架最大的缺点是使用了很多 rust-nightly 版本中的特性，导致无法在 rust-stable 分支下编译。这对于一个需要长期维护的较大的项目来说，就存在一定的升级风险。不">
+<meta name="keywords" content="Web,Rust,Rocket">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Rocket Web 框架入门">
+<meta property="og:url" content="http://ifaceless.space/2019/02/24/rust-rocket-quick-start/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言Rocket 框架 是 Rust 生态中比较流行的 Web 框架之一，其最大的特点是拥有类似 Flask 那样比较简洁的写法，可以非常轻松地编写 RESTful API，同时还支持中间件等机制，易于扩展。当然，目前该框架最大的缺点是使用了很多 rust-nightly 版本中的特性，导致无法在 rust-stable 分支下编译。这对于一个需要长期维护的较大的项目来说，就存在一定的升级风险。不">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-06-24T00:49:40.533Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Rocket Web 框架入门">
+<meta name="twitter:description" content="引言Rocket 框架 是 Rust 生态中比较流行的 Web 框架之一，其最大的特点是拥有类似 Flask 那样比较简洁的写法，可以非常轻松地编写 RESTful API，同时还支持中间件等机制，易于扩展。当然，目前该框架最大的缺点是使用了很多 rust-nightly 版本中的特性，导致无法在 rust-stable 分支下编译。这对于一个需要长期维护的较大的项目来说，就存在一定的升级风险。不">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2019/02/24/rust-rocket-quick-start/">
+
+
+
+
+
+  <title>Rocket Web 框架入门 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/02/24/rust-rocket-quick-start/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Rocket Web 框架入门</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-24T23:23:30+08:00">
+                2019-02-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Web-开发/" itemprop="url" rel="index">
+                    <span itemprop="name">Web 开发</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.9k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  7
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p><a href="https://rocket.rs/" target="_blank" rel="noopener">Rocket 框架</a> 是 Rust 生态中比较流行的 Web 框架之一，其最大的特点是拥有类似 Flask 那样比较简洁的写法，可以非常轻松地编写 RESTful API，同时还支持中间件等机制，易于扩展。当然，目前该框架最大的缺点是使用了很多 rust-nightly 版本中的特性，导致无法在 rust-stable 分支下编译。这对于一个需要长期维护的较大的项目来说，就存在一定的升级风险。不过鉴于目前我们不大可能在生产环境中使用 Rust 来编写 Web API，暂且还不用担心这些问题。</p>
+<a id="more"></a>
+<h1 id="你好，Rocket"><a href="#你好，Rocket" class="headerlink" title="你好，Rocket"></a>你好，Rocket</h1><p><em>需要说明的是，下面的示例代码是在 <code>rustc 1.34.0-nightly</code> 环境下编译并运行的~</em></p>
+<p>首先，需要新建项目 <code>hello-rocket</code>：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cargo new hello-rocket --bin</span><br></pre></td></tr></table></figure></p>
+<p>由于需要使用 rust-nightly 版本，所以这里需要切换版本并更新工具链。方法如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"># 将当前项目环境切到 nightly 版本</span><br><span class="line">rustup override set nightly &amp;&amp; rustup update</span><br></pre></td></tr></table></figure></p>
+<p>准备工作完成后，我们就需要给项目添加 <code>rocket</code> crate 依赖啦：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">cargo add rocket</span><br></pre></td></tr></table></figure>
+<p>可以在 <code>Cargo.toml</code> 中看到添加的依赖：</p>
+<figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line"><span class="section">[dependencies]</span></span><br><span class="line"><span class="attr">rocket</span> = <span class="string">"0.4.0"</span></span><br></pre></td></tr></table></figure>
+<p>接下来，我们在 <code>main.rs</code> 中编写一个最简单的 API，负责在访问对应路由时打印出 <code>Hello, Rocket</code>。可以将下面的代码粘贴到你的文件中：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#![feature(proc_macro_hygiene, decl_macro)]</span></span><br><span class="line"><span class="comment">// 我们需要使用 rocket 中定义的路由创建宏 `routes!`</span></span><br><span class="line"><span class="meta">#[macro_use]</span></span><br><span class="line"><span class="keyword">extern</span> <span class="keyword">crate</span> rocket;</span><br><span class="line"><span class="meta">#[get(<span class="meta-string">"/"</span>)]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">index</span></span>() -&gt; <span class="built_in">String</span> &#123;</span><br><span class="line">    <span class="string">"Hello, Rocket"</span>.to_string()</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    rocket::ignite().mount(<span class="string">"/"</span>, routes![index]).launch();</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上就完成了一个最简单的 API 编写。最后编译并启动 Web 服务后，可以在终端中看到下面的输出。你可以在浏览器中访问 <code>localhost:8000</code> 来查看响应内容：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Configured for development.</span><br><span class="line">    =&gt; address: localhost</span><br><span class="line">    =&gt; port: 8000</span><br><span class="line">    =&gt; log: normal</span><br><span class="line">    =&gt; workers: 8</span><br><span class="line">    =&gt; secret key: generated</span><br><span class="line">    =&gt; limits: forms = 32KiB</span><br><span class="line">    =&gt; keep-alive: 5s</span><br><span class="line">    =&gt; tls: disabled</span><br><span class="line">Mounting /:</span><br><span class="line">    =&gt; GET / (index)</span><br><span class="line">Rocket has launched from http://localhost:8000</span><br></pre></td></tr></table></figure>
+<h1 id="Rocket-的特性"><a href="#Rocket-的特性" class="headerlink" title="Rocket 的特性"></a>Rocket 的特性</h1><p>在其官网的 Overview 中，可以看到 Rocket 框架的主要特性。</p>
+<h2 id="路由（Routing）"><a href="#路由（Routing）" class="headerlink" title="路由（Routing）"></a>路由（Routing）</h2><p>Rocket 的主要任务便是路由请求到合适的请求处理 Handler。路由是通过 <code>get</code> 属性声明的，看起来像是 Python 中的装饰器：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[get(<span class="meta-string">"/"</span>)]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">index</span></span>() -&gt; &amp;<span class="symbol">'static</span> <span class="built_in">str</span> &#123;</span><br><span class="line">    <span class="string">"Hello, Rocket!"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上面的代码块为例，这个路由的名称为 <code>index</code>，和 <code>HTTP GET /</code> 匹配。请求处理函数会返回一个字符串作为 HTTP 响应的 body。</p>
+<h2 id="动态参数（Dynamic-Params）"><a href="#动态参数（Dynamic-Params）" class="headerlink" title="动态参数（Dynamic Params）"></a>动态参数（Dynamic Params）</h2><p>Rocket 可以动态地识别请求路径多个部分，并和处理函数的参数一一匹配，示例如下：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[get(<span class="meta-string">"/hello/&lt;name&gt;/&lt;age&gt;"</span>)]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">hello</span></span>(name: <span class="built_in">String</span>, age: <span class="built_in">u8</span>) -&gt; <span class="built_in">String</span> &#123;</span><br><span class="line">    <span class="built_in">format!</span>(<span class="string">"Hello, &#123;&#125; year old, named &#123;&#125;!"</span>, age, name)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述示例表示，<code>hello</code> 路由会动态匹配到路径中的 <code>&lt;name&gt;</code> 和 <code>&lt;age&gt;</code> 部分。每个动态参数都要有具体的类型，Rocket 会尝试将 <code>path</code> 中对应位置的参数转换为目标类型。只有参数正确转换后，才会调用相应的路由处理函数。为了解析字符串，Rocket 会使用 <code>FromParam</code> trait，你也可以为自定义类型实现该 trait。</p>
+<h2 id="请求数据处理（Handling-Data）"><a href="#请求数据处理（Handling-Data）" class="headerlink" title="请求数据处理（Handling Data）"></a>请求数据处理（Handling Data）</h2><p>请求的 body 数据是通过 <code>FromData</code> trait 来处理的。请求的 body 数据可以派生任何实现了 <code>FromData</code> 的类型。你可以像下面这样指定期望通过哪个参数使用请求的 body：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[post(<span class="meta-string">"/login"</span>, data = <span class="meta-string">"&lt;user_form&gt;"</span>)]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">login</span></span>(user_form: Form&lt;UserLogin&gt;) -&gt; <span class="built_in">String</span> &#123;</span><br><span class="line">    <span class="built_in">format!</span>(<span class="string">"Hello, &#123;&#125;!"</span>, user_form.name)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>Form</code> 类型是 Rocket 内建的类型，它可以将 Web 表单转换成结构体。Rocket 会自动尝试将请求的 body 数据转换成 <code>Form</code>，然后在转换成功后调用 <code>login</code> 处理函数。其它内建的 <code>FormData</code> 类型还有 <code>Data</code>、<code>Json</code> 和 <code>Flash</code>。</p>
+<h2 id="请求护卫（Request-Guards）"><a href="#请求护卫（Request-Guards）" class="headerlink" title="请求护卫（Request Guards）"></a>请求护卫（Request Guards）</h2><p>除了动态路径和数据参数外，请求处理函数还可以包含第三种类型的参数：<em>request guards</em>。<em>Request guards</em> 不用在路由属性中声明，而是出现在请求处理函数的参数签名中，并且支持任意多个。</p>
+<p><em>Request guards</em> 的作用是对请求的元信息进行判断，如果满足指定条件，才运行处理函数，起到保护作用。比如：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[get(<span class="meta-string">"/sensitive"</span>)]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">sensitive</span></span>(key: ApiKey) &#123;</span><br><span class="line"></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>例子中 <code>ApiKey</code> 用于保护 <code>sensitive</code> 处理函数，只有在请求头中的 API 密钥认证通过后，才会执行。<code>ApiKey</code> 类型需要过实现 <code>FromRequest</code> trait，然后在实现逻辑中检查 API 密钥头。<em>Request guards</em> 是 Rocket 中非常强大且独特的概念。</p>
+<h2 id="响应（Responder）"><a href="#响应（Responder）" class="headerlink" title="响应（Responder）"></a>响应（Responder）</h2><p>请求处理函数的返回类型可以是任何实现了 <code>Responder</code> 的类型：<br><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[get(<span class="meta-string">"/"</span>)]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">route</span></span>() -&gt; T &#123;&#125;</span><br></pre></td></tr></table></figure></p>
+<p>上述例子中，<code>T</code> 必须要实现 <code>Responder</code>。Rocket 已经为标准库中很多类型实现了 <code>Responder</code>：<code>&amp;str</code>、<code>String</code>、<code>File</code>、<code>Option</code> 以及 <code>Result</code>。Rocket 也实现了一些自定义的 <code>Responder</code>，如 <code>Redirect</code>、<code>Flash</code> 和 <code>Template</code>。</p>
+<p><code>Responder</code> 的任务就是尽可能生成 <code>Response</code>，它也可以在失败时提供状态码。如果指定了状态码，Rocket 就会调用相应的错误捕获函数。<code>catch</code> 路由的定义如下：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[catch(404)]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">not_found</span></span>() -&gt; T &#123;&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="运行（Launching）"><a href="#运行（Launching）" class="headerlink" title="运行（Launching）"></a>运行（Launching）</h2><p>为了运行 Rocket 应用，首先需要挂载路由；然后才可以启动。示例如下：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rocket::ignite()</span><br><span class="line">    .mount(<span class="string">"/base"</span>, routes![index, another])</span><br><span class="line">    .launch();</span><br></pre></td></tr></table></figure>
+<p>调用 <code>launch</code> 后会启动服务器，开发环境中，Rocket 会打印出一些比较有用的状态信息：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">🚀  Rocket has launched from http:<span class="comment">//localhost:8000</span></span><br></pre></td></tr></table></figure>
+<h1 id="Rocket-是如何工作的？"><a href="#Rocket-是如何工作的？" class="headerlink" title="Rocket 是如何工作的？"></a>Rocket 是如何工作的？</h1><p>每一个 Rocket Web 应用从接受到请求到进行响应，都会经历标准的三个步骤（这也是常规 Web 框架都会做的事情）。</p>
+<h2 id="校验"><a href="#校验" class="headerlink" title="校验"></a>校验</h2><p>首先，Rocket 会校验匹配的请求，确保处理函数中的每个类型都可以派生自当前请求。如果某个类型无法派生，则会定向到下一个匹配的路由，直到所有类型校验都没问题或者没有任何可尝试的路由为止。如果所有的路由都不匹配，则会返回自定义的 404 错误：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#[post(<span class="meta-string">"/user"</span>, data = <span class="meta-string">"&lt;new_user&gt;"</span>)]</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">new_user</span></span>(admin: AdminUser, new_user: Form&lt;User&gt;) -&gt; T &#123;</span><br><span class="line">   ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上述例子来说明：</p>
+<ol>
+<li>请求方法必须是 <code>POST</code></li>
+<li>请求路径必须是 <code>/user</code></li>
+<li>请求中必须包含 <code>body</code> 数据</li>
+<li>请求的元信息必须是通过认证的 <code>AdminUser</code></li>
+<li>请求体必须能够转换成 <code>User</code> 结构体</li>
+</ol>
+<h2 id="处理"><a href="#处理" class="headerlink" title="处理"></a>处理</h2><p>接下来，请求会被任意的 Handler 处理。这里就是执行具体的业务逻辑了。Rocket 中的 Handler 就是简单的函数，唯一要注意的是返回值必须要是实现了 <code>Responder</code> trait 的类型。</p>
+<h2 id="响应"><a href="#响应" class="headerlink" title="响应"></a>响应</h2><p>最后，Rocket 会将 Handler 返回值转换成 HTTP 响应，然后给客户端发送响应：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">route</span></span>() -&gt; T &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>上述例子中的 <code>T</code> 必须是实现了 <code>Responder</code> 的类型，Rocket 目前提供了很多常用的响应类型：</p>
+<ol>
+<li><code>Json&lt;T&gt;</code>: 将类型 <code>T</code> 转换成 JSON 并返回</li>
+<li><code>Template</code>: 渲染模板并返回</li>
+<li><code>Redirect</code>: 返回合适的重定向响应</li>
+<li><code>NamedFile</code>: 向客户端流传输指定的文件，<code>Content-Type</code> 设置为文件夹的扩展名</li>
+<li><code>Stream</code>: 向客户端流传输任意 <code>Read</code> 值</li>
+</ol>
+<h1 id="更多扩展功能"><a href="#更多扩展功能" class="headerlink" title="更多扩展功能"></a>更多扩展功能</h1><p>Rocket 框架可插拔的特性能能够给你带来很多额外的特性，这些特性在其文档中有详细的介绍。</p>
+<ol>
+<li><a href="https://rocket.rs/v0.4/guide/responses/#templates" target="_blank" rel="noopener">模板</a></li>
+<li><a href="https://rocket.rs/v0.4/guide/requests/#cookies" target="_blank" rel="noopener">Cookies</a></li>
+<li><a href="https://rocket.rs/v0.4/guide/requests/#streaming" target="_blank" rel="noopener">流传输</a></li>
+<li><a href="https://rocket.rs/v0.4/guide/configuration/#environment" target="_blank" rel="noopener">易于配置的开发环境</a></li>
+<li><a href="https://rocket.rs/v0.4/guide/testing#testing" target="_blank" rel="noopener">内建单元测试工具</a></li>
+<li><a href="https://rocket.rs/v0.4/guide/responses/#typed-uris" target="_blank" rel="noopener">类型安全的 URIs</a></li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li><a href="https://rocket.rs/v0.4/overview/" target="_blank" rel="noopener">Rocket Overview</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2019/02/24/rust-rocket-quick-start/" title="Rocket Web 框架入门">http://ifaceless.space/2019/02/24/rust-rocket-quick-start/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Web/" rel="tag"><i class="fa fa-tag"></i> Web</a>
+          
+            <a href="/tags/Rust/" rel="tag"><i class="fa fa-tag"></i> Rust</a>
+          
+            <a href="/tags/Rocket/" rel="tag"><i class="fa fa-tag"></i> Rocket</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/18/explore-thrift/" rel="next" title="Thrift 初探">
+                <i class="fa fa-chevron-left"></i> Thrift 初探
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/06/23/javascript-es5-learning-note/" rel="prev" title="JavaScript ES5 入门笔记">
+                JavaScript ES5 入门笔记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me@ifaceless.me" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#你好，Rocket"><span class="nav-number">2.</span> <span class="nav-text">你好，Rocket</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Rocket-的特性"><span class="nav-number">3.</span> <span class="nav-text">Rocket 的特性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#路由（Routing）"><span class="nav-number">3.1.</span> <span class="nav-text">路由（Routing）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动态参数（Dynamic-Params）"><span class="nav-number">3.2.</span> <span class="nav-text">动态参数（Dynamic Params）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#请求数据处理（Handling-Data）"><span class="nav-number">3.3.</span> <span class="nav-text">请求数据处理（Handling Data）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#请求护卫（Request-Guards）"><span class="nav-number">3.4.</span> <span class="nav-text">请求护卫（Request Guards）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#响应（Responder）"><span class="nav-number">3.5.</span> <span class="nav-text">响应（Responder）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#运行（Launching）"><span class="nav-number">3.6.</span> <span class="nav-text">运行（Launching）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Rocket-是如何工作的？"><span class="nav-number">4.</span> <span class="nav-text">Rocket 是如何工作的？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#校验"><span class="nav-number">4.1.</span> <span class="nav-text">校验</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#处理"><span class="nav-number">4.2.</span> <span class="nav-text">处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#响应"><span class="nav-number">4.3.</span> <span class="nav-text">响应</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#更多扩展功能"><span class="nav-number">5.</span> <span class="nav-text">更多扩展功能</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

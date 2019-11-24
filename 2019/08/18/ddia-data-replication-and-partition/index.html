@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="分布式数据库,数据复制,数据分区,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言完成第一部分的数据系统基础学习后，就开始进入分布式数据系统的世界了。前面学习的内容主要是针对单节点的情况；然而，在现实中，我们需要考虑到系统的扩展性、容错性以及延迟性等，这就引入了分布式系统。分布式系统中通常会有很多个节点，复杂度自然也上来了。这个部分将主要学习数据系统的复制、分区、事务、一致性共识算法、以及分布式系统设计时的一些挑战等，这些知识都比较硬核，也非常有趣。所以，「上车，走吧~」">
+<meta name="keywords" content="分布式数据库,数据复制,数据分区">
+<meta property="og:type" content="article">
+<meta property="og:title" content="野猪🐗书读书笔记之数据复制和分区">
+<meta property="og:url" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言完成第一部分的数据系统基础学习后，就开始进入分布式数据系统的世界了。前面学习的内容主要是针对单节点的情况；然而，在现实中，我们需要考虑到系统的扩展性、容错性以及延迟性等，这就引入了分布式系统。分布式系统中通常会有很多个节点，复杂度自然也上来了。这个部分将主要学习数据系统的复制、分区、事务、一致性共识算法、以及分布式系统设计时的一些挑战等，这些知识都比较硬核，也非常有趣。所以，「上车，走吧~」">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/master-slave-replication.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/data-sync.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/read-after-write.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/monotonic-read.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/prefix-read.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/multi-master-nodes.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/repair-on-read.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/partition.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/partition-with-hash.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/secondary-index-on-doc.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/secondary-index-on-terms.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/rebalance.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/route-policies.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/zookeeper-save-meta.png">
+<meta property="og:updated_time" content="2019-11-24T09:45:59.823Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="野猪🐗书读书笔记之数据复制和分区">
+<meta name="twitter:description" content="引言完成第一部分的数据系统基础学习后，就开始进入分布式数据系统的世界了。前面学习的内容主要是针对单节点的情况；然而，在现实中，我们需要考虑到系统的扩展性、容错性以及延迟性等，这就引入了分布式系统。分布式系统中通常会有很多个节点，复杂度自然也上来了。这个部分将主要学习数据系统的复制、分区、事务、一致性共识算法、以及分布式系统设计时的一些挑战等，这些知识都比较硬核，也非常有趣。所以，「上车，走吧~」">
+<meta name="twitter:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/master-slave-replication.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/">
+
+
+
+
+
+  <title>野猪🐗书读书笔记之数据复制和分区 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">野猪🐗书读书笔记之数据复制和分区</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-18T19:27:19+08:00">
+                2019-08-18
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/系统设计/" itemprop="url" rel="index">
+                    <span itemprop="name">系统设计</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  4.3k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  14
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>完成第一部分的数据系统基础学习后，就开始进入分布式数据系统的世界了。前面学习的内容主要是针对单节点的情况；然而，在现实中，我们需要考虑到系统的<strong>扩展性</strong>、<strong>容错性</strong>以及<strong>延迟性</strong>等，这就引入了分布式系统。分布式系统中通常会有很多个节点，复杂度自然也上来了。这个部分将主要学习数据系统的复制、分区、事务、一致性共识算法、以及分布式系统设计时的一些挑战等，这些知识都比较硬核，也非常有趣。所以，「上车，走吧~」</p>
+<p>本篇笔记重点是关于数据系统的复制和分区，可以了解下常规的主从复制原理、多主复制的应用场景，另外还介绍了无主复制的系统（如亚马逊 Dynamo 系统）。最后就是关于数据分区的介绍，可以了解下常见的分区策略，动态平衡策略等。</p>
+<a id="more"></a>
+<h1 id="为什么需要分布式系统？"><a href="#为什么需要分布式系统？" class="headerlink" title="为什么需要分布式系统？"></a>为什么需要分布式系统？</h1><h2 id="共享架构"><a href="#共享架构" class="headerlink" title="共享架构"></a>共享架构</h2><p>针对共享架构，如果负载增加，最常见的扩展方式就是采买更强大的 CPU、添加更多的内存等。这种被称为垂直扩展，但是这种方式并不一定奏效，天花板是看得见的。并且扩展的成本非线性，而应对负载的能力却不一定能线性提高。</p>
+<h2 id="无共享架构"><a href="#无共享架构" class="headerlink" title="无共享架构"></a>无共享架构</h2><p>在无共享架构中，每个节点使用独立的 CPU、内存和磁盘，节点之间的通信采用以太网。该架构无需特殊的硬件支持，性价比高。扩展性好（水平扩展），并且有强大的容错能力和负载均衡能力。不过这种架构最大的问题是会带来更大的复杂性，甚至会限制实际可使用的数据模型。</p>
+<h1 id="数据复制"><a href="#数据复制" class="headerlink" title="数据复制"></a>数据复制</h1><h2 id="主节点和从节点"><a href="#主节点和从节点" class="headerlink" title="主节点和从节点"></a>主节点和从节点</h2><ol>
+<li>每个保存了数据库完整数据集的节点叫作副本</li>
+<li>主从复制方案：<ol>
+<li>指定某个副本为主副本（主节点）。写入会发给主节点</li>
+<li>主节点在将新数据存储后，将更改作为复制的日志或者更改流的方式发给从节点。从节点获取更改日志，并应用到本地，这里必须要保持和主副本相同的写入顺序</li>
+<li>客户端读取时，可读取从副本的数据<br><img src="./master-slave-replication.png" alt=""></li>
+</ol>
+</li>
+</ol>
+<h3 id="同步复制-v-s-异步复制"><a href="#同步复制-v-s-异步复制" class="headerlink" title="同步复制 v.s. 异步复制"></a>同步复制 v.s. 异步复制</h3><p><img src="./data-sync.png" alt=""></p>
+<ol>
+<li>对于关系数据库，两种复制方式通常是可配置的；而其他系统可能只可指定其中一种方式。</li>
+<li>同步复制：<ol>
+<li>优点：一旦向用户确认写入请求，则主从数据一致，并都处于最新版本。主库宕机，也可以放心从从库读取。</li>
+<li>缺点：如果从节点无法完成确认（如网络拥塞、故障等），写入会失败。主节点会阻塞后续写请求，降低系统吞吐量和可靠性。</li>
+</ol>
+</li>
+<li><strong>半同步</strong>：实践中，如果开启了同步复制模式，通常是其中的<strong>某个从节</strong>（可根据情况选择其他从节点提升为同步模式）点为同步复制，而其他为异步复制模式。</li>
+<li><strong>全异步</strong>：<ol>
+<li>优点：系统的吞吐性能很好</li>
+<li>缺点：数据的持久化无法得到保证，可能存在数据丢失的情况</li>
+</ol>
+</li>
+</ol>
+<h3 id="配置新的从节点"><a href="#配置新的从节点" class="headerlink" title="配置新的从节点"></a>配置新的从节点</h3><ol>
+<li><p>什么时候需要？</p>
+<ol>
+<li>提高负载能力</li>
+<li>提供容错能力</li>
+<li>替换失败的副本</li>
+</ol>
+</li>
+<li><p>要想做到不停机完成新节点添加，逻辑上主要操作如下：</p>
+<ol>
+<li><strong>生成快照</strong>：在某刻对主节点的数据副本产生一个一致性快照（避免长时间锁库）</li>
+<li><strong>快照发送</strong>：快照发送到新的从节点（这样大部分的历史数据就有了）</li>
+<li><strong>变更日志</strong>：从节点上线连接到主节点，<strong>请求快照点之后发生的所有数据更改日志</strong>（增量）</li>
+<li><strong>追赶</strong>：获得日志后，从节点应用快照后的数据变更。继续处理主节点上新数据变化。并重复步骤 1~4</li>
+</ol>
+</li>
+</ol>
+<h3 id="节点失效怎么办？"><a href="#节点失效怎么办？" class="headerlink" title="节点失效怎么办？"></a>节点失效怎么办？</h3><ol>
+<li><strong>从节点失效：追赶式恢复</strong>。从节点可根据副本的复制日志得知故障前最后一笔事务，然后向主节点请求该事务之后中断期间内的所有数据变更，并应用变更，完成追赶。</li>
+<li><p><strong>主节点失效：节点切换</strong>：</p>
+<ol>
+<li>故障切换可手动，可自动。</li>
+<li>自动切换常规步骤：<ol>
+<li><em>确定主节点失效</em>。多采用基于超时的机制，可以周期性地发送心跳包。</li>
+<li><em>选举新的主节点</em>。涉及到共识的算法，原则是要保证新的主节点与原来的数据差异最小，尽可能减少数据丢失风险。</li>
+<li><em>重新配置系统，生效主节点</em>。客户端需要将写请求发送到新的主节点，对于原主节点恢复后需要确保其被降级为从节点，认可新的主节点。</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>需要思考的问题：</p>
+<ol>
+<li>如果采用异步复制，新的主节点选举后，原主节点也上线，新的主节点可能会收到<strong>写冲突</strong>。简单粗暴的方式就是，抛弃原主节点未完成复制的写请求，违背数据持久化承诺。</li>
+<li><strong>脑裂（Brain-Split）</strong>问题，两个主节点都接收写请求，会导致数据冲突、丢失或者破坏等。可粗暴地关闭某个主节点。</li>
+<li>超时设置多久才合适？太长，意味着主节点宕机后，总体恢复时间变长；太短，会导致很多不必要的切换。尤其是系统处于高负载的压力下，同时网络拥塞严重，不必要的切换会导致情况更加糟糕。</li>
+</ol>
+</li>
+</ol>
+<h3 id="复制日志如何实现"><a href="#复制日志如何实现" class="headerlink" title="复制日志如何实现"></a>复制日志如何实现</h3><ol>
+<li><p><strong>基于语句的复制</strong>：</p>
+<ol>
+<li>看起来不复杂</li>
+<li>不适用的场景：调用非确定性函数的语句；副本需要严格按照完全相同的顺序执行语句（针对依赖数据库的现有数据的情况）；有副作用的语句，在不同的节点可能会产生不同的副作用</li>
+</ol>
+</li>
+<li><p><strong>基于 WAL 传输</strong>：</p>
+<ol>
+<li>可以基于 WAL 构建一个完整的副本</li>
+<li>日志描述的数据结构很底层，复制方案与存储引擎紧密耦合；协议版本升级需要顾虑的较多</li>
+</ol>
+</li>
+<li><p><strong>基于行的逻辑日志复制</strong>：</p>
+<ol>
+<li>逻辑日志，区分物理存储引擎的数据表示。描述数据表行级别的写请求。</li>
+<li>与存储引擎逻辑解耦，便于保持向后兼容。这样主从节点甚至可以运行不同的版本或者使用不同的存储引擎。</li>
+<li>容易解析，易于外部系统处理</li>
+</ol>
+</li>
+<li><p><strong>基于触发器的复制</strong>：给应用层提供了一定的灵活性，但是复制开销更高。</p>
+</li>
+</ol>
+<h2 id="复制滞后问题"><a href="#复制滞后问题" class="headerlink" title="复制滞后问题"></a>复制滞后问题</h2><h3 id="读自己的写（Read-After-Write）"><a href="#读自己的写（Read-After-Write）" class="headerlink" title="读自己的写（Read After Write）"></a>读自己的写（Read After Write）</h3><p><img src="./read-after-write.png" alt=""></p>
+<ol>
+<li>该机制要保证用户总能看到自己最近提交的更新。</li>
+<li>如何实现？<ol>
+<li>如果用户访问可能被修改的内容，则从主节点读；否则从从节点读。</li>
+<li>针对大部分都会被修改的场景，上述方式会丧失从节点的存在意义。可以考虑跟踪最新的更新时间，对于更新时间在最近一分钟的，从主节点读取。同时需要添加监控。</li>
+</ol>
+</li>
+</ol>
+<h3 id="单调读"><a href="#单调读" class="headerlink" title="单调读"></a>单调读</h3><p><img src="./monotonic-read.png" alt=""></p>
+<ol>
+<li>用户在读取修改了的数据时，出现「回滚」的现象。也就是明明修改了，并且第一次读的时候看到了新的数据，但是在第二次读取的时候却看到了旧的数据（多节点数据未同步）。</li>
+<li>单调读要提供的保证就是避免这种奇怪的回滚现象，它比强一致性要弱，但比最终一致性要强。</li>
+<li>可能的解决方案：可以考虑同一个用户总是从某个固定的副本读取（不同的用户分发到不同的副本）。</li>
+</ol>
+<h3 id="前缀一致读"><a href="#前缀一致读" class="headerlink" title="前缀一致读"></a>前缀一致读</h3><p><img src="./prefix-read.png" alt=""></p>
+<ol>
+<li>该机制要保证对于一系列按照特定顺序的写请求，在读取这些内容时要要遵循同样的顺序。否则可能会看到先有果，再有因的奇怪现象，仿佛遇到了先知。</li>
+<li>可能的解决方案：确保拥有因果关系的写入都提交给某个特定分区完成，但是实际效率比较低。</li>
+</ol>
+<h2 id="多主节点复制"><a href="#多主节点复制" class="headerlink" title="多主节点复制"></a>多主节点复制</h2><p><img src="./multi-master-nodes.png" alt=""></p>
+<ol>
+<li>主从模式的缺点：系统仅有一个主节点，承载所有的写请求。如果主节点宕机，会影响所有的写入操作。</li>
+<li>多主节点复制：<ol>
+<li>每个主节点分别接受写请求，并复制（异步 or 同步）给对应的从节点</li>
+<li>每个主节点扮演其它主节点的从节点</li>
+</ol>
+</li>
+</ol>
+<h3 id="适用场景"><a href="#适用场景" class="headerlink" title="适用场景"></a>适用场景</h3><ol>
+<li>多数据中心</li>
+<li>离线客户端操作（典型的例子是 WizNote），每个设备都充当主节点的本地数据库，设备之间采用异步同步方式完成数据同步。同步滞后时间不定。</li>
+<li>协作编辑</li>
+</ol>
+<h2 id="无主节点复制"><a href="#无主节点复制" class="headerlink" title="无主节点复制"></a>无主节点复制</h2><ol>
+<li>亚马逊的 Dynamo 系统是典型的代表，Riak、Cassandra 也受到了启发。</li>
+<li>客户端直接将写请求发送给多个副本，或者交给协调者（不保证写入顺序）来发送。</li>
+<li><p>数据一致性保证？</p>
+<ol>
+<li>读时修复</li>
+<li>反熵：补偿机制，寻找节点之间的差异，将缺少的数据给补充好。该过程不保证特定顺序的复制写入。<br><img src="./repair-on-read.png" alt=""></li>
+</ol>
+</li>
+<li><p>读写 quorum：</p>
+<ol>
+<li>保证：w + r &gt; n（总节点数）</li>
+<li>通常 n 为奇数，w = r = (n+1)/2 （向上舍入）</li>
+<li>quorum 不一定非得是多数，读写节点集合中至少有一个是重叠的节点才最为关键！</li>
+<li>不能保证总能读取到最新值，Dynamo 数据库通常针对最终一致性场景优化的。</li>
+</ol>
+</li>
+<li>并发检测（这块还是建议看书中的例子吧）：<ol>
+<li>最后写入者获胜（LWW），丢弃并发写入。可实现最终收敛目标，但是牺牲了数据持久性为代价。</li>
+<li>Happens-before 关系与并发</li>
+<li>确定前后关系：使用版本号</li>
+<li>合并同时写入的值</li>
+<li>版本矢量</li>
+</ol>
+</li>
+</ol>
+<h1 id="数据分区"><a href="#数据分区" class="headerlink" title="数据分区"></a>数据分区</h1><ol>
+<li>定义：每条数据（或者记录、文档）只属于某个特定分区，每个分区可视为一个完整的小型数据库，是整个数据集的一部分。</li>
+<li><p>为什么要分区？</p>
+<ol>
+<li>提高系统扩展性：将大的数据集分散到更多的节点，负载均衡</li>
+<li>提高查询吞吐量：跨分区并发查询</li>
+</ol>
+</li>
+<li><p>分区和复制通常结合使用，每个分区在多个节点上都有副本，提高系统的容错性：<br> <img src="./partition.png" alt=""></p>
+</li>
+</ol>
+<h2 id="KV-数据分区"><a href="#KV-数据分区" class="headerlink" title="KV 数据分区"></a>KV 数据分区</h2><ol>
+<li><p>分区可能带来的问题：</p>
+<ol>
+<li>分区不均匀，会造成访问倾斜的问题，甚至可能造成热点</li>
+<li>可采用随机分配到所有节点避免热点问题，但是查询会很困难（可能需要并发请求所有分区）</li>
+</ol>
+</li>
+<li><p>基于关键字区间分区：</p>
+<ol>
+<li>核心是<strong>为每个分区分配一段连续的关键字或者关键字区间</strong>（以最小值和最大值来表示）</li>
+<li>关键字区间段不一定要均匀分布</li>
+<li>支持区间查询方便（有一定顺序）</li>
+<li>可能会有热点问题（比如按照时间戳范围划分，可能最新的日期读写就很多），可以考虑再添加别的字段来组合决定分区</li>
+</ol>
+</li>
+<li><p>基于关键字哈希值分区：</p>
+<ol>
+<li>好的哈希函数可处理数据倾斜，均匀分布</li>
+<li>丧失良好的区间查询特性<br><img src="./partition-with-hash.png" alt=""></li>
+</ol>
+</li>
+<li><p>负载倾斜和热点：</p>
+<ol>
+<li>即便通过哈希值分区的方案，也不能完全避免热点问题。极端情况是，所有的读写都针对同一个关键字（如微博大 V），导致所有请求都到了同一个分区。</li>
+<li>大多数系统无法自动消除这种高度倾斜的负载，需要应用层介入。</li>
+</ol>
+</li>
+</ol>
+<h2 id="分区和二级索引"><a href="#分区和二级索引" class="headerlink" title="分区和二级索引"></a>分区和二级索引</h2><ol>
+<li>二级索引的挑战是不能规整地映射到分区中。</li>
+<li><p>基于文档分区的二级索引：</p>
+<ol>
+<li>每个分区只关注自己的分区的文档，并建立了独立的索引</li>
+<li>查询时延迟放大严重，需要分散查询并合并结果，代价较高<br><img src="./secondary-index-on-doc.png" alt=""></li>
+</ol>
+</li>
+<li><p>基于词条分区的二级索引：</p>
+<ol>
+<li>对所有数据构建全局索引；全局索引并非存储在一个节点上（会进行分区），可以和关键字采取不同的分区策略</li>
+<li>可支持高效地区间查询</li>
+<li>读取高效，不需要 scatter/gather 模式</li>
+<li>写入速度慢，且很复杂，会有显著的写放大问题</li>
+<li>所有现有的数据库都难以支持同步更新二级索引，所以通常都是异步更新<br><img src="./secondary-index-on-terms.png" alt=""></li>
+</ol>
+</li>
+</ol>
+<h2 id="分区再平衡"><a href="#分区再平衡" class="headerlink" title="分区再平衡"></a>分区再平衡</h2><ol>
+<li>即将数据和请求从一个节点迁移到另一个节点，这种迁移负载的过程被叫作再平衡（动态平衡）</li>
+<li><p>什么情况下需要？</p>
+<ol>
+<li>查询压力增加，需要增加 CPU 处理负载</li>
+<li>数据规模增加</li>
+<li>节点故障</li>
+</ol>
+</li>
+<li><p>再平衡需要满足的要求：</p>
+<ol>
+<li>平衡之后，负载、数据存储、读写请求等在集群范围更加均匀分布</li>
+<li>平衡过程不能影响线上服务</li>
+<li>避免不必要的负载迁移，尽量减少网络和磁盘 I/O 影响</li>
+</ol>
+</li>
+</ol>
+<h3 id="动态平衡策略"><a href="#动态平衡策略" class="headerlink" title="动态平衡策略"></a>动态平衡策略</h3><ol>
+<li><p>直接取模怎么样？</p>
+<ol>
+<li>方法比较简单，应用层可根据比如用户 ID 和分区数量取模，得到具体要访问的分区对应的节点</li>
+<li>扩展或移除节点困难，涉及到大量数据的移动，应用层代码也可能会被波及</li>
+</ol>
+</li>
+<li><p>固定数量的分区：</p>
+<ol>
+<li>初始时根据长远规划，设置一个远超实际节点数的分区数（比如 1000），每个节点分配多个分区。<strong>每个分区的大小和数据集大小成正比，和节点数无关</strong>。</li>
+<li>新增节点时，从其他节点匀走若干分区，直到再次达到全局平衡；删除节点，则采取相反的措施。</li>
+<li>需要改变分区和节点的映射关系；但是总的分区数不会变，关键字映射也不会变。</li>
+<li>对于数据规模高度不确定或者可变的场景不适用。</li>
+<li>Riak, ES, Couchbase 等支持这种动态平衡策略。<br><img src="./rebalance.png" alt=""></li>
+</ol>
+</li>
+<li><p>动态分区</p>
+<ol>
+<li>如 HBase 和 RethinkDB，可以在分区数据增长到某个阈值（HBase 默认阈值为 10GB）自动拆分成两个分区；如果数据被大量删除，且分区缩小到某个阈值，将相邻的分区进行合并。<strong>类似 B 树分裂</strong>。</li>
+<li>分区数量自动适配分区总量，少量数据-&gt;少量分区-&gt;较小的系统开销；每个分区最大值可被限制。<strong>分区总数和数据集大小成正比，和节点数无关</strong>。</li>
+<li>预分裂可避免初期先验条件不足，无法确定较适合的边界，导致写入都集中在单个节点处理的问题。HBase 和 MongoDB 都支持配置初始分区。</li>
+<li>适合关键字区间分区和哈希分区策略。</li>
+</ol>
+</li>
+<li><p>按节点比例分区：Cassandra 和 Ketama 采用了将分区数和集群节点数成正比关系的方式，每个节点的分区数固定：</p>
+<ol>
+<li>节点数不变时，分区大小和数据集总量成正比</li>
+<li>节点数增加时，分区则会变小</li>
+<li>分区大小保持稳定，可添加更多的节点承载更多的数据</li>
+</ol>
+</li>
+</ol>
+<h2 id="请求路由"><a href="#请求路由" class="headerlink" title="请求路由"></a>请求路由</h2><ol>
+<li><p>典型的服务发现问题，处理策略如下：</p>
+<ol>
+<li><strong>集群中的节点感知分区情况</strong>：允许客户端连接任意节点。如果某个节点恰好拥有请求的分区，则直接处理；否则将请求转发给别的节点，等待答复，并返回给客户端。</li>
+<li><strong>路由层感知分区情况</strong>：所有客户端请求发送至一个路由代理层，由它来做转发。</li>
+<li><strong>客户端感知分区和节点分配关系</strong>：客户端可决定连接到哪个节点，无需中介。<br><img src="./route-policies.png" alt=""></li>
+</ol>
+</li>
+<li><p>很多分布式系统使用了独立的协调服务（如 ZooKeeper）跟踪集群中的元数据，比如 HBase，Kafka 等。<br><img src="./zookeeper-save-meta.png" alt="">  </p>
+</li>
+<li><p>另外一种思路是节点之间采用 gossip 协议同步集群状态变化，此时请求可发到任意节点，该节点负责处理或转发。最大的好处是不依赖第三方服务，但是节点复杂性也增加了。典型的代表是 Cassandra 和 Riak，当然还有 Redis Cluster。</p>
+</li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://book.douban.com/subject/30329536/" target="_blank" rel="noopener">《数据密集型应用设计》第二部分</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/" title="野猪🐗书读书笔记之数据复制和分区">http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/分布式数据库/" rel="tag"><i class="fa fa-tag"></i> 分布式数据库</a>
+          
+            <a href="/tags/数据复制/" rel="tag"><i class="fa fa-tag"></i> 数据复制</a>
+          
+            <a href="/tags/数据分区/" rel="tag"><i class="fa fa-tag"></i> 数据分区</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/08/14/ddia-data-sys-basics/" rel="next" title="野猪🐗书读书笔记之数据系统基础">
+                <i class="fa fa-chevron-left"></i> 野猪🐗书读书笔记之数据系统基础
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/08/24/ddia-transaction/" rel="prev" title="野猪🐗书读书笔记之事务">
+                野猪🐗书读书笔记之事务 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me@ifaceless.me" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#为什么需要分布式系统？"><span class="nav-number">2.</span> <span class="nav-text">为什么需要分布式系统？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#共享架构"><span class="nav-number">2.1.</span> <span class="nav-text">共享架构</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#无共享架构"><span class="nav-number">2.2.</span> <span class="nav-text">无共享架构</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数据复制"><span class="nav-number">3.</span> <span class="nav-text">数据复制</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#主节点和从节点"><span class="nav-number">3.1.</span> <span class="nav-text">主节点和从节点</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#同步复制-v-s-异步复制"><span class="nav-number">3.1.1.</span> <span class="nav-text">同步复制 v.s. 异步复制</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置新的从节点"><span class="nav-number">3.1.2.</span> <span class="nav-text">配置新的从节点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#节点失效怎么办？"><span class="nav-number">3.1.3.</span> <span class="nav-text">节点失效怎么办？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#复制日志如何实现"><span class="nav-number">3.1.4.</span> <span class="nav-text">复制日志如何实现</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#复制滞后问题"><span class="nav-number">3.2.</span> <span class="nav-text">复制滞后问题</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#读自己的写（Read-After-Write）"><span class="nav-number">3.2.1.</span> <span class="nav-text">读自己的写（Read After Write）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#单调读"><span class="nav-number">3.2.2.</span> <span class="nav-text">单调读</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#前缀一致读"><span class="nav-number">3.2.3.</span> <span class="nav-text">前缀一致读</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#多主节点复制"><span class="nav-number">3.3.</span> <span class="nav-text">多主节点复制</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#适用场景"><span class="nav-number">3.3.1.</span> <span class="nav-text">适用场景</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#无主节点复制"><span class="nav-number">3.4.</span> <span class="nav-text">无主节点复制</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数据分区"><span class="nav-number">4.</span> <span class="nav-text">数据分区</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#KV-数据分区"><span class="nav-number">4.1.</span> <span class="nav-text">KV 数据分区</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分区和二级索引"><span class="nav-number">4.2.</span> <span class="nav-text">分区和二级索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#分区再平衡"><span class="nav-number">4.3.</span> <span class="nav-text">分区再平衡</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#动态平衡策略"><span class="nav-number">4.3.1.</span> <span class="nav-text">动态平衡策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#请求路由"><span class="nav-number">4.4.</span> <span class="nav-text">请求路由</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

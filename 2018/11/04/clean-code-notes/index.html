@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="整洁代码,编程风格,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言《代码整洁之道》（Clean Code）这本书非常适合每一个希望提高编程质量的程序员阅读。如何给参数命名？如何定义函数？如何编排子函数？等等这些问题的答案，你都可以在书中找到。 项目质量的好坏很大程度上取决于代码风格，如果团队的代码风格能够基本保持一致，对于每一位开发者和维护者来说都是福音。优秀的代码易于理解，逻辑清晰，命名规范，也是非常值得学习的。 本文记录了在阅读 Robert C. Ma">
+<meta name="keywords" content="整洁代码,编程风格">
+<meta property="og:type" content="article">
+<meta property="og:title" content="《代码整洁之道》读书笔记">
+<meta property="og:url" content="http://ifaceless.space/2018/11/04/clean-code-notes/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言《代码整洁之道》（Clean Code）这本书非常适合每一个希望提高编程质量的程序员阅读。如何给参数命名？如何定义函数？如何编排子函数？等等这些问题的答案，你都可以在书中找到。 项目质量的好坏很大程度上取决于代码风格，如果团队的代码风格能够基本保持一致，对于每一位开发者和维护者来说都是福音。优秀的代码易于理解，逻辑清晰，命名规范，也是非常值得学习的。 本文记录了在阅读 Robert C. Ma">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://pho2na29z.bkt.clouddn.com/2018-11-05-22-56-49.png">
+<meta property="og:updated_time" content="2019-06-24T00:49:40.528Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="《代码整洁之道》读书笔记">
+<meta name="twitter:description" content="引言《代码整洁之道》（Clean Code）这本书非常适合每一个希望提高编程质量的程序员阅读。如何给参数命名？如何定义函数？如何编排子函数？等等这些问题的答案，你都可以在书中找到。 项目质量的好坏很大程度上取决于代码风格，如果团队的代码风格能够基本保持一致，对于每一位开发者和维护者来说都是福音。优秀的代码易于理解，逻辑清晰，命名规范，也是非常值得学习的。 本文记录了在阅读 Robert C. Ma">
+<meta name="twitter:image" content="http://pho2na29z.bkt.clouddn.com/2018-11-05-22-56-49.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2018/11/04/clean-code-notes/">
+
+
+
+
+
+  <title>《代码整洁之道》读书笔记 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2018/11/04/clean-code-notes/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">《代码整洁之道》读书笔记</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-11-04T15:04:59+08:00">
+                2018-11-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/编程之道/" itemprop="url" rel="index">
+                    <span itemprop="name">编程之道</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  5.7k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  19
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>《代码整洁之道》（<em><strong>Clean Code</strong></em>）这本书非常适合每一个希望提高编程质量的程序员阅读。如何给参数命名？如何定义函数？如何编排子函数？等等这些问题的答案，你都可以在书中找到。</p>
+<p>项目质量的好坏很大程度上取决于代码风格，如果团队的代码风格能够基本保持一致，对于每一位开发者和维护者来说都是福音。优秀的代码易于理解，逻辑清晰，命名规范，也是非常值得学习的。</p>
+<p>本文记录了在阅读 <strong>Robert C. Martin</strong> 的《代码整洁之道》一书时学习到的关键内容，便于后期复习、反思、总结和进一步提升。努力做一个拥有良好「代码洁癖」的码农~</p>
+<a id="more"></a>
+<p><img src="http://pho2na29z.bkt.clouddn.com/2018-11-05-22-56-49.png" alt="2018-11-05-22-56-49"></p>
+<h1 id="命名规则"><a href="#命名规则" class="headerlink" title="命名规则"></a>命名规则</h1><ol>
+<li>名副其实：<ol>
+<li>不需要注释来补充命名的含义</li>
+</ol>
+</li>
+<li>避免误导：<ol>
+<li>避免使用与本意相悖的词</li>
+<li>堤防使用不同之处较小的名称</li>
+</ol>
+</li>
+<li>做有意义的区分：<ol>
+<li>不要以数字区分</li>
+<li>避免废话</li>
+<li>废话都是冗余，Variable 一词永远不应当出现在变量名中</li>
+<li>要区分名称，就要以读者能鉴别不同之处的方式来区分。</li>
+</ol>
+</li>
+<li>使用读得出来的名称</li>
+<li>使用可搜索的名称：<ol>
+<li>避免使用单字母的词</li>
+<li>名称长短应与其作用域大小相对应</li>
+</ol>
+</li>
+<li>避免使用编码：<ol>
+<li>对于现代编译器，请摒弃匈牙利命名法</li>
+<li>不需要成员前缀，如 <code>_m</code></li>
+</ol>
+</li>
+<li>避免思维映射：<ol>
+<li>明确是王道</li>
+</ol>
+</li>
+<li>类名：<ol>
+<li>类名和对象应当是名词或者名词性短语</li>
+<li>避免 <code>Manager</code>, <code>Processor</code>, <code>Data</code> 或 <code>Info</code> 这类的类名</li>
+<li>类名不应该是动词。</li>
+</ol>
+</li>
+<li>方法名：<ol>
+<li>方法名应当是动词或动词短语</li>
+</ol>
+</li>
+<li>别扮可爱：<ol>
+<li>宁可明确，毋为好玩</li>
+<li>言到意到，意到言到</li>
+</ol>
+</li>
+<li>每个概念对应一个词</li>
+<li>别用双关语：<ol>
+<li>避免将同一个单词用于不同目的</li>
+</ol>
+</li>
+<li>使用解决方案领域名称：<ol>
+<li>多使用 CS 术语、算法、模式、数学术语吧</li>
+</ol>
+</li>
+<li>使用源自所涉问题领域的名称</li>
+<li>添加有意义的语境：<ol>
+<li>良好命名的类、函数或命名空间放置名称，提供语境</li>
+<li>使用前缀</li>
+</ol>
+</li>
+<li>不要添加没用的语境：<ol>
+<li>只要短名称足够清楚，就比长名称好</li>
+</ol>
+</li>
+</ol>
+<h1 id="函数"><a href="#函数" class="headerlink" title="函数"></a>函数</h1><ol>
+<li>短小：<ol>
+<li>函数的第一规则是<strong>短小</strong>，第二条是<strong>更短小</strong></li>
+<li>函数，20 行封顶最佳</li>
+</ol>
+</li>
+<li>只做一件事：<ol>
+<li><strong>函数应该只做一件事情，最好这件事情</strong></li>
+<li>判断函数是否不止做了一件事情，就是看能否再拆出一个函数</li>
+<li>如果函数只是做了该函数同一抽象层上的步骤，则函数还是只做了一件事</li>
+</ol>
+</li>
+<li>每个函数一个抽象层级：<ol>
+<li>自顶向下读代码：向下规则</li>
+<li>让每个函数后面都跟着位于下一抽象层的函数</li>
+</ol>
+</li>
+<li><code>switch</code> 语句：<ol>
+<li>多态创建，隐藏于某个继承关系中，不要暴露出来</li>
+</ol>
+</li>
+<li>使用描述性的名称：<ol>
+<li>如果每个例程都让你感到深合己意，那就是整洁代码</li>
+<li>长而具有描述性的名称，比短而令人费解的名称好</li>
+<li>长而具有描述性的名称，要比描述性的长注释好</li>
+</ol>
+</li>
+<li>函数参数：<ol>
+<li>参数不要过多（尽可能）</li>
+<li>参数和函数名称处于不同的抽象层级，要求你了解目前并不特别重要的细节</li>
+<li>标识参数丑陋不堪，意味着要做不止一件事情</li>
+<li>有两个参数的函数要比一元函数难懂</li>
+<li>少用参数列表</li>
+</ol>
+</li>
+<li>无副作用：<ol>
+<li>普遍而言，应避免使用输出参数。如果函数必须要修改某种状态，就修改所属的对象状态吧。</li>
+</ol>
+</li>
+<li>分隔指令与询问：<ol>
+<li>函数要么做什么事情，要么回答什么，二者不可兼得</li>
+<li>函数应该修改对象的状态或返回对象的有关信息。</li>
+</ol>
+</li>
+<li>使用异常替代返回的错误码：<ol>
+<li>抽离 <code>try/catch</code> 代码块</li>
+<li>函数只应该做一件事，错误处理就是一件</li>
+</ol>
+</li>
+<li>别重复自己（DRY)：<ol>
+<li>重复可能是软件中一切邪恶的根源</li>
+<li>很多原则和实践规则都是为了控制与消除重复而创建</li>
+</ol>
+</li>
+<li>结构化编程</li>
+<li>并不是从一开始按照规则写函数，没人可以做到。可以一开始让函数工作起来，再利用上面的规范进行优化，同时配合单元测试保证没有错误</li>
+<li>真正的目标在于讲述系统的故事，编写的函数必须可以干净利落地拼装在一块，形成一种精确而清晰的语言，帮你讲故事</li>
+</ol>
+<h1 id="注释"><a href="#注释" class="headerlink" title="注释"></a>注释</h1><ol>
+<li>注释总是一种失败，我们总无法找到不用注释就能表达自我的方法，所以总要有注释，并不值得庆祝</li>
+<li>程序员不能坚持维护注释</li>
+<li>真正好的注释是不写注释，用代码表达</li>
+<li>好的注释：<ol>
+<li>法律信息</li>
+<li>提供信息的注释</li>
+<li>对意图的解释</li>
+<li>阐释</li>
+<li>警示</li>
+<li>TODO 注释</li>
+<li>放大</li>
+</ol>
+</li>
+<li>坏的注释：<ol>
+<li>喃喃自语：任何迫使读者查看其它模块的注释都没能与读者沟通好</li>
+<li>多余的注释</li>
+<li>误导性注释</li>
+<li>循规蹈矩式注释</li>
+<li>日志式注释</li>
+<li>废话注释</li>
+<li>可怕的废话</li>
+<li>能用函数或变量时就别用注释</li>
+<li>位置标记</li>
+<li>归属与署名：源码控制系统已经可以搞定</li>
+<li>注释掉的代码</li>
+<li>HTML 注释</li>
+<li>非本地信息：注释要靠近代码</li>
+<li>信息过多</li>
+<li>不明显的联系：注释要解释代码中不能自行解释的部分，不要让注释需要二次解析</li>
+<li>函数头注释：用好的函数名称代替</li>
+<li>范例</li>
+</ol>
+</li>
+</ol>
+<h1 id="格式"><a href="#格式" class="headerlink" title="格式"></a>格式</h1><ol>
+<li>代码格式很重要。代码格式关乎沟通，而沟通是专业开发的头等大事</li>
+<li>让风格和律条永存</li>
+<li>短文件通常比长文件易于理解</li>
+<li>向报纸学习：循序渐进</li>
+<li>概念间垂直方向上的区隔：空行</li>
+<li>垂直方向上的靠近：紧密代码相互靠近</li>
+<li>垂直距离：关系密切的概念应该相互靠近，应避免读者在源文件和类中跳来跳去<ol>
+<li>变量声明：尽可能靠近使用位置</li>
+<li>实体变量：应在类的顶部声明</li>
+<li>相关函数：若某个函数调用了另一个，就应该把它们放到一起，调用者应该尽可能放在被调用者上边</li>
+<li>概念相关：此类代码应放在一起，相关性越强，应该越靠近</li>
+</ol>
+</li>
+<li>垂直顺序：自顶向下地展现调用依赖</li>
+<li>横向格式：建议每行短小，120 列就是上限了</li>
+<li>水平方向上的区隔与靠近：<ol>
+<li>加空格分隔</li>
+</ol>
+</li>
+<li>水平对齐：<ol>
+<li>不用太刻意关注</li>
+</ol>
+</li>
+<li>缩进：一种继承结构，体现一种层级关系</li>
+<li>空范围：应当缩进开来</li>
+<li>团队规则：<strong>遵守团队规则</strong>。好的软件系统是由一系列读起来不错的代码文件组成的</li>
+</ol>
+<h1 id="对象和数据结构"><a href="#对象和数据结构" class="headerlink" title="对象和数据结构"></a>对象和数据结构</h1><ol>
+<li>隐藏实现关乎抽象，类并不是简单地用取值器和赋值器将其变量推向外间，而是暴露抽象接口，以便用户无需了解数据的实现就能操作数据本体</li>
+<li>数据、对象和反对称性：<ol>
+<li>对象把数据隐藏于抽象之后，暴露操作数据的函数</li>
+<li>数据结构暴露数据，没有提供有意义的函数</li>
+<li>过程式代码（使用数据结构的代码）便于在不改动既有数据结构的前提下新增函数。面向对象代码便于在不改动既有函数的前提下新增类，反之亦然</li>
+<li>对于两种类型，应该根据情况考虑使用</li>
+<li>得墨忒耳律：模块不应该了解它所操作对象的内部情形，方法不应调用任何函数返回的对象的方法（比如链式调用就违反了）</li>
+</ol>
+</li>
+<li>数据传送对象：<ol>
+<li>最为精炼的数据结构是一个只有公共变量、没有函数的类，即数据传送对象（DTO, Data Transfer Objects）</li>
+</ol>
+</li>
+<li>对象暴露行为，隐藏数据。便于添加新对象类型而无需修改既有行为，同时也难以在既有对象中添加新行为</li>
+<li>数据结构暴露数据，没有明显的行为。便于向数据结构添加新行为，同时也难以向既有函数中添加新的数据结构</li>
+<li>在任何系统中我们有时希望能够灵活添加新的数据类型，所以这部分使用对象。有时希望灵活添加新行为，这时更希望使用数据类型和过程。优秀的开发者不带成见地了解这些形式，根据情况选择合适的手段</li>
+</ol>
+<h1 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h1><p>当错误发生时，程序员有责任保证代码照常工作。错误处理很重要，如果搞乱了代码逻辑，则是错误的做法。</p>
+<ol>
+<li>使用异常而非返回码</li>
+<li>先写 <code>try-catch-finally</code> 语句：<ol>
+<li>异常的妙处之一，它们在程序中定义了一个范围</li>
+<li>尝试编写强行抛出异常的测试，再往处理器中添加行为，使之满足测试要求</li>
+</ol>
+</li>
+<li>使用不可控异常：<ol>
+<li>可控异常的代价是违反“开闭原则”</li>
+<li>一般应用开发，应该避免可控异常</li>
+</ol>
+</li>
+<li>给出异常发生的环境说明：创建信息充分的错误消息，并和异常一起传递出去。在消息中包括失败的操作和失败的类型</li>
+<li>依调用者需要定义异常类：<ol>
+<li>定义异常，考虑它们应该如何捕获</li>
+<li>将第三方 API 打包是个良好的实践手段，当打包一个第三方 API，就降低了对它的依赖，同时在测试时有助于模拟第三方调用</li>
+</ol>
+</li>
+<li>定义常规流程：<ol>
+<li>创建一个类或配置一个对象，用来处理特例，异常行为封装到特例对象中</li>
+<li>避免打断业务逻辑</li>
+</ol>
+</li>
+<li>避免传递 None/NULL/nil 等，否则函数需要做很多额外的判断（当然，这些是必须的）</li>
+</ol>
+<h1 id="边界"><a href="#边界" class="headerlink" title="边界"></a>边界</h1><p>如何保持软件边界整洁？这一章给出一些实践手段和技巧</p>
+<ol>
+<li>使用第三方代码：<ol>
+<li>边界上的接口是隐藏的</li>
+<li>不应将含有边界接口的对象到处传递，应当把它保留在类或近亲类中</li>
+</ol>
+</li>
+<li>学习性测试的好处不只是免费：<ol>
+<li>无论如何都要学习使用 API，而编写测试是获得这些知识的容易而不影响其他工作的途径</li>
+<li>学习性测试是一种精确实验，帮助我们队 API 的理解</li>
+</ol>
+</li>
+<li>使用尚不存在的代码：<ol>
+<li>还有一种边界，将已知和位置分隔开的边界</li>
+<li>Fake 和 Adapter</li>
+</ol>
+</li>
+<li>整洁的边界：<ol>
+<li>边界上的代码需要清晰地分割和定义期望的测试。应该避免我们的代码过多了解第三方代码的特定信息</li>
+<li>依靠你能控制的东西，好过依靠你控制不了的东西</li>
+<li>可以采用内部隐藏边界接口或者使用适配模式保持边界整洁，从而减少接口的修改</li>
+</ol>
+</li>
+</ol>
+<h1 id="单元测试"><a href="#单元测试" class="headerlink" title="单元测试"></a>单元测试</h1><ol>
+<li>TDD 三定律：<ol>
+<li>在编写不能通过的单元测试前，不可编写生产代码</li>
+<li>只可编写刚好无法通过的单元测试，不能编译也算不通过</li>
+<li>只编写刚好可以通过当前失败测试的生产代码</li>
+</ol>
+</li>
+<li>保持整洁的测试：<ol>
+<li>肮脏的测试等同于没有测试</li>
+<li>测试必须跟随生产代码修改</li>
+<li>测试代码和生成代码一样重要，需要仔细思考、设计和照料，保持整洁</li>
+<li>正是单元测试让你的代码可扩展、可维护、可复用</li>
+<li>测试带来了一切好处，使变动成为可能</li>
+<li>测试越脏，代码最终会越脏</li>
+</ol>
+</li>
+<li>整洁的测试：<ol>
+<li>可读性</li>
+<li>构造-操作-检验（<strong>BUILD-OPERATE-CHECK</strong>)模式</li>
+<li>测试直达目的，只用真正需要的数据类型和函数</li>
+<li>专业的开发者将他们的测试代码重构为简洁和具有表达力的形式</li>
+</ol>
+</li>
+<li>每个测试一个断言：<ol>
+<li>每个测试时一个概念</li>
+</ol>
+</li>
+<li>FIRST：<ol>
+<li><strong>快速 Fast</strong>：能够频繁运行</li>
+<li><strong>独立 Independent</strong>：某个测试不应为下一个测试设定条件</li>
+<li><strong>可重复 Repeatable</strong>：测试应当可以在任何环境中重复通过</li>
+<li><strong>自足验证 Self-Validating</strong>：测试应有布尔值输出，可以直接反馈测试结果</li>
+<li><strong>及时 Timely</strong>：测试应及时编写</li>
+</ol>
+</li>
+<li>或许测试更为重要，它保证和增强了生产代码的可扩展性、可维护性和可复用性</li>
+</ol>
+<h1 id="类"><a href="#类" class="headerlink" title="类"></a>类</h1><ol>
+<li>类的组织：<ol>
+<li>公共函数应跟在变量列表之后，我们喜欢把由某个公共函数调用的私有工具函数紧随在该公共函数的后面，符合自顶向下的原则</li>
+</ol>
+</li>
+<li>类应该短小：<ol>
+<li>计算「权责 responsibility」衡量类大小</li>
+<li>类的名称应当描述权责，如果无法为某个类命名以精确的名称，这个类大概就太长了</li>
+<li>单一权责原则（SRP)：类或模块应该有且只有一条加以修改的理由</li>
+<li>系统应该由许多短小的类而非少量巨大的类组成。每个小类封装一个权责，只有一个修改的原因，并与少数其他类一起协同达成期望的系统行为</li>
+<li>内聚：类应该只有少量的实体变量，类中的每个方法都应该操作一个或多个这种变量</li>
+<li>保持内聚会得到许多短小的类</li>
+</ol>
+</li>
+<li>在理想系统中，我们通过扩展而非修改现有系统的方式添加新特性</li>
+<li>部件之间的解耦代表系统中的元素相互隔离的很好，隔离也让系统每个元素的理解变得更加容易</li>
+<li>依赖倒置原(DIP)：依赖于抽象而非实现的细节</li>
+</ol>
+<h1 id="系统（偏-Java）"><a href="#系统（偏-Java）" class="headerlink" title="系统（偏 Java）"></a>系统（偏 Java）</h1><p>“复杂要人命。它消磨开发者的生命，让产品难以规划、构建和测试”—— Ray Ozzie，微软首席技术官</p>
+<ol>
+<li>城市管理：有人负责全局，有人负责局部</li>
+<li>将系统的构造和使用分开：<ol>
+<li>“软件系统应将起始过程和起始过程之后的运行时逻辑分离开，在起始过程中构建应用对象，也会存在互相纠缠的依赖关系”</li>
+<li>分解 main</li>
+<li>工厂</li>
+<li>依赖注入：控制反转在依赖管理中的一种应用手段</li>
+</ol>
+</li>
+<li>扩容：<ol>
+<li>“一开始就做对系统”纯属神话</li>
+<li>测试驱动开发、迭代和增量敏捷扩展系统</li>
+</ol>
+</li>
+</ol>
+<h1 id="小步快跑：迭代"><a href="#小步快跑：迭代" class="headerlink" title="小步快跑：迭代"></a>小步快跑：迭代</h1><ol>
+<li>通过迭代和改进设计达到整洁目的（Kent Beck 的简单设计规则）：<ol>
+<li>运行所有测试</li>
+<li>不可重复</li>
+<li>表达了程序员的意图</li>
+<li>尽可能减少类和方法的数量</li>
+<li>以上规则按重要程度排序</li>
+</ol>
+</li>
+<li>简单设计规则 1：运行所有测试：<ol>
+<li>全面测试并持续通过所有测试的系统，就是可测试的系统</li>
+<li>不可测试的系统不可验证，不可验证的系统，不可部署</li>
+<li>紧耦合的代码难以编写测试，同样编写测试越多，就越会遵循 DIP 之类规则</li>
+<li>遵循有关编写测试并持续运行测试的简单、明确的规划，系统就会更贴近 OO 低耦合度、高内聚度的目标，编写测试引致更好的设计</li>
+</ol>
+</li>
+<li>简单设计规则 2~4：重构：<ol>
+<li>测试消除了对清理代码就会破坏代码的恐惧</li>
+<li>增量式重构改善代码</li>
+<li>提升内聚性、降低耦合度、切分关注面、模块化系统性关注面、缩小函数和类的尺寸、选用更好的名称等</li>
+</ol>
+</li>
+<li>不可重复：<ol>
+<li>重复包括形式上和实现上的重复</li>
+<li>模板方法模式是一种移除高层重复的通用技巧</li>
+</ol>
+</li>
+<li>表达力：<ol>
+<li>软件项目的主要成本在于长期维护</li>
+<li>选用好的名称</li>
+<li>保持函数和类尺寸短小</li>
+<li>采用标准命名法</li>
+<li>编写良好的单元测试</li>
+<li>做到有表带最重要的是尝试，太多时候我们写出能工作的代码，就转移到下一个问题，没有下足功夫调整</li>
+</ol>
+</li>
+<li>尽可能减少类和方法：<ol>
+<li>类和方法的数量太多，有时候是由毫无意义的教条主义导致的</li>
+<li>保持函数和类短小的同时，保持整个系统短小精悍</li>
+</ol>
+</li>
+<li>遵循简单设计的实践手段，开发者不必年轻学习就能掌握好的原则和模式</li>
+</ol>
+<h1 id="并发编程"><a href="#并发编程" class="headerlink" title="并发编程"></a>并发编程</h1><p>“对象是对过程的抽象，线程是对调度的抽象”</p>
+<ol>
+<li>为什么要并发：<ol>
+<li>并发是一种解耦策略，把做什么（目的）和何时（时机）分开</li>
+<li>解耦目的与时机能明显地改进应用程序的吞吐量和结构</li>
+<li>误区：<ol>
+<li>并发总能改进性能</li>
+<li>编写并发程序无需修改设计</li>
+</ol>
+</li>
+<li>实际：<ol>
+<li>并发会在性能和编写额外代码上增加额外一些开销</li>
+<li>正确的并发是复杂的，几遍对于简单的问题也是如此</li>
+<li>并发缺陷并非总能重现</li>
+<li>并发常常需要对设计策略的根本性修改</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>并发防御原则：<ol>
+<li>单一权责原则：<ol>
+<li>分离并发相关的代码和其它代码</li>
+</ol>
+</li>
+<li>推论：限制数据作用域：<ol>
+<li>保护临界区共享对象</li>
+<li>谨记数据封装，严格限制对可能被共享的数据的访问</li>
+</ol>
+</li>
+<li>推论：使用数据副本</li>
+<li>推论：线程应尽可能独立：尝试将数据分解到可被独立线程（可能不同的服务器上）操作的独立子集</li>
+</ol>
+</li>
+<li>了解执行模型：<ol>
+<li>几种概念：<ol>
+<li>限定资源</li>
+<li>互斥</li>
+<li>线程饥饿</li>
+<li>死锁</li>
+<li>活锁：执行次序一致的线程，每个都想起步，但发现其他线程已经在路上</li>
+</ol>
+</li>
+<li>生产者-消费者模型：中间队列是限定资源</li>
+<li>读者-写着模型</li>
+<li>宴席哲学家</li>
+</ol>
+</li>
+<li>保持同步区域微小：尽可能减少同步区域，否则会增加资源竞争，执行效率降低</li>
+<li>尽早考虑关闭问题，尽早令其正常工作</li>
+<li>测试线程代码：<ol>
+<li>建议编写有潜力暴露问题的测试，在不同的配置和负载下频繁运行。如果测试失败，则跟踪错误</li>
+<li>将伪失败看做可能的线程问题</li>
+<li>先使用单线程代码可工作</li>
+<li>编写可插拔的线程代码</li>
+<li>编写可调整的线程代码</li>
+<li>运行多于处理器数量的线程</li>
+<li>在不同平台上运行</li>
+<li>调整代码并强迫发生错误</li>
+</ol>
+</li>
+<li>不要将系统错误归咎于偶发事件</li>
+<li>任务交换越频繁，越有可能找到错过临界区或导致死锁的代码</li>
+</ol>
+<h1 id="Code-Smell-amp-Inspiration"><a href="#Code-Smell-amp-Inspiration" class="headerlink" title="Code Smell &amp; Inspiration"></a>Code Smell &amp; Inspiration</h1><ol>
+<li>注释：<ol>
+<li>不恰当的注释</li>
+<li>废弃的注释</li>
+<li>冗余的注释</li>
+<li>糟糕的注释</li>
+<li>注释掉的代码</li>
+</ol>
+</li>
+<li>环境：<ol>
+<li>需要多步才能实现的构建：构建系统应该是单步的小操作</li>
+<li>需要多步才能做到的测试：应该能快速运行单元测试</li>
+</ol>
+</li>
+<li>函数：<ol>
+<li>过多的参数</li>
+<li>输出参数</li>
+<li>标志参数</li>
+<li>死函数</li>
+</ol>
+</li>
+<li>一般性问题：<ol>
+<li>一个源文件中存在多种语言：应尽力减少源文件中额外语言的数量和范围</li>
+<li>明显的行为未实现：应遵循“最小惊讶原则”</li>
+<li>不正确的边界行为</li>
+<li>忽视安全</li>
+<li>重复</li>
+<li>在错误的抽象层级上的代码：<ol>
+<li>创建分离较高层一般性概念与较低层细节概念的抽象模型很重要</li>
+<li>孤立抽象是软件开发者最难做到的事情之一，而且一旦做错也没有快捷的修复手段</li>
+</ol>
+</li>
+<li>基类依赖于派生类：通常基类对派生类一无所知</li>
+<li>信息过多：<ol>
+<li>良好设计的模块有非常小的接口</li>
+<li>优秀开发者应该限制类或者模块中暴露的接口数量</li>
+<li>隐藏数据、工具函数、常量、临时变量</li>
+<li>死代码：死代码会变臭</li>
+<li>垂直分离：<ol>
+<li>变量和函数应该靠近被使用的地方定义</li>
+<li>私有函数应该刚好在其首次被使用的位置下面定义</li>
+</ol>
+</li>
+<li>前后不一致</li>
+<li>混淆视听：<ol>
+<li>没有用到的变量、函数、注释等都要移除</li>
+<li>保持文件整洁、良好组织</li>
+</ol>
+</li>
+<li>人为耦合：人为耦合是指两个没有直接目的的模块的耦合</li>
+<li>特性依恋：类的方法只应对其所属类的变量和函数感兴趣，不应该垂青其他类中的变量和函数</li>
+<li>选择标志参数：选择标志参数只是一种避免把大函数切分成小函数偷懒的做法</li>
+<li>晦涩的意图</li>
+<li>位置错误的权责</li>
+<li>不恰当的静态方法</li>
+<li>使用解释性变量</li>
+<li>函数名称应该表达其行为</li>
+<li>理解算法</li>
+<li>把逻辑依赖改为物理依赖</li>
+<li>用多态替换 if/else</li>
+<li>遵循约定标准</li>
+<li>用命名常量替代魔术数</li>
+<li>准确：如果处理货币，请使用整数</li>
+<li>结构甚于约定：</li>
+<li>封装条件</li>
+<li>避免否定性条件</li>
+<li>函数只做一件事情</li>
+<li>掩蔽时序耦合</li>
+<li>别随意</li>
+<li>封装边界条件</li>
+<li>函数应该只在一个抽象层级上</li>
+<li>在较高层级放置可配置数据</li>
+<li>避免传递浏览</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>名称：<ol>
+<li>采用描述性名称</li>
+<li>名称应与抽象层级相符</li>
+<li>尽可能使用标准命名法</li>
+<li>无歧义的名称</li>
+<li>为较大作用范围选用较长的名称</li>
+<li>避免编码：如一些前缀等</li>
+<li>名称应该说明副作用</li>
+</ol>
+</li>
+<li>测试：<ol>
+<li>测试不足</li>
+<li>使用覆盖率工具</li>
+<li>别略过小测试</li>
+<li>被忽略的测试就是对不确定事物的疑问</li>
+<li>测试边界条件</li>
+<li>全面测试相近的缺陷</li>
+<li>测试失败的模式有启发性</li>
+<li>测试应该快速</li>
+</ol>
+</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2018/11/04/clean-code-notes/" title="《代码整洁之道》读书笔记">http://ifaceless.space/2018/11/04/clean-code-notes/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/整洁代码/" rel="tag"><i class="fa fa-tag"></i> 整洁代码</a>
+          
+            <a href="/tags/编程风格/" rel="tag"><i class="fa fa-tag"></i> 编程风格</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/11/04/mkdown-in-vscode/" rel="prev" title="VSCode Markdown 写作效率提升">
+                VSCode Markdown 写作效率提升 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me@ifaceless.me" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#命名规则"><span class="nav-number">2.</span> <span class="nav-text">命名规则</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#函数"><span class="nav-number">3.</span> <span class="nav-text">函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#注释"><span class="nav-number">4.</span> <span class="nav-text">注释</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#格式"><span class="nav-number">5.</span> <span class="nav-text">格式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#对象和数据结构"><span class="nav-number">6.</span> <span class="nav-text">对象和数据结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#错误处理"><span class="nav-number">7.</span> <span class="nav-text">错误处理</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#边界"><span class="nav-number">8.</span> <span class="nav-text">边界</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#单元测试"><span class="nav-number">9.</span> <span class="nav-text">单元测试</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#类"><span class="nav-number">10.</span> <span class="nav-text">类</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#系统（偏-Java）"><span class="nav-number">11.</span> <span class="nav-text">系统（偏 Java）</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小步快跑：迭代"><span class="nav-number">12.</span> <span class="nav-text">小步快跑：迭代</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#并发编程"><span class="nav-number">13.</span> <span class="nav-text">并发编程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Code-Smell-amp-Inspiration"><span class="nav-number">14.</span> <span class="nav-text">Code Smell &amp; Inspiration</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

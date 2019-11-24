@@ -1,0 +1,1158 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="《数据密集型应用设计》,事务,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言由于数据存储期间，可能发生错误、故障的点特别多，比如网络中断、磁盘写满等，面对这些复杂的情况，应用层应付起来非常困难。所以就有了事务的概念，说道事务，我们最先能想到的就是：可以一次事务中将很多读写入操作打包成一个逻辑操作单元，整个事务不成功（Committed）便成仁（Rollback）。如果失败，应用层可根据情况安全地重试，不用担心部分写入的问题。">
+<meta name="keywords" content="《数据密集型应用设计》,事务">
+<meta property="og:type" content="article">
+<meta property="og:title" content="野猪🐗书读书笔记之事务">
+<meta property="og:url" content="http://ifaceless.space/2019/08/24/ddia-transaction/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言由于数据存储期间，可能发生错误、故障的点特别多，比如网络中断、磁盘写满等，面对这些复杂的情况，应用层应付起来非常困难。所以就有了事务的概念，说道事务，我们最先能想到的就是：可以一次事务中将很多读写入操作打包成一个逻辑操作单元，整个事务不成功（Committed）便成仁（Rollback）。如果失败，应用层可根据情况安全地重试，不用担心部分写入的问题。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://ifaceless.space/2019/08/24/ddia-transaction/mvvc.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/24/ddia-transaction/write-skew.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/24/ddia-transaction/procedure.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/24/ddia-transaction/collision-detection.png">
+<meta property="og:updated_time" content="2019-11-24T09:45:59.904Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="野猪🐗书读书笔记之事务">
+<meta name="twitter:description" content="引言由于数据存储期间，可能发生错误、故障的点特别多，比如网络中断、磁盘写满等，面对这些复杂的情况，应用层应付起来非常困难。所以就有了事务的概念，说道事务，我们最先能想到的就是：可以一次事务中将很多读写入操作打包成一个逻辑操作单元，整个事务不成功（Committed）便成仁（Rollback）。如果失败，应用层可根据情况安全地重试，不用担心部分写入的问题。">
+<meta name="twitter:image" content="http://ifaceless.space/2019/08/24/ddia-transaction/mvvc.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2019/08/24/ddia-transaction/">
+
+
+
+
+
+  <title>野猪🐗书读书笔记之事务 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/08/24/ddia-transaction/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">野猪🐗书读书笔记之事务</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-24T11:37:50+08:00">
+                2019-08-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/系统设计/" itemprop="url" rel="index">
+                    <span itemprop="name">系统设计</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3.5k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  12
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>由于数据存储期间，可能发生错误、故障的点特别多，比如网络中断、磁盘写满等，面对这些复杂的情况，应用层应付起来非常困难。所以就有了事务的概念，说道事务，我们最先能想到的就是：可以一次事务中将很多读写入操作打包成一个逻辑操作单元，整个事务不成功（Committed）便成仁（Rollback）。如果失败，应用层可根据情况安全地重试，不用担心部分写入的问题。</p>
+<a id="more"></a>
+<p>总的来说，事务就是一层抽象，为简化应用层编程模型而生！当然，并非所有的数据库都支持事务，但是对关系型数据库而言，这个基本是标配；某些 NoSQL 数据库可能因为性能、可用性以及扩展性考虑，而放弃了对事务的支持。另外，分布式数据库下，事务的实现会更加困难，并且执行开销也很大，但并不代表它不能实现。典型的 分布式关系数据库如 TiDB 以及 Google Spanner 就提供了事务支持。</p>
+<h1 id="深入理解-ACID"><a href="#深入理解-ACID" class="headerlink" title="深入理解 ACID"></a>深入理解 ACID</h1><ol>
+<li><strong>Atomicity（原子性）</strong>：将多个写操作纳入一个原子事务中，并在故障（进程崩溃、网络中断、磁盘故障）发生时能够及时中止事务，并将部分完成的写入全部丢弃。</li>
+<li><p><strong>Consistency（一致性）</strong>：</p>
+<ol>
+<li>对数据有特定的状态预期，任何数据变更必须满足这些状态约束（或者恒等条件）</li>
+<li>应用程序应该负责保证这种一致性，数据库只是存储</li>
+<li><strong>这个更多的是应用层属性</strong>，所以 C 原本不属于 ACID，只是作者 Joe Hellerstein 认为听起来顺口就加了进来😢</li>
+</ol>
+</li>
+<li><p><strong>Isolation（隔离性）</strong>：并发执行的多个事务相互隔离，不能相互交叉。经典的教材把其称为<em>可串行化</em>。但实践中，串行化隔离级别较少使用，更多的还是较弱的隔离级别。</p>
+</li>
+<li><p><strong>Durability（持久性）</strong>：数据库承诺，一旦事务提交成功，即便硬件故障或数据库崩溃，事务写入的数据也不会丢失。</p>
+<ol>
+<li>对于如主从复制的数据库集群，意味着写入的数据复制到了多个节点</li>
+<li>完美的持久性无法保证（把硬盘拔了、全部机房烧了🔥呢？）</li>
+</ol>
+</li>
+<li><p>理性看待各家数据库宣称的 ACID 兼容；实际各家实现都可能不同</p>
+</li>
+<li>不符合 ACID 标准的系统通常称为 BASE：<ul>
+<li>Basically Available</li>
+<li>Soft State</li>
+<li>Eventually Consistency</li>
+</ul>
+</li>
+<li>ACID 数据库基于这样的理念：<strong>如果存在违反 AID 的风险，就放弃整个事务，而非部分放弃</strong>！</li>
+</ol>
+<h1 id="弱隔离级别"><a href="#弱隔离级别" class="headerlink" title="弱隔离级别"></a>弱隔离级别</h1><ol>
+<li>安全的并行事务：两个事务间没数据依赖关系，操作的是完全不同的数据</li>
+<li>不安全的并行事务（会引入竞争条件）：<ol>
+<li>A 事务修改了<strong>某数据</strong>；B 事务又读取<strong>该数据</strong>；</li>
+<li>A 事务和 B 事务<strong>同时修改相同</strong>的数据。</li>
+</ol>
+</li>
+<li>隔离就是为了保证事务能够安全地并发执行，假装没有发生并发；可串行地隔离意味着数据库会保证事务的执行结果和串行执行结果一致。</li>
+<li>为何产生弱隔离级别？<ol>
+<li>串行隔离性能不好</li>
+<li>弱隔离可解决部分并发问题；但是还是需要彻底理解各种隔离级别以及它们可能产生的问题，才能更好地完成业务需求</li>
+</ol>
+</li>
+</ol>
+<h2 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h2><p>在学习各种隔离级别前，有必要了解如下几个关键要点：</p>
+<table>
+<thead>
+<tr>
+<th>要点</th>
+<th>解释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>脏读 Dirty Read</td>
+<td>在事务 A 中读取到了事务 B 尚未提交的写入。<em>采用 <strong>Read Committed</strong> 及以上级别可防范</em>。</td>
+</tr>
+<tr>
+<td>脏写 Dirty Write</td>
+<td>在事务 A 中覆盖了事务 B 尚未提交的写入。<em>几乎所有的数据库都可以防止脏写，最简单就是加锁</em>。</td>
+</tr>
+<tr>
+<td>读倾斜（不可重复读） Non-Repeatable Read</td>
+<td>在事务执行期间，不同的时间点读取同一条记录，得到的值不同。<em>快照隔离可轻松应付，通常使用 MVCC 实现快照隔离（如 InnoDB）</em>。</td>
+</tr>
+<tr>
+<td>更新丢失 Lost Update</td>
+<td>两个事务中都执行了 Read-Modify-Write 的操作序列，出现了其中一个覆盖了另一个的写入，但没有包含对方最新值的情况（典型的例子是：读取某个字段-&gt;字段值加 1-&gt;写入该字段的新值，可能会出现两个事务同时执行了 +1，但最终结果不是预期的 +2 效果）。<em>通常可以采用数据支持的原子写操作，或者使用 SELECT…FOR UPDATE 显式加锁的方式解决；当然，某些快照隔离的实现可以自动防止这种异常</em></td>
+</tr>
+<tr>
+<td>写倾斜 Write Skew</td>
+<td>典型的场景是：事务中查询数据，再根据查询结果做出决策，最后修改数据库。但是如果事务提交时，支持决策的前提条件不再成立（比如另一个事务中做了修改，导致同样的查询条件，得到的结果不同）。<em>只有串行化隔离级别才能真正防止这种异常</em></td>
+</tr>
+<tr>
+<td>幻读 Phantom Read</td>
+<td>事务读取了某些符合查询条件的记录，同时另一个事务执行写入，改变了先前的查询结果。<em>快照隔离可防止简单的幻读</em></td>
+</tr>
+</tbody>
+</table>
+<h2 id="ANSI-SQL-几种隔离级别定义："><a href="#ANSI-SQL-几种隔离级别定义：" class="headerlink" title="ANSI SQL 几种隔离级别定义："></a>ANSI SQL 几种隔离级别定义：</h2><p>实际上各家数据库的支持是不尽相同的😣。</p>
+<table>
+<thead>
+<tr>
+<th>级别</th>
+<th>P1 脏读</th>
+<th>P2 不可重复读</th>
+<th>P3 幻读</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Read Uncommitted</td>
+<td>允许</td>
+<td>允许</td>
+<td>允许</td>
+</tr>
+<tr>
+<td>Read Committed</td>
+<td>禁止</td>
+<td>允许</td>
+<td>允许</td>
+</tr>
+<tr>
+<td>Repeatable Read</td>
+<td>禁止</td>
+<td>禁止</td>
+<td>允许</td>
+</tr>
+<tr>
+<td>Serializable</td>
+<td>禁止</td>
+<td>禁止</td>
+<td>禁止</td>
+</tr>
+</tbody>
+</table>
+<h2 id="读已提交"><a href="#读已提交" class="headerlink" title="读已提交"></a>读已提交</h2><ol>
+<li><p>最基本的事务隔离级别，需要提供下面两个保证：</p>
+<ol>
+<li>防止脏读</li>
+<li>防止脏写</li>
+</ol>
+</li>
+<li><p>实现：</p>
+<ol>
+<li>为了防止脏写，当事务需要修改某个对象（比如行或文档）时，必须要获得该对象的锁，一直持有该锁直到事务提交或中止；    </li>
+<li>为了防止脏读，使用锁的方式虽然也可以实现，但在运行较长时间的写事务会导致许多只读事务等待时间太长，影响只读事务的响应延迟，可操作性差。通常对于每个待更新的对象，数据库维护其旧值和当前持锁事务将要设置的新值两个版本。在事务提交前，所有其它读操作都读取旧值；仅当写事务提交后，才会切换到读取新值。</li>
+</ol>
+</li>
+</ol>
+<h2 id="快照隔离级别和可重复读"><a href="#快照隔离级别和可重复读" class="headerlink" title="快照隔离级别和可重复读"></a>快照隔离级别和可重复读</h2><ol>
+<li><p>Rread Committed 不能解决<strong>不可重复读</strong>的问题，而在一些场景下就不能容忍：</p>
+<ol>
+<li>备份</li>
+<li>分析查询和完整性检查</li>
+</ol>
+</li>
+<li><p>快照隔离保证每个事务只看到特定时间点的旧数据，不感知其它事务中对数据的修改。读取操作不会阻止写操作，反之亦然。</p>
+</li>
+<li>数据库使用了<strong>多版本并发控制（Multi-Version Concurrency Control, MVCC）</strong>技术来实现快照隔离。而 MVCC 也可以用来实现 Read Committed 隔离级别（只需要保留两个版本即可，已提交的旧数据和尚未提交的新版本数据），典型的做法是对每个不同的查询单独创建一个快照；而快照隔离级别则使用一个快照运行整个事务。<br> <img src="./mvvc.png" alt=""></li>
+<li>一致性快照中数据可见性规则：<ol>
+<li>事务开始时，创建该对象的事务已经完成提交</li>
+<li>对象没有被标记删除；或者即便标记了，但是删除事务在当前事务开始的时候尚未提交</li>
+</ol>
+</li>
+</ol>
+<h2 id="防止更新丢失"><a href="#防止更新丢失" class="headerlink" title="防止更新丢失"></a>防止更新丢失</h2><ol>
+<li><p>产生更新丢失的典型场景是：Read-Modify-Write，当两个并发事务在同样的数据记录上执行类似操作时，二者相互不会感知对方的修改值，最终导致某个事务的修改值可能丢失。场景如下：</p>
+<ol>
+<li>递增计数器；更新账户余额</li>
+<li>对复杂对象的一部分进行修改（如一个大 JSON 对象）</li>
+</ol>
+</li>
+<li><p>如何解决？</p>
+<ol>
+<li><p>采用<strong>原子写操作</strong>（如果数据库支持的话）：</p>
+<ol>
+<li><code>UPDATE counter SET value = value + 1 WHERE id = 1</code>;</li>
+<li>通常采用读取对象并加独占锁的方式来实现（在当前事务未提交前，其它事务也不可读）；或者可以采用单线程执行原子操作</li>
+</ol>
+</li>
+<li><p><strong>显式加锁</strong>：</p>
+<ol>
+<li><code>SELECT * FROM figures WHERE name = &#39;robot&#39; FOR UPDATE</code></li>
+<li>对所选行加锁，其它事务若要同时尝试读取对象，则要等待当前正在执行的序列全部完成</li>
+</ol>
+</li>
+<li><p><strong>自动检测更新丢失</strong>：</p>
+<ol>
+<li>事务管理器如果检测到更新丢失风险，会中止当前事务，强制退回到安全的 R-M-W 方式</li>
+<li>MySQL InnoDB 不支持检测；PostgreSQL 的可重复读、Oracle 可串行化和 SQL Server 快照隔离级别都支持</li>
+</ol>
+</li>
+<li><strong>原子比较和设置</strong>：<ol>
+<li>只有在上次读取的数据未发生变化时才允许更新；否则回退到 R-M-W 方式</li>
+<li>使用前需要仔细检查</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+<h2 id="写倾斜与幻读"><a href="#写倾斜与幻读" class="headerlink" title="写倾斜与幻读"></a>写倾斜与幻读</h2><p><img src="./write-skew.png" alt=""></p>
+<ol>
+<li><p>写倾斜可以认为是一种更广义的更新丢失问题，即如果两个事务读取相同的一组对象，然后更新其中的一部分：</p>
+<ol>
+<li>不同的事务更新不同的对象，则可能发生写倾斜</li>
+<li>不同的事务更新相同的对象，则可能发生脏写或更新丢失</li>
+</ol>
+</li>
+<li><p>相关场景：</p>
+<ol>
+<li>会议室预定系统</li>
+<li>多人游戏</li>
+<li>声明一个用户名</li>
+<li>防止双重开支（积分等）</li>
+</ol>
+</li>
+<li><p>如何应对写倾斜：</p>
+<ol>
+<li>如值班医生的例子，可以采用 <code>SELECT...FOR UPDATE</code> 方式<strong>显式加锁</strong>，但如果查询结果为空，这样做也不能奏效</li>
+<li>实体化冲突，比如会议室预定，可以提前将未来 N 个月的对应的所有时间和房间组合创建好，这样显示加锁可以生效</li>
+<li>采用串行化隔离级别</li>
+</ol>
+</li>
+</ol>
+<h1 id="串行化"><a href="#串行化" class="headerlink" title="串行化"></a>串行化</h1><h2 id="严格串行执行"><a href="#严格串行执行" class="headerlink" title="严格串行执行"></a>严格串行执行</h2><ol>
+<li>采用单线程按顺序执行事务，避免检测、事务冲突等问题；同时可能会比支持并发的系统效率更高，避免锁的开销</li>
+<li>为什么可行？<ol>
+<li>内存更便宜</li>
+<li>OLTP 事务通常很快执行完，只产生少量读取</li>
+</ol>
+</li>
+<li>典型的代表：VoltDB / H-Store, Redis 和 Datomic</li>
+<li>通常不能支持交互式的多语句事务（否则得等待太久了）<br> <img src="./procedure.png" alt=""></li>
+<li>满足以下约束，串行执行事务科实现串行化隔离：<ol>
+<li>事务必须<strong>简短高效</strong></li>
+<li>仅限于活动数据集完全可以加载到内存的场景</li>
+<li>写入吞吐必须足够低，才能在单核上处理；否则需要采用分区，但最好不要使用跨分区事务（避免协调开销）</li>
+<li>跨分区事务可以支持，但占比必须要小</li>
+</ol>
+</li>
+</ol>
+<h2 id="两阶段锁（Two-Phase-Lock-2PL）"><a href="#两阶段锁（Two-Phase-Lock-2PL）" class="headerlink" title="两阶段锁（Two-Phase Lock, 2PL）"></a>两阶段锁（Two-Phase Lock, 2PL）</h2><ol>
+<li>2PL 是比较老牌的串行化算法，应用于 MySQL InnoDB 和 SQL Server 的「可串行化隔离」和 DB2 的「可重复读隔离」。悲观事务模型。</li>
+<li>典型特征：<ol>
+<li>读写互斥</li>
+<li>并发写互斥</li>
+</ol>
+</li>
+<li><p>基本思路（数据库会为每个对象维护读写锁来隔离读写操作，锁可以处于<strong>共享模式</strong>或<strong>独占模式</strong>）：</p>
+<ol>
+<li>如果事务要读取对象，必须先以共享模式获得锁。多个事务可同时以获得对象的共享锁；但如果某个事务获得了对象的独占锁，则其他事务都需要等待</li>
+<li>如果事务要修改对象，必须以独占模式获取锁。如果对象已经加锁（不管是读还是写），则该事务必须等待</li>
+<li>如果事务先读后写，则将共享锁升级为独占锁</li>
+<li>事务获取锁后，直到事务结束才会释放</li>
+</ol>
+</li>
+<li><p>两阶段的含义：</p>
+<ol>
+<li>事务执行前<strong>获取锁</strong></li>
+<li>事务结束后<strong>释放锁</strong></li>
+</ol>
+</li>
+<li><p>2PL 的问题：</p>
+<ol>
+<li>系统吞吐量和查询响应时间相对于弱隔离级别下降很多</li>
+<li>锁的开销多；事务的并发性降低</li>
+<li>访问延迟不确定性高</li>
+<li>死锁问题，如果检测到死锁，事务会被强行中止（应用层可选择重试）</li>
+</ol>
+</li>
+<li><p>谓词锁：</p>
+<ol>
+<li>不属于特定的对象，作用于特定的搜索条件查询到的所有对象</li>
+<li>可以保护数据库中尚不存在但可能马上会被插入的对象（会引起幻读）</li>
+<li>2PL 和谓词锁结盟，可阻止任何形式的写倾斜和其它竞争条件，使得隔离真正串行化</li>
+<li>缺点：性能不佳</li>
+</ol>
+</li>
+<li><p>索引区间锁（next-key locking）</p>
+<ol>
+<li>核心就是将保护对象扩大化，不如为谓词锁精确，但开销低，所以实践中常用</li>
+<li>会对合适的索引加区间锁，如果没有合适的索引，就回退到整张表加共享锁</li>
+</ol>
+</li>
+</ol>
+<h2 id="可串行化快照隔离（Serializable-Snapshot-Isolation-SSI）"><a href="#可串行化快照隔离（Serializable-Snapshot-Isolation-SSI）" class="headerlink" title="可串行化快照隔离（Serializable Snapshot Isolation, SSI）"></a>可串行化快照隔离（Serializable Snapshot Isolation, SSI）</h2><ol>
+<li>SSI 是乐观事务模型实现，如果可能发生冲突，也不会阻止事务提交，而是在真正提交时检查是否发生了冲突（即违反隔离性原则），如果是，则会中止并接下来重试。</li>
+<li>适用于事务之间竞争不大，冲突较少的场景，会比悲观方式高效很多（所以也比较适用于互联网环境）。</li>
+<li>事务无需等待其它事务所持有的锁，要求读写型事务要简短（长时间的读取事务没有限制）<br><img src="./collision-detection.png" alt=""></li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://book.douban.com/subject/30329536/" target="_blank" rel="noopener">《数据密集型应用设计》第二部分</a></li>
+<li><a href="https://www.zhihu.com/question/280650327" target="_blank" rel="noopener">知乎：SQL 四种隔离级别的若干迷惑？</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/38214642" target="_blank" rel="noopener">数据库事务隔离标准分析</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2019/08/24/ddia-transaction/" title="野猪🐗书读书笔记之事务">http://ifaceless.space/2019/08/24/ddia-transaction/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/《数据密集型应用设计》/" rel="tag"><i class="fa fa-tag"></i> 《数据密集型应用设计》</a>
+          
+            <a href="/tags/事务/" rel="tag"><i class="fa fa-tag"></i> 事务</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/08/18/ddia-data-replication-and-partition/" rel="next" title="野猪🐗书读书笔记之数据复制和分区">
+                <i class="fa fa-chevron-left"></i> 野猪🐗书读书笔记之数据复制和分区
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/10/29/golang-traps/" rel="prev" title="Go 编写姿势">
+                Go 编写姿势 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me@ifaceless.me" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#深入理解-ACID"><span class="nav-number">2.</span> <span class="nav-text">深入理解 ACID</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#弱隔离级别"><span class="nav-number">3.</span> <span class="nav-text">弱隔离级别</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#名词解释"><span class="nav-number">3.1.</span> <span class="nav-text">名词解释</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ANSI-SQL-几种隔离级别定义："><span class="nav-number">3.2.</span> <span class="nav-text">ANSI SQL 几种隔离级别定义：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#读已提交"><span class="nav-number">3.3.</span> <span class="nav-text">读已提交</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#快照隔离级别和可重复读"><span class="nav-number">3.4.</span> <span class="nav-text">快照隔离级别和可重复读</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#防止更新丢失"><span class="nav-number">3.5.</span> <span class="nav-text">防止更新丢失</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#写倾斜与幻读"><span class="nav-number">3.6.</span> <span class="nav-text">写倾斜与幻读</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#串行化"><span class="nav-number">4.</span> <span class="nav-text">串行化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#严格串行执行"><span class="nav-number">4.1.</span> <span class="nav-text">严格串行执行</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#两阶段锁（Two-Phase-Lock-2PL）"><span class="nav-number">4.2.</span> <span class="nav-text">两阶段锁（Two-Phase Lock, 2PL）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可串行化快照隔离（Serializable-Snapshot-Isolation-SSI）"><span class="nav-number">4.3.</span> <span class="nav-text">可串行化快照隔离（Serializable Snapshot Isolation, SSI）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

@@ -1,0 +1,956 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="前端,JavaScript,Redux,React,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言根据官网介绍，Redux 是一个 JavaScript 状态管理容器，提供了可预测的状态管理能力。可以构建一致的应用，运行于多种环境下（客户端、服务器和原生应用等），且易于测试（甚至都不要在写界面之前进行测试）。">
+<meta name="keywords" content="前端,JavaScript,Redux,React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redux 简记">
+<meta property="og:url" content="http://ifaceless.space/2019/07/03/react-redux-notes/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言根据官网介绍，Redux 是一个 JavaScript 状态管理容器，提供了可预测的状态管理能力。可以构建一致的应用，运行于多种环境下（客户端、服务器和原生应用等），且易于测试（甚至都不要在写界面之前进行测试）。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-11-24T09:45:59.965Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redux 简记">
+<meta name="twitter:description" content="引言根据官网介绍，Redux 是一个 JavaScript 状态管理容器，提供了可预测的状态管理能力。可以构建一致的应用，运行于多种环境下（客户端、服务器和原生应用等），且易于测试（甚至都不要在写界面之前进行测试）。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2019/07/03/react-redux-notes/">
+
+
+
+
+
+  <title>Redux 简记 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/07/03/react-redux-notes/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Redux 简记</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-03T23:03:18+08:00">
+                2019-07-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端/" itemprop="url" rel="index">
+                    <span itemprop="name">前端</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.6k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  7
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>根据官网介绍，Redux 是一个 JavaScript 状态管理容器，提供了可预测的状态管理能力。可以构建一致的应用，运行于多种环境下（客户端、服务器和原生应用等），且易于测试（甚至都不要在写界面之前进行测试）。</p>
+<a id="more"></a>
+<h1 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h1><h2 id="核心思想"><a href="#核心思想" class="headerlink" title="核心思想"></a>核心思想</h2><p>Redux 的核心就是管理状态，所有的状态是在 store 对象树中维护。使用 action 来描述 state 变化，而为了能够将 action 和 state 串联在一块，就有了 reducer 函数，它负责根据不同的 action dispatch 到不同的分支，然后返回新的状态。需要注意的是，reducer 是纯函数，不应该 inplace 那种方式修改 state，而是生成新的 nextState 并返回。<br>通常一个应用中可能有多个小的 reducers ，我们可以使用 <code>combineReducers</code> 将它们组合在一起。</p>
+<h2 id="三大原则"><a href="#三大原则" class="headerlink" title="三大原则"></a>三大原则</h2><ul>
+<li><strong>单一数据源</strong>：整个应用的 state 是存储在一个 obj tree 中的，并且该 obj tree 只存在于唯一一个 store 中</li>
+<li><strong>state 是只读的</strong>：唯有触发 action 才会改变 state，使用 action 来描述发生了什么</li>
+<li><strong>使用纯函数执行修改</strong>：需要编写 reducer 实现状态改变</li>
+</ul>
+<h1 id="三驾马车"><a href="#三驾马车" class="headerlink" title="三驾马车"></a>三驾马车</h1><h2 id="Action"><a href="#Action" class="headerlink" title="Action"></a>Action</h2><ul>
+<li>Action 是把数据从应用传递到 store 的有效载荷，是 store 数据的唯一来源</li>
+<li>一般通过 <code>store.dispatch()</code> 分发 action，传递到 store</li>
+<li>当应用规模变大时，建议将 Action 使用单独的模块存放</li>
+<li>尽量减少在 action 中传递的数据</li>
+<li><strong>Action 创建函数</strong>：返回 action 的函数，使用 <code>bindActionCreators()</code> 可以自动将多个 action 创建函数绑定到 <code>dispatch()</code> 方法上</li>
+<li>Action 只是描述了<em>有事情发生了</em>这样的事实，但不会描述应用如何更新 state</li>
+</ul>
+<h2 id="Reducer"><a href="#Reducer" class="headerlink" title="Reducer"></a>Reducer</h2><ul>
+<li>在 reducer 中响应 action，并产生新的 state，达到改变 state 的目的</li>
+<li><p>为什么叫 <strong>reducer</strong>？参考 <code>Array.prototype.reduce(reducer, ?initialValue)</code> 里面的回调函数，它们比较类似，都必须是纯函数。reducer 函数不欢迎如下操作：</p>
+<ul>
+<li><strong>修改传入参数</strong></li>
+<li><strong>执行含有副作用的操作</strong>，如 API 请求和路由跳转</li>
+<li><strong>调用非纯函数</strong>，如 <code>Date.now()</code> 或 <code>Math.random()</code></li>
+</ul>
+</li>
+<li><p>可以把所有顶级 reducer 放在独立的文件中，通过 <code>export</code> 暴露每个 reducer 函数：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; combineReducers &#125; <span class="keyword">from</span> <span class="string">'redux'</span></span><br><span class="line"><span class="keyword">import</span> * <span class="keyword">as</span> reducers <span class="keyword">from</span> <span class="string">'./reducers'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> todoApp = combineReducers(recuders)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h2 id="Store"><a href="#Store" class="headerlink" title="Store"></a>Store</h2><ul>
+<li><p>Store 的职责如下：</p>
+<ul>
+<li>维持应用的 state</li>
+<li>提供 <code>getState()</code> 读取状态</li>
+<li>提供 <code>dispatch(action)</code> 方法更新状态<br>-提供  <code>subscribe(listener)</code> 方法注册监视器，其返回的函数用于注销监视器</li>
+</ul>
+</li>
+<li><p>Redux 应用的 store 只会有一个，一般会根据业务逻辑来拆分子状态分组，可以通过 <code>reducers</code> 组合完成</p>
+</li>
+<li><code>createStore(reducer, ?initialState)</code>  创建应用 store</li>
+</ul>
+<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; useRef &#125; <span class="keyword">from</span> <span class="string">'react'</span></span><br><span class="line"><span class="keyword">import</span> ReactDOM <span class="keyword">from</span> <span class="string">'react-dom'</span></span><br><span class="line"><span class="keyword">import</span> &#123; createStore, combineReducers &#125; <span class="keyword">from</span> <span class="string">'redux'</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">todos</span>(<span class="params">state = [], action</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (action.type) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">'ADD_TODO'</span>:</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">'Add todo: '</span> + action)</span><br><span class="line">            <span class="keyword">return</span> [</span><br><span class="line">                ...state,</span><br><span class="line">                todo(<span class="literal">undefined</span>, action)</span><br><span class="line">            ]</span><br><span class="line">        <span class="keyword">case</span> <span class="string">'REMOVE_TODO'</span>:</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">'Remove todo: '</span> + action)</span><br><span class="line">            <span class="keyword">return</span> state.map(<span class="function">(<span class="params">item</span>) =&gt;</span> todo(item, action))</span><br><span class="line">        <span class="keyword">case</span> <span class="string">'TOGGLE_TODO'</span>:</span><br><span class="line">            <span class="built_in">console</span>.log(<span class="string">'Toggle todo: '</span> + action)</span><br><span class="line">            <span class="keyword">return</span> state.map(<span class="function">(<span class="params">item</span>) =&gt;</span> todo(item, action))</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">return</span> state</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">todo</span>(<span class="params">state, action</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">switch</span> (action.type) &#123;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">'ADD_TODO'</span>:</span><br><span class="line">            <span class="keyword">return</span> &#123;</span><br><span class="line">                id: action.id,</span><br><span class="line">                text: action.text,</span><br><span class="line">                completed: action.completed,</span><br><span class="line">                isDeleted: <span class="literal">false</span>,</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">'REMOVE_TODO'</span>:</span><br><span class="line">            <span class="keyword">if</span> (state.id !== action.id) &#123;</span><br><span class="line">                <span class="keyword">return</span> state</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> &#123;</span><br><span class="line">                ...state,</span><br><span class="line">                isDeleted: <span class="literal">true</span></span><br><span class="line">            &#125;</span><br><span class="line">        <span class="keyword">case</span> <span class="string">'TOGGLE_TODO'</span>:</span><br><span class="line">            <span class="keyword">if</span> (state.id !== action.id) &#123;</span><br><span class="line">                <span class="keyword">return</span> state</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> &#123;</span><br><span class="line">                ...state,</span><br><span class="line">                completed: !state.completed</span><br><span class="line">            &#125;</span><br><span class="line">        <span class="keyword">default</span>:</span><br><span class="line">            <span class="keyword">return</span> state</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> todoApp = combineReducers(&#123;</span><br><span class="line">    todos</span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">const</span> store = createStore(todoApp)</span><br><span class="line"><span class="keyword">let</span> nextTodoId = <span class="number">0</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">TodoItem</span>(<span class="params">&#123; todo &#125;</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        &lt;li&gt;</span><br><span class="line">            &lt;label</span><br><span class="line">                style=&#123;&#123; <span class="attr">textDecoration</span>: todo.completed ? <span class="string">'line-through'</span> : <span class="string">'none'</span> &#125;&#125;</span><br><span class="line">                onClick=&#123;() =&gt; store.dispatch(&#123; <span class="attr">type</span>: <span class="string">'TOGGLE_TODO'</span>, <span class="attr">id</span>: todo.id &#125;)&#125;</span><br><span class="line">            &gt;</span><br><span class="line">                &#123;todo.text&#125;</span><br><span class="line">            &lt;<span class="regexp">/label&gt;</span></span><br><span class="line"><span class="regexp">            &lt;button</span></span><br><span class="line"><span class="regexp">                style=&#123;&#123; marginLeft: 10 &#125;&#125;</span></span><br><span class="line"><span class="regexp">                onClick=&#123;() =&gt; &#123; store.dispatch(&#123; type: 'REMOVE_TODO', id: todo.id &#125;) &#125;&#125;</span></span><br><span class="line"><span class="regexp">            &gt;移除&lt;/</span>button&gt;</span><br><span class="line">        &lt;<span class="regexp">/li&gt;</span></span><br><span class="line"><span class="regexp">    )</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br><span class="line"><span class="regexp">function TodoApp(&#123; todos = [] &#125;) &#123;</span></span><br><span class="line"><span class="regexp">    const todoItems = todos</span></span><br><span class="line"><span class="regexp">        .filter((todo) =&gt; !todo.isDeleted)</span></span><br><span class="line"><span class="regexp">        .map((todo) =&gt; &lt;TodoItem key=&#123;todo.id&#125; todo=&#123;todo&#125; /</span>&gt;)</span><br><span class="line">    <span class="keyword">const</span> input = useRef()</span><br><span class="line">    <span class="keyword">const</span> handleClick = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> text = input.current.value</span><br><span class="line">        <span class="keyword">if</span> (!text) &#123;</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        &#125;</span><br><span class="line">        store.dispatch(&#123; <span class="attr">type</span>: <span class="string">'ADD_TODO'</span>, <span class="attr">id</span>: nextTodoId++, <span class="attr">text</span>: input.current.value &#125;)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">        &lt;div&gt;</span><br><span class="line">            &lt;input ref=&#123;input&#125; /&gt;</span><br><span class="line">            &lt;button onClick=&#123;handleClick&#125; style=&#123;&#123; <span class="attr">marginLeft</span>: <span class="number">10</span> &#125;&#125;&gt;添加&lt;<span class="regexp">/button&gt;</span></span><br><span class="line"><span class="regexp">            &lt;ul&gt;</span></span><br><span class="line"><span class="regexp">                &#123;todoItems&#125;</span></span><br><span class="line"><span class="regexp">            &lt;/u</span>l&gt;</span><br><span class="line">        &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">    )</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br><span class="line"><span class="regexp">const render = () =&gt; &#123;</span></span><br><span class="line"><span class="regexp">    const state = store.getState()</span></span><br><span class="line"><span class="regexp">    ReactDOM.render(</span></span><br><span class="line"><span class="regexp">        &lt;TodoApp</span></span><br><span class="line"><span class="regexp">            todos=&#123;state.todos&#125;</span></span><br><span class="line"><span class="regexp">        /</span>&gt;,</span><br><span class="line">        <span class="built_in">document</span>.getElementById(<span class="string">'root'</span>)</span><br><span class="line">    )</span><br><span class="line">&#125;</span><br><span class="line">store.subscribe(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(store.getState())</span><br><span class="line">    render()</span><br><span class="line">&#125;)</span><br><span class="line">render()</span><br></pre></td></tr></table></figure>
+<h1 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h1><p>按照 Redux 提供的几个官方示例，可以看出编写一个简单的 Todo 应用其实要考虑的还是挺多的，尤其是需要在分散的模块中分别定义 actions, reducers, containers, dumb components 等，然后搭配 react-redux 来实现整体功能。<br>以下是一个经典的  React Redux 应用的示例的文件结构：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">src/</span><br><span class="line">    actions/</span><br><span class="line">    components/</span><br><span class="line">    consts/</span><br><span class="line">    containers/</span><br><span class="line">    reducers/</span><br><span class="line">    sotore.js</span><br><span class="line">    index.js</span><br></pre></td></tr></table></figure>
+<p>看起来，分层结构很明晰。但这里有几个很大的问题：</p>
+<ol>
+<li>components 和 containers 可能会出现相互引用的问题；</li>
+<li>对于某些情形，严格区分 smart components 和 dumb components 比较死板；</li>
+<li>编写起来很复杂、啰嗦、冗余。</li>
+</ol>
+<p>针对这个痛点，可以借助 <a href="https://github.com/rematch/rematch" target="_blank" rel="noopener">rematch</a> 框架解决。它本质上是一个基于 Redux 封装的框架，目的是提供最佳的 Redux 实践，减少大量的样板代码编写，解放生产力！</p>
+<p>使用 Rematch 时，有个非常重要的概念叫做 <code>model</code>。你可以在 <code>models</code> 里面将<strong>状态</strong>、引起状态变化<strong>reducers</strong> 及异步 actions 和 action creators 收敛到一起，方便维护和测试。总的来说，<code>model</code> 定义包含如下几个部分：</p>
+<ul>
+<li><strong>state</strong>: 初始状态是什么</li>
+<li><strong>reducers</strong>: 如何改变状态</li>
+<li><strong>effects</strong>: 处理异步的 actions，带有副作用的操作</li>
+</ul>
+<p>一个典型的 model 定义如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> count = &#123;</span><br><span class="line">  state: <span class="number">0</span>, <span class="comment">// initial state</span></span><br><span class="line">  reducers: &#123;</span><br><span class="line">    <span class="comment">// 使用同步函数，处理状态变更</span></span><br><span class="line">    increment(state, payload) &#123;</span><br><span class="line">      <span class="keyword">return</span> state + payload</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;,</span><br><span class="line">  effects: <span class="function">(<span class="params">dispatch</span>) =&gt;</span> (&#123;</span><br><span class="line">    <span class="comment">// 使用纯函数处理状态变更（异步 actions）</span></span><br><span class="line">    <span class="keyword">async</span> incrementAsync(payload, rootState) &#123;</span><br><span class="line">      <span class="keyword">await</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function"><span class="params">resolve</span> =&gt;</span> setTimeout(resolve, <span class="number">1000</span>))</span><br><span class="line">      dispatch.count.increment(payload)</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>有了 models 后，就可以创建 Redux store，并使用 <code>dispatch</code> 来触发 reducers 和 effects 调用（无需手动编写 action creators 啦~）。当然，在展示层，我们依然可以结合 react-redux 来使用。具体可以参考官方示例，更详细的文档可以参考 <a href="https://github.com/rematch/rematch/tree/master/docs" target="_blank" rel="noopener">这里</a>。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://redux.js.org/" target="_blank" rel="noopener">Redux 官网文档</a></li>
+<li><a href="https://cn.redux.js.org/" target="_blank" rel="noopener">Redux 中文译文</a></li>
+<li><a href="https://egghead.io/lessons/react-redux-the-single-immutable-state-tree" target="_blank" rel="noopener">Redux 入门视频教程</a></li>
+<li><a href="https://egghead.io/series/building-react-applications-with-idiomatic-redux" target="_blank" rel="noopener">以地道的方式使用 Redux 构建 React 应用</a></li>
+<li><a href="https://www.fullstackreact.com/articles/redux-with-mark-erikson/" target="_blank" rel="noopener">Redux and Why it’s Good For You</a></li>
+<li><a href="https://daveceddia.com/what-does-redux-do/" target="_blank" rel="noopener">What Does Redux Do</a></li>
+<li><a href="https://medium.com/@dan_abramov/smart-and-dumb-components-7ca2f9a7c7d0" target="_blank" rel="noopener">Presentational and Container Components</a>，<em>作者其实已经不推荐这种写法了</em></li>
+<li><a href="https://react-redux.js.org/introduction/quick-start" target="_blank" rel="noopener">React Redux 官方文档</a></li>
+</ul>
+<h1 id="延伸阅读"><a href="#延伸阅读" class="headerlink" title="延伸阅读"></a>延伸阅读</h1><ul>
+<li><a href="https://css-tricks.com/react-router-4/" target="_blank" rel="noopener">All About React Router 4</a></li>
+<li><a href="https://css-tricks.com/learning-react-redux/" target="_blank" rel="noopener">Learning React Redux</a></li>
+<li><a href="https://css-tricks.com/learning-react-container-components/" target="_blank" rel="noopener">Leveling Up With React: Container Components</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2019/07/03/react-redux-notes/" title="Redux 简记">http://ifaceless.space/2019/07/03/react-redux-notes/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/前端/" rel="tag"><i class="fa fa-tag"></i> 前端</a>
+          
+            <a href="/tags/JavaScript/" rel="tag"><i class="fa fa-tag"></i> JavaScript</a>
+          
+            <a href="/tags/Redux/" rel="tag"><i class="fa fa-tag"></i> Redux</a>
+          
+            <a href="/tags/React/" rel="tag"><i class="fa fa-tag"></i> React</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/02/react-core-concepts/" rel="next" title="React 核心概念">
+                <i class="fa fa-chevron-left"></i> React 核心概念
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/07/16/css-learning-notes/" rel="prev" title="CSS 学习笔记">
+                CSS 学习笔记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me@ifaceless.me" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#概念"><span class="nav-number">2.</span> <span class="nav-text">概念</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#核心思想"><span class="nav-number">2.1.</span> <span class="nav-text">核心思想</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三大原则"><span class="nav-number">2.2.</span> <span class="nav-text">三大原则</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三驾马车"><span class="nav-number">3.</span> <span class="nav-text">三驾马车</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Action"><span class="nav-number">3.1.</span> <span class="nav-text">Action</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Reducer"><span class="nav-number">3.2.</span> <span class="nav-text">Reducer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Store"><span class="nav-number">3.3.</span> <span class="nav-text">Store</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#示例"><span class="nav-number">3.4.</span> <span class="nav-text">示例</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#实践"><span class="nav-number">4.</span> <span class="nav-text">实践</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#延伸阅读"><span class="nav-number">6.</span> <span class="nav-text">延伸阅读</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

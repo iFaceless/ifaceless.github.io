@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="前端,JavaScript,ES5,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言最近抽空学习了下 JavaScript 语言，当然还是入门级别的那种。学习过程中也做了些笔记。总的来说，ES5 学完后，对 JavaScript 本身了解了大概，语言本身设计上也存在一些坑，所以搭配《JavaScript 精粹》这本书看看，可以进一步了解有哪些比较好的写法避免踩坑。">
+<meta name="keywords" content="前端,JavaScript,ES5">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JavaScript ES5 入门笔记">
+<meta property="og:url" content="http://ifaceless.space/2019/06/23/javascript-es5-learning-note/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言最近抽空学习了下 JavaScript 语言，当然还是入门级别的那种。学习过程中也做了些笔记。总的来说，ES5 学完后，对 JavaScript 本身了解了大概，语言本身设计上也存在一些坑，所以搭配《JavaScript 精粹》这本书看看，可以进一步了解有哪些比较好的写法避免踩坑。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-11-24T09:45:59.950Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JavaScript ES5 入门笔记">
+<meta name="twitter:description" content="引言最近抽空学习了下 JavaScript 语言，当然还是入门级别的那种。学习过程中也做了些笔记。总的来说，ES5 学完后，对 JavaScript 本身了解了大概，语言本身设计上也存在一些坑，所以搭配《JavaScript 精粹》这本书看看，可以进一步了解有哪些比较好的写法避免踩坑。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2019/06/23/javascript-es5-learning-note/">
+
+
+
+
+
+  <title>JavaScript ES5 入门笔记 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/06/23/javascript-es5-learning-note/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">JavaScript ES5 入门笔记</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-06-23T18:02:26+08:00">
+                2019-06-23
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端/" itemprop="url" rel="index">
+                    <span itemprop="name">前端</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3.5k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  13
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>最近抽空学习了下 JavaScript 语言，当然还是入门级别的那种。学习过程中也做了些笔记。总的来说，ES5 学完后，对 JavaScript 本身了解了大概，语言本身设计上也存在一些坑，所以搭配《JavaScript 精粹》这本书看看，可以进一步了解有哪些比较好的写法避免踩坑。</p>
+<a id="more"></a>
+<h1 id="基础篇"><a href="#基础篇" class="headerlink" title="基础篇"></a>基础篇</h1><ul>
+<li><p>判断是否为未定义的变量：</p>
+  <figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 错误的写法</span></span><br><span class="line"><span class="keyword">if</span> (v) &#123;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ReferenceError: v is not defined</span></span><br><span class="line"><span class="comment">// 正确的写法</span></span><br><span class="line"><span class="keyword">if</span> (<span class="keyword">typeof</span> v === <span class="string">"undefined"</span>) &#123;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>typeof null</code> 也是 <code>object</code></p>
+</li>
+<li>使用 <code>instanceof</code> 可以判断是否为数组：<code>v instanceof Array</code></li>
+<li><p><code>null</code> 和 <code>undefined</code> 非常类似，甚至 <code>null == undefined</code> 都成立，但是它们在 JavaScript 中还是有区别：</p>
+<ul>
+<li><code>null</code> 表示空对象，可转换为数值 0：<code>Number(null) //0</code></li>
+<li><code>undefined</code> 表示没有定义的原始值，转换为数值为 NaN</li>
+</ul>
+</li>
+<li><p>JS 中所有数字都是以 64 位浮点数存储的，对于某些运算，只能用整数，JS 会将数字转换为 32 位整数再做运算</p>
+</li>
+<li>数值计算比较需要注意，因为浮点数有精度丢失的问题。比如：<code>0.3-0.2 !== 0.2-0.</code>。</li>
+<li>JavaScript 对 15 位的十进制数都可以精确处理。</li>
+<li>对于码点在 U+10000 到 U+10FFFF 之间的字符，JavaScript 总是认为它们是两个字符（length 属性为 2）</li>
+<li>base64 转换：<code>btoa</code>, <code>atob</code></li>
+<li><p>属性删除 <code>delete</code>：</p>
+<ul>
+<li>不能删除对象本身</li>
+<li>无论属性是否存在，删除总会返回 <code>true</code></li>
+<li>继承的属性不能删除，虽然也会返回 <code>true</code></li>
+<li>使用 <code>defineProperty</code> 定义的标记为不可删除的属性，<code>delete</code> 返回 <code>false</code></li>
+</ul>
+</li>
+<li><p>对象属性存在新判断：</p>
+<ul>
+<li><code>in</code> 可以判断，但是不能区分是继承的还是自身拥有的</li>
+<li><code>hasOwnProperty</code> 可以弥补上述缺点</li>
+</ul>
+</li>
+<li><p><code>for...in</code> 用于遍历对象的属性：</p>
+<ul>
+<li>对象属性必须是可遍历的（enumerable）</li>
+<li>对于继承的属性也会被遍历到，如果不想要，可以搭配 <code>hasOwnProperty</code> 过滤掉</li>
+</ul>
+</li>
+<li><p>一般也可以使用 <code>Object.keys(o).map(k =&gt; { /*do stuff*/ }</code> </p>
+</li>
+<li>函数声明几种方式：<ul>
+<li><code>function func_name(params) {}</code></li>
+<li><code>let say = function (word) {}</code>，匿名函数</li>
+<li><code>let say = function f(word) { console.log(f) }</code>，注意，这里的函数名 <code>f</code> 只可以在该函数内部访问到，有两个好处：<ul>
+<li>遍历在函数内部调用自己</li>
+<li>方便调试，排错时看到具体的函数名，而不再是匿名函数</li>
+</ul>
+</li>
+<li>使用 <code>Function</code> 构造函数，注意，返回的函数的 <code>type</code> 的确也是 <code>function</code>（不推荐使用）</li>
+</ul>
+</li>
+<li>JS 引擎将函数名视为变量名，所以也存在「函数名提升」的效果，因此，在函数声明位置的上方调用也不会出错</li>
+<li>函数执行时所在的作用域，是定义时的作用域，而不是调用时所在的作用域</li>
+<li><p><code>arguments</code> 对象可以获取到函数传入的参数值：</p>
+<ul>
+<li>该对象不是数组，所以像 <code>slice</code>, <code>forEach</code> 方法就不存在</li>
+<li>如果想要转换成数组，一种方式就是：<code>let args = Array.prototype.slice.call(arguments)</code></li>
+<li>在严格模式下，不能通过 <code>arguments.callee</code> 调用函数自身；对 <code>arguments</code> 的修改不会对原始传入的参数产生影响</li>
+</ul>
+</li>
+<li><p>立即调用函数的两种方式：</p>
+<ul>
+<li><code>(function () {console.log(10)})()</code></li>
+<li><code>(function () {console.log(10)}())</code></li>
+</ul>
+</li>
+<li><p>数组是特殊的对象，其键名就是一组数字，可以通过 <code>Object.keys</code> 返回所有的键名</p>
+</li>
+<li>数组的 <code>length</code> 属性不过滤空位。所以，使用 length 属性进行数组遍历，一定要非常小心。如 <code>delete arr[3]</code> 之后，依然不会影响 <code>length</code>，只是产生了一个空位；所以可以使用 <code>forEach</code> 替代，可以过滤空位（但空位不等同于 <code>undefined</code>）。也就是说 <code>var a = [, , ,]</code> 表示的每个位置都是空位；<code>var a = [undefined, undefined]</code> 则是可遍历到的，只是值为 <code>undefined</code> 而已</li>
+<li>类似数组的数组（Array like object）：<ul>
+<li>对象拥有类似下面的定义：<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// 所有的键都是数字</span><br><span class="line">// 带有 length 属性</span><br><span class="line">var obj = &#123;</span><br><span class="line">  0: &apos;a&apos;,</span><br><span class="line">  1: &apos;b&apos;,</span><br><span class="line">  2: &apos;c&apos;,</span><br><span class="line">  length: 3</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>函数的 <code>arguments</code>，字符串，还有多数的 DOM 元素都是 array-like 的对象。可以使用 <code>Array.prototype.slice.call(xx)</code> 转换成数组</p>
+</li>
+<li><p><code>void</code> 运算符：作用是执行一个表达式，不返回任何值（返回 undefined）：</p>
+<ul>
+<li>推荐用法：<code>void (x = 5)</code></li>
+<li>使用场景，防止网页跳转：<code>&lt;a href=&quot;javascript: void f()&quot;&gt;文字&lt;/a&gt;</code></li>
+</ul>
+</li>
+<li><p>逗号运算符返回最后一个值 <code>&#39;a&#39;, &#39;b&#39; // &quot;b&quot;</code></p>
+</li>
+</ul>
+<h1 id="语法专题"><a href="#语法专题" class="headerlink" title="语法专题"></a>语法专题</h1><ul>
+<li><code>Number</code> 用于强制转换成数值类型，与 <code>parseInt</code> 相比，转换要严格得多，只要遇到不可转换为数值的字符，转换就失败</li>
+<li><code>Boolean</code> 所有对象（含空对象）的转换结果都是 <code>true</code>，如 <code>Boolean(new Boolean(false)) // true</code></li>
+<li><p>JS 中所有抛出的错误都是 <code>new Error(xx)</code> 出来的，Error 的基本属性：</p>
+<ul>
+<li><code>message</code>：错误提示信息（必须）</li>
+<li><code>name</code>：错误名称（非标准属性，看 JS 引擎）</li>
+<li><code>stack</code>：错误的堆栈（非标准属性，看 JS 引擎）</li>
+</ul>
+</li>
+<li><p>派生错误对象：    </p>
+<ul>
+<li><code>SyntaxError</code></li>
+<li><code>ReferenceError</code></li>
+<li><code>RangeError</code>：数组长度为负数；<code>Number</code> 对象的方法参数超出范围；函数堆栈超过最大值</li>
+<li><code>TypeError</code></li>
+<li><code>URIError</code></li>
+</ul>
+</li>
+<li><p><code>throw</code> 可以抛出任意类型的值，并且在 <code>throw</code> 的位置就中断了执行，JS 引擎会接收到抛出的信息</p>
+</li>
+<li><p><code>console</code> 一些重要的方法：</p>
+<ul>
+<li><code>info</code></li>
+<li><code>error</code></li>
+<li><code>debug</code></li>
+<li><code>warn</code></li>
+<li><code>table</code></li>
+<li><code>log</code></li>
+<li><code>dir</code>：类似 <code>inspect</code></li>
+</ul>
+</li>
+<li><p>可以在需要的地方加 <code>debugger</code> 作为断点，用于调试</p>
+</li>
+</ul>
+<h1 id="标准库"><a href="#标准库" class="headerlink" title="标准库"></a>标准库</h1><ul>
+<li><code>Object()</code> 函数可以将任意值转换成对象，如果传入的参数是原始类型值，则会转换成其包装对象的实例；如果入参已经是对象了，则不会转换</li>
+<li>可以利用上述特性判断变量是否为对象：<code>value === Object(value)</code></li>
+<li><code>Object.keys()</code> 静态方法可以返回对象的所有属性名（非继承，且可枚举），该遍历方法优先</li>
+<li><code>Object.getOwnPropertyNames()</code> 静态方法则会返回对象的所有属性名（包括不可枚举的）</li>
+<li><p><code>Object.prototype.xxx</code> 实例方法：</p>
+<ul>
+<li><code>valueOf()</code>：返回对象的值，默认为自身</li>
+<li><code>toString()</code>：返回对象的字符串表示</li>
+<li><code>Object.prototype.toString.call(value)</code> 返回 <code>[object &lt;TypeName&gt;]</code>，第二个元素可以得到具体的值类型</li>
+</ul>
+</li>
+<li><p>JS 提供了内部数据结构，描述对象的属性，控制其行为，示例如下：</p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    value: <span class="number">123</span>,</span><br><span class="line">    writeable: <span class="literal">false</span>,</span><br><span class="line">    enumerable: <span class="literal">true</span>,</span><br><span class="line">    configurable: <span class="literal">false</span>,</span><br><span class="line">    get: <span class="literal">undefined</span>,</span><br><span class="line">    set: <span class="literal">undefined</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>Object.getOwnPropertyDescriptor(obj, &#39;a&#39;)</code> 可以获取属性描述对象</p>
+</li>
+<li>默认情况下，如果属性被设置为 <code>writeable=false</code> 后，继承者将无法重新定义同名属性；除非可以通过覆盖属性描述对象来绕过限制 </li>
+<li><p>如果属性的 <code>enumerable</code> 为 <code>false</code>，则有三种操作不能取到该属性：</p>
+<ul>
+<li><code>for...in</code> </li>
+<li><code>Object.keys</code>：无法获取对象继承的属性，此时可以用 <code>getOwnPropertyNames</code></li>
+<li><code>JSON.stringify</code></li>
+</ul>
+</li>
+<li><p><code>configurable</code>：控制是否可以修改描述符属性，并且当 <code>configurable=fasle</code> 时，无法删除</p>
+</li>
+<li>判断对象是否为数组：<code>Array.isArray</code></li>
+</ul>
+<h1 id="面向对象"><a href="#面向对象" class="headerlink" title="面向对象"></a>面向对象</h1><ul>
+<li>JavaScript 中的对象体系，是基于构造函数 <code>constructor</code> 和原型链 <code>prototype</code> 的。构造函数就是对象生成的「模板」</li>
+<li><p>构造函数特点：</p>
+<ul>
+<li>内部使用 <code>this</code>，指向生成的对象实例</li>
+<li>需要配合 <code>new</code> 关键字</li>
+</ul>
+</li>
+<li><p><code>new</code> 干了什么：</p>
+<ul>
+<li>新建空对象，作为要返回的对象</li>
+<li>将空对象的 <code>__proto__</code> 指向构造函数的 <code>prototype</code></li>
+<li>将该空对象赋值给函数内部的 <code>this</code> 关键字</li>
+<li>执行构造函数中的代码</li>
+</ul>
+</li>
+<li><p>函数内部可使用 <code>new.target</code> 判断是否使用了 <code>new</code> 调用构造函数</p>
+</li>
+<li><code>this</code> 在函数体内部，指向当前的运行环境</li>
+<li>如果 <code>this</code> 所在的方法不在对象的第一层，这时 <code>this</code> 只是指向当前一层的对象，而不会继承更上面的层</li>
+<li>函数实例的 <code>call</code> 方法可以指定 <code>this</code> 指向的环境，此外可以跳过同名函数覆盖，直接使用原始的函数；<code>appy</code> 和 <code>call</code> 类似，只是接收一个列表参数</li>
+<li><code>bind</code> 也可以绑定对象，变换 <code>this</code> 指向</li>
+<li>JS 继承机制的核心：原型中所有属性和方法都可以被多个实例共享</li>
+<li><code>instanceof</code> 运算符：<ul>
+<li>只能用于非原始类型对象</li>
+<li>对象的原型 <code>prototype</code> 均为 null 时失效</li>
+<li><code>undefined instanceof Object</code> 和 <code>null instanceof Object</code> 均为 <code>false</code></li>
+</ul>
+</li>
+</ul>
+<h1 id="异步"><a href="#异步" class="headerlink" title="异步"></a>异步</h1><ul>
+<li>Promise 的回调函数不是正常的异步任务，而是<strong>微任务</strong>。前者会追加到下一轮事件循环，而微任务则追加到本轮事件循环。所以微任务执行要早于常规异步任务。</li>
+<li><code>setTimeout(f, 0)</code> 可以让任务在下轮事件循环中执行</li>
+</ul>
+<h1 id="DOM"><a href="#DOM" class="headerlink" title="DOM"></a>DOM</h1><ul>
+<li>元素的 <code>hidden</code> 属性只有在 CSS 没有明确设定当前元素的可见性时才会生效，也就是 CSS 的 <code>display</code> 用于可见性控制的优先级高于元素自身的 <code>hidden</code> 属性</li>
+<li>网页元素可以自定义 <code>data-*</code> 属性，添加数据，可以使用 <code>.dataset</code> 返回数据对象</li>
+<li>为防止遭受攻击，对于文本内容，建议使用 <code>textContent</code> 替代 <code>innerHTML</code> 设置文本</li>
+</ul>
+<h2 id="CSS"><a href="#CSS" class="headerlink" title="CSS"></a>CSS</h2><ul>
+<li>CSS 负责视觉效果；JavaScript 负责与用户的行为互动</li>
+<li>可以通过 <code>style</code> 属性设置 CSS 样式</li>
+<li><p><code>CSSStyleDeclaration</code> 对象用于操作元素的样式，包括：</p>
+<ul>
+<li>元素的 <code>style</code> 属性</li>
+<li><code>CSSStyle</code> 实例的 <code>style</code> 属性</li>
+<li><code>window.getComputedStyle()</code> 返回值（元素的全部样式需要它获取到）</li>
+</ul>
+</li>
+<li><p>需要注意的是，<code>CSSStyleDeclaration</code> 的属性名和原生 CSS 还是有点区别，命名需要修改，如 <code>backgroud-color</code> -&gt; <code>backgroudColor</code>；如果是 JS 的保留字，则需要加上 <code>css</code> 前缀</p>
+</li>
+<li>属性操作：<ul>
+<li><code>setProperty</code></li>
+<li><code>removeProperty</code></li>
+</ul>
+</li>
+</ul>
+<h2 id="DOM-变动监控"><a href="#DOM-变动监控" class="headerlink" title="DOM 变动监控"></a>DOM 变动监控</h2><ul>
+<li>Mutation Observer API：DOM 的变动（节点增减、属性变动、文本内容变动），都可以通过该 API 获得通知</li>
+<li>与事件的区别：<ul>
+<li>MO 事件是在 DOM 变动时异步触发，并且是等到当前所有 DOM 操作都结束才触发</li>
+<li>事件则是同步触发，DOM 变动立刻触发</li>
+</ul>
+</li>
+<li><p>总结来说：</p>
+<ul>
+<li>等待所有脚本任务完成后，才会触发</li>
+<li>把 DOM 变动记录封装成一个数组处理，而非每条都分别处理</li>
+<li>既可以观察 DOM 所有类型变动，也可以指定观察某类变动</li>
+</ul>
+</li>
+<li><p>用法：  </p>
+<figure class="highlight js"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> observer = <span class="keyword">new</span> MutationObserver(<span class="function">(<span class="params">mutations, observer</span>) =&gt;</span> &#123;&#125;)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 指定监听的元素和类型</span></span><br><span class="line"><span class="keyword">const</span> article = <span class="built_in">document</span>.querySelector(<span class="string">"article"</span>)</span><br><span class="line">observer.observe(article, &#123;<span class="string">'childList'</span>: <span class="literal">true</span>, <span class="string">'attritubes'</span>: <span class="literal">true</span>&#125;)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h1 id="事件"><a href="#事件" class="headerlink" title="事件"></a>事件</h1><ul>
+<li><p>DOM 的事件操作（监听、触发），都是 <code>EventTarget</code> 中定义的。主要接口如下：</p>
+<ul>
+<li><code>addEventListener</code></li>
+<li><code>removeEventListener</code></li>
+<li><code>dispatchEvent</code></li>
+</ul>
+</li>
+<li><p>HTML 中可以直接在元素属性中，定义某些监听代码。如 <code>onload</code>，这类监听代码只在冒泡阶段触发</p>
+</li>
+<li>元素的 <code>onclick</code> 属性，也可以指定监听函数，并且在冒泡阶段触发</li>
+<li>事件传播：<ul>
+<li>第一阶段：从 <code>window</code> 对象传导到目标节点（上层传到底层），即为「捕获阶段」（capture phase）</li>
+<li>第二阶段：从目标节点上触发，叫做「目标阶段」（target phase）</li>
+<li>第三阶段：从目标节点传导回 <code>window</code> 对象（从底层传回上层），叫做「冒泡阶段」（bubbling phase）</li>
+</ul>
+</li>
+<li><code>e.StopPropagation</code> 则是会阻止事件传播，但不会处理其它的监听事件</li>
+<li><code>e.stopImmediatePropagation</code> 会彻底取消同名的时间</li>
+<li>网页中除了元素节点默认不可以拖拉，其它（图片、链接、选中的文字）都是可以拖拉的，可通过将元素节点的 <code>draggable</code> 属性设置为 <code>true</code> 实现</li>
+<li>一旦某个元素节点被设置为可拖拽后，就无法通过鼠标选中节点内部的文字或子节点了</li>
+</ul>
+<h1 id="浏览器对象"><a href="#浏览器对象" class="headerlink" title="浏览器对象"></a>浏览器对象</h1><ul>
+<li>嵌入脚本时，<code>&lt;script&gt;</code> 元素的 <code>type</code> 属性默认为 <code>text/javascript</code>，新浏览器可以写成 <code>application/javascript</code>。当然，也可以不填写。另外，<code>integrity</code> 属性可以设置脚本的 SHA256 签名，对于非法脚本浏览器会拒绝加载</li>
+<li><code>async</code> 和 <code>defer</code> 同时存在，则后者不起作用</li>
+<li><code>window.navigator</code> 指向包含浏览器和系统信息的 <code>Navigator</code> 对象，可以了解用户的环境信息</li>
+<li>Cookie 是服务器保存在浏览器的一小段文本信息，每个 Cookie 的大小一般不超过 4KB，每次请求服务器，都会附带该信息</li>
+<li><p>Cookie 包括的信息：</p>
+<ul>
+<li>名字</li>
+<li>值</li>
+<li>到期时间</li>
+<li>所属域名（默认当前域名）</li>
+<li>生效的路径（默认当前网站）</li>
+</ul>
+</li>
+<li><p><strong>浏览器的安全基础是「同源政策」（same-origin policy）</strong></p>
+</li>
+<li><p>同源的含义：</p>
+<ul>
+<li>相同的协议</li>
+<li>相同的域名</li>
+<li>相同的端口</li>
+</ul>
+</li>
+<li><p>非同源的限制：</p>
+<ul>
+<li>无法读取非同源网页的 Cookie, LocalStorage 和 IndexedDB</li>
+<li>无法接触非同源网页的 DOM</li>
+<li>无法向非同源地址发送 AJAX 请求（即便发送，浏览器也会拒绝接受响应）</li>
+</ul>
+</li>
+<li><p><code>document.domain</code> 设置可共享 Cookie，适用于 ifame 和 Cookie，对于 LocalStorage 和 IndexedDB 无效；此外，服务器可以在设置 Cookie 时就指定好所属一级域名：<code>.example.com</code>，也可以对子域名达到共享 Cookie 的目的</p>
+</li>
+<li><p>对于完全不同源的窗口，想要通信有两种方式：</p>
+<ul>
+<li><code>fragment identifier</code>：片段标识符。<code>http://example.com/x.html#fragment</code> 只是改变 <code>#fragment</code> 不会导致网页刷新，属于破解无法通信之法</li>
+<li>H5 提供了新的 <code>postMessage</code> 方法发送消息，监听方可以监听 <code>message</code> 事件获取消息</li>
+</ul>
+</li>
+<li><p>AJAX 突破同源限制的方法：</p>
+<ul>
+<li>JSONP</li>
+<li>WebSocket</li>
+<li>CORS (Cross-Origin Resource Sharing)</li>
+</ul>
+</li>
+<li><p>CORS 通信：</p>
+<ul>
+<li>W3C 标准，允许浏览器跨域请求</li>
+<li><a href="https://wangdoc.com/javascript/bom/cors.html" target="_blank" rel="noopener">详细介绍</a></li>
+<li>区分简单请求和非简单请求，流程不同</li>
+<li>简单请求中，Origin Header 很重要</li>
+<li>非简单请求，先进行 <code>/OPTIONS</code> 预先检查，然后后续流程类似简单请求</li>
+</ul>
+</li>
+<li><p>Storage 接口：</p>
+<ul>
+<li><code>sessionStorage</code>：保存的数据用于浏览器一次会话，结束后会被清理</li>
+<li><code>localStorage</code> 保存数据长期存在</li>
+<li>只有同域名下的网页才可以读取，跨域会报错</li>
+<li><code>length</code> 返回数据项个数</li>
+<li><code>setItem</code> 保存 key + value</li>
+<li><code>getItem</code> 返回保存的 key 对应的 value</li>
+<li><code>clear</code></li>
+<li><code>key</code> 返回对应位置的键值 </li>
+</ul>
+</li>
+</ul>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://wangdoc.com/javascript/events/eventtarget.html" target="_blank" rel="noopener">JavaScript 入门</a></li>
+</ul>
+<ol>
+<li><a href="https://developer.mozilla.org/zh-CN/docs/Web/JavaScript" target="_blank" rel="noopener">MDN JavaScript</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2019/06/23/javascript-es5-learning-note/" title="JavaScript ES5 入门笔记">http://ifaceless.space/2019/06/23/javascript-es5-learning-note/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/前端/" rel="tag"><i class="fa fa-tag"></i> 前端</a>
+          
+            <a href="/tags/JavaScript/" rel="tag"><i class="fa fa-tag"></i> JavaScript</a>
+          
+            <a href="/tags/ES5/" rel="tag"><i class="fa fa-tag"></i> ES5</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/24/rust-rocket-quick-start/" rel="next" title="Rocket Web 框架入门">
+                <i class="fa fa-chevron-left"></i> Rocket Web 框架入门
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/06/23/javascript-es6-learning-note/" rel="prev" title="JavaScript ES6 学习笔记">
+                JavaScript ES6 学习笔记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me@ifaceless.me" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基础篇"><span class="nav-number">2.</span> <span class="nav-text">基础篇</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#语法专题"><span class="nav-number">3.</span> <span class="nav-text">语法专题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#标准库"><span class="nav-number">4.</span> <span class="nav-text">标准库</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#面向对象"><span class="nav-number">5.</span> <span class="nav-text">面向对象</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#异步"><span class="nav-number">6.</span> <span class="nav-text">异步</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#DOM"><span class="nav-number">7.</span> <span class="nav-text">DOM</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#CSS"><span class="nav-number">7.1.</span> <span class="nav-text">CSS</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#DOM-变动监控"><span class="nav-number">7.2.</span> <span class="nav-text">DOM 变动监控</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#事件"><span class="nav-number">8.</span> <span class="nav-text">事件</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#浏览器对象"><span class="nav-number">9.</span> <span class="nav-text">浏览器对象</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">10.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

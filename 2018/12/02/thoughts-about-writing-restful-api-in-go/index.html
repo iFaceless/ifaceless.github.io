@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Go,Web,RESTful,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言近来实践了下 Go Web 开发，也一并做了些 Web 开发相关的效率工具，目的也是为了提升开发体验，进而改善项目质量和提高开发效率。 之前在使用 Python 做 Web 项目时，比较习惯基于类的方式为某个资源提供 RESTful 接口。和采用纯函数的方式不同，基于类的方式可以使得资源管理更清晰，当逻辑代码较多时，代码结构也不至于太混乱。">
+<meta name="keywords" content="Go,Web,RESTful">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go 语言编写 RESTful API 的一些思考">
+<meta property="og:url" content="http://ifaceless.space/2018/12/02/thoughts-about-writing-restful-api-in-go/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言近来实践了下 Go Web 开发，也一并做了些 Web 开发相关的效率工具，目的也是为了提升开发体验，进而改善项目质量和提高开发效率。 之前在使用 Python 做 Web 项目时，比较习惯基于类的方式为某个资源提供 RESTful 接口。和采用纯函数的方式不同，基于类的方式可以使得资源管理更清晰，当逻辑代码较多时，代码结构也不至于太混乱。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-11-24T09:45:59.965Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Go 语言编写 RESTful API 的一些思考">
+<meta name="twitter:description" content="引言近来实践了下 Go Web 开发，也一并做了些 Web 开发相关的效率工具，目的也是为了提升开发体验，进而改善项目质量和提高开发效率。 之前在使用 Python 做 Web 项目时，比较习惯基于类的方式为某个资源提供 RESTful 接口。和采用纯函数的方式不同，基于类的方式可以使得资源管理更清晰，当逻辑代码较多时，代码结构也不至于太混乱。">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2018/12/02/thoughts-about-writing-restful-api-in-go/">
+
+
+
+
+
+  <title>Go 语言编写 RESTful API 的一些思考 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2018/12/02/thoughts-about-writing-restful-api-in-go/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Go 语言编写 RESTful API 的一些思考</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-02T17:51:54+08:00">
+                2018-12-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Web-开发/" itemprop="url" rel="index">
+                    <span itemprop="name">Web 开发</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.1k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  4
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>近来实践了下 Go Web 开发，也一并做了些 Web 开发相关的效率工具，目的也是为了提升开发体验，进而改善项目质量和提高开发效率。</p>
+<p>之前在使用 Python 做 Web 项目时，比较习惯基于类的方式为某个资源提供 RESTful 接口。和采用纯函数的方式不同，基于类的方式可以使得资源管理更清晰，当逻辑代码较多时，代码结构也不至于太混乱。</p>
+<a id="more"></a>
+<p>所以在使用 Go 语言实践时，我们会采用类似 <code>ResourceHandler</code> 的结构体的方式来替代类，并给该结构体绑定相应的 <code>GET/POST/DELETE/PUT/PATCH</code> 方法，用以和 HTTP 相应的请求方法匹配。</p>
+<h1 id="遇到的问题"><a href="#遇到的问题" class="headerlink" title="遇到的问题"></a>遇到的问题</h1><p>我们使用的 Web 框架是基于 <a href="https://github.com/go-chi/chi" target="_blank" rel="noopener">go-chi/chi</a> 封装的，这个框架本身的特点就是简单，与 Go 标准库 <code>http</code> 无缝衔接。主要用它来做路由分发，方便编写 HTTP API。</p>
+<p>但在实践中，路由注册那块感觉很繁琐。比如，我们先前的写法大致是下面这样的：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">r := chi.NewRouter()</span><br><span class="line"></span><br><span class="line">hd := NewTasksHandler()</span><br><span class="line"></span><br><span class="line">r.Get(<span class="string">"/tasks/&#123;task_id:(\\d+)&#125;"</span>, hd.Get)</span><br><span class="line">r.Post(<span class="string">"/tasks/&#123;task_id:(\\d+)&#125;"</span>, hd.Post)</span><br><span class="line">r.Delete(<span class="string">"/tasks/&#123;task_id:(\\d+)"</span>, hd.Delete&#125;</span><br></pre></td></tr></table></figure>
+<p>显然，上面的写法有点啰嗦，且容易出错。比如在单元测试中，我们就可能会因为疏忽大意，给 <code>test server</code> 绑定的路由<strong>和实际的不同</strong>（别问我怎么知道的）。所以就希望能有一种简单的方式注册路由，并且让程序自己根据请求的 Method 分发到 <code>Handler</code> 对应的方法上。</p>
+<p>既然遇到问题，那就得想个优雅的方法解决，尽可能保证性能损耗不大，但又能带来较好的开发体验。于是乎，<a href="https://github.com/iFaceless/rest" target="_blank" rel="noopener">rest</a> 包诞生了。</p>
+<h1 id="说说-REST-包"><a href="#说说-REST-包" class="headerlink" title="说说 REST 包"></a>说说 REST 包</h1><p><a href="https://github.com/iFaceless/rest" target="_blank" rel="noopener">rest</a> 包的实现很简单，就是对 <a href="https://github.com/go-chi/chi" target="_blank" rel="noopener">go-chi/chi</a> 框架做了简单的包装，实现了一个自定义的 <code>BaseHandler</code> 实现请求分发到所谓的「子类」结构体对应的方法进行处理。由于并不会进行类型断言或者使用反射，所以带来的性能开销不会很高。</p>
+<p>那么，在有了 <a href="https://github.com/iFaceless/rest" target="_blank" rel="noopener">rest</a> 包后，我们如何使用它呢？</p>
+<h1 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h1><p>假如我们要编写一个<strong>任务管理</strong>服务，需要提供的接口如下：</p>
+<table>
+<thead>
+<tr>
+<th>功能</th>
+<th>方法</th>
+<th>URL 示例</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>获取任务列表</td>
+<td>GET</td>
+<td><code>/tasks</code></td>
+</tr>
+<tr>
+<td>新建任务</td>
+<td>POST</td>
+<td><code>/tasks</code></td>
+</tr>
+<tr>
+<td>获取单个任务</td>
+<td>GET</td>
+<td><code>/tasks/1</code></td>
+</tr>
+<tr>
+<td>删除单个任务</td>
+<td>DELETE</td>
+<td><code>/tasks/1</code></td>
+</tr>
+</tbody>
+</table>
+<p>在 <a href="https://github.com/iFaceless/rest" target="_blank" rel="noopener">rest</a> 的助攻下，我们可以这样来写：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    r := rest.NewRouter()</span><br><span class="line">    r.MountHandler(<span class="string">"/tasks"</span>, &amp;TasksHandler&#123;&#125;)</span><br><span class="line">    r.MountHandler(<span class="string">"/tasks/&#123;task_id:(\\d+)&#125;"</span>, &amp;TaskHandler&#123;&#125;)</span><br><span class="line">    rest.Run(r, <span class="number">8000</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> TasksHandler <span class="keyword">struct</span> &#123;</span><br><span class="line">    rest.BaseHandler</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(hd *TasksHandler)</span> <span class="title">Get</span><span class="params">()</span></span> &#123;</span><br><span class="line">    hd.RenderJSON(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;<span class="string">"message"</span>: <span class="string">"Get Tasks"</span>&#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(hd *TasksHandler)</span> <span class="title">Post</span><span class="params">()</span></span> &#123;</span><br><span class="line">    hd.RenderJSON(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;<span class="string">"message"</span>: <span class="string">"Create Task"</span>&#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> TaskHandler <span class="keyword">struct</span> &#123;</span><br><span class="line">    rest.BaseHandler</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(hd *TaskHandler)</span> <span class="title">Get</span><span class="params">()</span></span> &#123;</span><br><span class="line">    hd.RenderJSON(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;<span class="string">"message"</span>: <span class="string">"GET Task"</span>&#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(hd *TaskHandler)</span> <span class="title">Delete</span><span class="params">()</span></span> &#123;</span><br><span class="line">    hd.RenderJSON(<span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">string</span>&#123;<span class="string">"message"</span>: <span class="string">"Delete Task"</span>&#125;)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h1><p>这个项目结构仅供参考，也没啥特别的：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── Gopkg.lock (dep 包管理使用，锁定版本)</span><br><span class="line">├── Gopkg.toml (dep 包管理使用)</span><br><span class="line">├── Makefile (一些环境准备命令等)</span><br><span class="line">├── README.md (项目简介)</span><br><span class="line">├── bin</span><br><span class="line">│   ├── web (Web 服务二进制程序，单个文件即可运行)</span><br><span class="line">├── cmd</span><br><span class="line">│   └── web (Web 服务的入口)</span><br><span class="line">│       └── main.go</span><br><span class="line">├── pkg</span><br><span class="line">│   ├── configs (项目资源配置，通过资源发现获取)</span><br><span class="line">│   ├── consts</span><br><span class="line">│   │   ├── enum.go (定义一些枚举类型)</span><br><span class="line">│   │   └── macro.go (定义一些常量)</span><br><span class="line">│   ├── controllers (核心的业务逻辑)</span><br><span class="line">│   ├── errs (业务错误定义，放在一块维护)</span><br><span class="line">│   ├── middlewares (业务自定义中间件)</span><br><span class="line">│   ├── models (顾名思义，ORM Model 层)</span><br><span class="line">│   ├── rpcs (依赖的第三方服务)</span><br><span class="line">│   ├── utils (常用的小工具)</span><br><span class="line">│   └── web</span><br><span class="line">│       ├── handlers (处理请求的 handlers 实现)</span><br><span class="line">│       ├── schemas (定义聚合数据的 API Schema)</span><br><span class="line">│       └── router.go (路由注册)</span><br><span class="line">├── scripts (一些脚本)</span><br><span class="line">├── testdata (放单元测试需要的 Mock 数据)</span><br><span class="line">│   ├── fixtures (测试数据，用于导入测试库)</span><br><span class="line">│   │   └── foo.yml</span><br><span class="line">└── vendor (一些第三方依赖包，因为有墙😭，所以得存下来避免部署时因为网络等太久)</span><br></pre></td></tr></table></figure>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>怎么样，新的路由注册方式是不是更加简单了？其实这正是借鉴了 Python Tornado 的一些思想。<strong>我不认为这种做法是所谓的反模式，或者不符合 Go 的风格</strong>（欢迎来喷）。其实这压根和语言无关，为什么不愿意去实践一些能够改善开发体验的新方法呢？况且还能够减少犯错！</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2018/12/02/thoughts-about-writing-restful-api-in-go/" title="Go 语言编写 RESTful API 的一些思考">http://ifaceless.space/2018/12/02/thoughts-about-writing-restful-api-in-go/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Go/" rel="tag"><i class="fa fa-tag"></i> Go</a>
+          
+            <a href="/tags/Web/" rel="tag"><i class="fa fa-tag"></i> Web</a>
+          
+            <a href="/tags/RESTful/" rel="tag"><i class="fa fa-tag"></i> RESTful</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/12/02/tidb-academy-learning-notes-part-two/" rel="next" title="TiDB 学习笔记（二）">
+                <i class="fa fa-chevron-left"></i> TiDB 学习笔记（二）
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/12/16/golang-web-dev-practice-summary/" rel="prev" title="Go Web 工程实践总结">
+                Go Web 工程实践总结 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me@ifaceless.me" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#遇到的问题"><span class="nav-number">2.</span> <span class="nav-text">遇到的问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#说说-REST-包"><span class="nav-number">3.</span> <span class="nav-text">说说 REST 包</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用示例"><span class="nav-number">4.</span> <span class="nav-text">使用示例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#项目结构"><span class="nav-number">5.</span> <span class="nav-text">项目结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

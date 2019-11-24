@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="CSS,布局,样式,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言从 0 到 1 实现一个网站，前端部分自然是要了解 CSS 的。CSS 的全称是 Cascading Style Sheets，它是一种专门用于给结构化文档（如 Web HTML）添加样式的语言。我们可以通过使用 CSS 来为网页布局，设定字体的样式，设定动画等，让我们的网站更加炫酷，更加现代化。而这些通过传统的编程语言来实现会非常繁琐，使用 CSS 只需要按需定义即可，极大地提高了开发效率。">
+<meta name="keywords" content="CSS,布局,样式">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CSS 学习笔记">
+<meta property="og:url" content="http://ifaceless.space/2019/07/16/css-learning-notes/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言从 0 到 1 实现一个网站，前端部分自然是要了解 CSS 的。CSS 的全称是 Cascading Style Sheets，它是一种专门用于给结构化文档（如 Web HTML）添加样式的语言。我们可以通过使用 CSS 来为网页布局，设定字体的样式，设定动画等，让我们的网站更加炫酷，更加现代化。而这些通过传统的编程语言来实现会非常繁琐，使用 CSS 只需要按需定义即可，极大地提高了开发效率。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://ifaceless.space/2019/07/16/css-learning-notes/box.png">
+<meta property="og:image" content="http://ifaceless.space/2019/07/16/css-learning-notes/margin-padding.png">
+<meta property="og:image" content="http://ifaceless.space/2019/07/16/css-learning-notes/list.png">
+<meta property="og:image" content="http://ifaceless.space/2019/07/16/css-learning-notes/box-shadow.png">
+<meta property="og:image" content="http://ifaceless.space/2019/07/16/css-learning-notes/matrix-calc.png">
+<meta property="og:updated_time" content="2019-11-24T09:45:59.821Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CSS 学习笔记">
+<meta name="twitter:description" content="引言从 0 到 1 实现一个网站，前端部分自然是要了解 CSS 的。CSS 的全称是 Cascading Style Sheets，它是一种专门用于给结构化文档（如 Web HTML）添加样式的语言。我们可以通过使用 CSS 来为网页布局，设定字体的样式，设定动画等，让我们的网站更加炫酷，更加现代化。而这些通过传统的编程语言来实现会非常繁琐，使用 CSS 只需要按需定义即可，极大地提高了开发效率。">
+<meta name="twitter:image" content="http://ifaceless.space/2019/07/16/css-learning-notes/box.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2019/07/16/css-learning-notes/">
+
+
+
+
+
+  <title>CSS 学习笔记 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/07/16/css-learning-notes/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">CSS 学习笔记</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-07-16T22:35:57+08:00">
+                2019-07-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/前端/" itemprop="url" rel="index">
+                    <span itemprop="name">前端</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2.3k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  9
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>从 0 到 1 实现一个网站，前端部分自然是要了解 CSS 的。CSS 的全称是 Cascading Style Sheets，它是一种专门用于给结构化文档（如 Web HTML）添加样式的语言。我们可以通过使用 CSS 来为网页布局，设定字体的样式，设定动画等，让我们的网站更加炫酷，更加现代化。而这些通过传统的编程语言来实现会非常繁琐，使用 CSS 只需要按需定义即可，极大地提高了开发效率。本篇笔记主要是记录核心的 CSS 技巧，相关的练习位于 GitHub <a href="https://www.github.com/ifaceless/learning-css" target="_blank" rel="noopener">learning-css 仓库</a>。</p>
+<a id="more"></a>
+<h1 id="CSS-基础"><a href="#CSS-基础" class="headerlink" title="CSS 基础"></a>CSS 基础</h1><ul>
+<li><p>多重样式优先级顺序（依次增加）：</p>
+<ol>
+<li>通用选择器（<code>*</code>）</li>
+<li>元素（类型）选择器</li>
+<li>类选择器</li>
+<li>属性选择器</li>
+<li>伪类</li>
+<li>ID 选择器</li>
+<li>内联样式</li>
+</ol>
+</li>
+<li><p><code>!important</code> 规则在被应用样式声明中时，该样式声明会覆盖 CSS 中任何其他的声明，使用它并非好习惯：</p>
+<ol>
+<li><strong>Always</strong>：要优化考虑使用样式规则的优先级来解决问题，而非 <code>!important</code></li>
+<li><strong>Only</strong>：只有在需要覆盖全站或外部 CSS 的特定页面中使用它</li>
+<li><strong>Never</strong>：永远不要在全站范围使用它</li>
+<li><strong>Never</strong>：永远不要在你的插件中使用它</li>
+</ol>
+</li>
+<li><p>CSS 链接样式：</p>
+<ol>
+<li>四种特殊状态可以分别设置：<ol>
+<li><code>a:link</code>: 正常，未访问过的链接</li>
+<li><code>a:visited</code>: 已访问过的链接</li>
+<li><code>a:hover</code>: 鼠标放在链接上时</li>
+<li><code>a:active</code>: 链接被点击的那刻</li>
+</ol>
+</li>
+<li>上述顺序很重要，简记：<code>L(ink)OV(isited)E and H(over)A(ctive)TE</code></li>
+</ol>
+</li>
+<li><p>所有的 HTML 元素都可以看做是一个 Box。CSS 盒模型本质上就是封装了 HTML 元素的盒子。图示如下：<img src="./box.png" alt=""></p>
+</li>
+<li><p>当指定 CSS 元素的高度和宽度时，只是在设置<strong>内容区域</strong>的高度和高度。实际元素尺寸计算：</p>
+<ol>
+<li>总宽度 = 内容宽度 + 左填充 + 右填充 + 左边框 + 右边框 + 左边距 + 右边距</li>
+<li>总高度 = 内容高度 + 顶部填充 + 底部填充 + 上边框 + 下边框 + 上边距 + 下边距</li>
+</ol>
+</li>
+<li><p>盒样式应用（适用于 margin, padding 等简写样式的情况）：</p>
+<ul>
+<li>四个值：a, b, c, d -&gt; 上，下，左，右（逆时针方向）</li>
+<li>三个值：a, b, c -&gt; 上，左右，下</li>
+<li>两个值：a, b -&gt; 上下，左右</li>
+<li>一个值：a -&gt; 上下左右</li>
+</ul>
+</li>
+<li><p>outline 是在 border 外部的，在元素周围绘制出元素的边缘，起到突出元素的作用。使用方式类似 <code>border</code>，可设定的属性包括：<code>outline-style</code>, <code>outline-color</code>, <code>outline-width</code> 等。需要注意的是，<code>outline</code> 是不占空间的，不会增加额外的宽度和高度。<code>outline</code> 也可能是非矩形的，和浏览器实现有关。</p>
+</li>
+<li><p>margin &amp; padding：<img src="./margin-padding.png" alt=""></p>
+</li>
+<li><p>隐藏元素：</p>
+<ul>
+<li><code>display:none</code>：不会占据空间，会从布局中移除</li>
+<li><code>visibility:hidden</code>：会占据空间，影响布局</li>
+</ul>
+</li>
+<li><p><strong>块（ block）元素</strong>：</p>
+<ul>
+<li>占据全部宽度，并且会产生换行</li>
+<li>width, height, padding, margin 都是可控制的</li>
+<li>块元素：<code>&lt;address/&gt;</code>, <code>&lt;blockquote/&gt;</code>, <code>&lt;center/&gt;</code>, <code>&lt;dir/&gt;</code>, <code>&lt;div/&gt;</code>, <code>&lt;dl/&gt;</code>, <code>&lt;fieldset/&gt;</code>, <code>&lt;form/&gt;</code>, <code>&lt;h1/&gt;</code>, <code>&lt;h2/&gt;</code>, <code>&lt;h3/&gt;</code>, <code>&lt;h4/&gt;</code>, <code>&lt;h5/&gt;</code>, <code>&lt;h6/&gt;</code>, <code>&lt;hr/&gt;</code>, <code>&lt;isindex/&gt;</code>, <code>&lt;menu/&gt;</code>, <code>&lt;noframes/&gt;</code>, <code>&lt;noscript&gt;</code>, <code>&lt;ol/&gt;</code>, <code>&lt;p/&gt;</code>, <code>&lt;pre/&gt;</code>, <code>&lt;table/&gt;</code>, <code>&lt;ul/&gt;</code>, <code>&lt;li/&gt;</code></li>
+</ul>
+</li>
+<li><p><strong>内联（inline）元素</strong>：</p>
+<ul>
+<li>只占据必要的宽度，不会换行</li>
+<li>width, height, padding-top, padding-bottom, margin-top, margin-bottom 都不可改变</li>
+<li>内联元素：<code>&lt;a/&gt;</code>, <code>&lt;abbr/&gt;</code>, <code>&lt;acronym/&gt;</code>, <code>&lt;b/&gt;</code>, <code>&lt;bdo/&gt;</code>, <code>&lt;big/&gt;</code>,  <code>&lt;br /&gt;</code>, <code>&lt;cite/&gt;</code>, <code>&lt;code/&gt;</code>, <code>&lt;dfn/&gt;</code>, <code>&lt;em/&gt;</code>, <code>&lt;font/&gt;</code>, <code>&lt;i/&gt;</code>, <code>&lt;img/&gt;</code>, <code>&lt;input/&gt;</code>, <code>&lt;kbd/&gt;</code>, <code>&lt;label/&gt;</code>, <code>&lt;q/&gt;</code>, <code>&lt;s/&gt;</code>, <code>&lt;samp/&gt;</code>, <code>&lt;select/&gt;</code>, <code>&lt;small/&gt;</code>, <code>&lt;span/&gt;</code>, <code>&lt;strike/&gt;</code>, <code>&lt;strong/&gt;</code>, <code>&lt;sub/&gt;</code>, <code>&lt;sup/&gt;</code>, <code>&lt;textarea/&gt;</code>, <code>&lt;tt/&gt;</code>, <code>&lt;u/&gt;</code>, <code>&lt;var/&gt;</code></li>
+</ul>
+</li>
+<li><p>主要使用的三种样式：</p>
+<ul>
+<li><code>display:block</code>：显式为块元素</li>
+<li><code>display:inline</code>：显示为内联元素</li>
+<li><code>display:inline-block</code>：显示为内联块元素，表现为同行显示，同时可以修改 width/height/padding/margin 等，效果如下：<br>  <img src="./list.png" alt=""></li>
+</ul>
+</li>
+<li><p>CSS 定位（Position）：</p>
+<ul>
+<li>static：元素默认定位方式，不受 top/bottom/left/right 的影响</li>
+<li>relative：相对正常位置的偏移；原本<strong>空间依然会被预留</strong>出来，可能会与别的元素重叠</li>
+<li>fixed：元素的位置相对于浏览器窗口是固定的，会和其它元素重叠；元素的位置和文档流无关，<strong>不占据空间</strong></li>
+<li>absolute：绝对定位的元素的位置是相对于最近的已定位父元素，若元素无已定位父元素，则它的位置是相对于 <html>；与文档流无关，<strong>不占据空间</strong>，会与其它元素重叠</html></li>
+<li>sticky：粘性定位，与滚动有关，受限于浏览器</li>
+<li>可以使用 <code>overflow</code> 指定当内容溢出时的行为（可选择是否展示滚动条），但其只可用于指定了高度的块元素上</li>
+</ul>
+</li>
+<li><p>元素的浮动：</p>
+<ul>
+<li>会让元素向左或向右浮动，周围元素也会重新排列</li>
+<li>元素水平浮动，意味着只能左右移动</li>
+<li>浮动元素会尽量向左或向右移动，直到它的外边缘碰到包括框或另一个浮动框的边缘为止</li>
+</ul>
+</li>
+<li><p>设置居中：</p>
+<ul>
+<li>元素居中：可以通过 <code>margin: auto</code> 解决，但是必须要设置元素的宽度</li>
+<li>文本居中：可使用 <code>text-align</code></li>
+</ul>
+</li>
+<li><p>组合选择器：</p>
+<ul>
+<li>后代选择器：<code>div p</code></li>
+<li>子元素选择器：<code>div&gt;p</code></li>
+<li>相邻兄弟选择器：<code>div+p</code></li>
+<li>普通兄弟选择器：<code>div~p</code></li>
+</ul>
+</li>
+<li><p>伪类（pseudo-classes）：</p>
+<ul>
+<li>用于添加一些选择器的特殊效果</li>
+<li>伪类选择的元素是<strong>基于当前元素所处的状态</strong>，或者是元素所具有的特性，而非静态标志（如 class, id, 属性）。而状态是动态的，所以当一个元素到达一个特定状态的时候，可能得到一个伪类的样式；当状态改变时，它会失去这个样式。基于文档之外的抽象，故称为伪类。</li>
+<li>语法：<ul>
+<li><code>selector:psedudo-class { property: value }</code></li>
+<li><code>selector.class:pseudo-class { property: value }</code></li>
+</ul>
+</li>
+<li>伪类名称不区分大小写</li>
+<li>示例：<code>a:hover { color: red }</code></li>
+</ul>
+</li>
+<li><p>伪元素（pseudo-element）：</p>
+<ul>
+<li>用于添加一些选择器的特殊效果</li>
+<li>语法：类似伪类</li>
+<li>伪元素是对元素中<strong>特定内容</strong>选择并操作，操作层次要比伪类更深，动态性比伪类低。设计伪元素的目的就是选取诸如第一个字母（行）等，选取内容的前后并操作等，这些普通的选择器是无法完成的。本身是基于元素的抽象，不存在于文档中，故称为伪元素。</li>
+</ul>
+</li>
+<li><p>属性选择器：</p>
+<ul>
+<li>语法：<code>&lt;element&gt;[attr] { }</code> 或者 <code>&lt;element&gt;[attr&lt;op&gt;value]{ }</code></li>
+<li>选择范围：<ul>
+<li><code>=</code>: <code>equal_word</code></li>
+<li><code>*=</code>: 相当于 <code>contains</code>，如 <code>&lt;p title=&quot;buyfflowerrr&quot;&gt;&lt;/p&gt;</code></li>
+<li><code>~=</code>:  相当于 <code>contains_word</code>，如 <code>&lt;p title=&quot;buy flower&quot;&gt;&lt;/p&gt;</code> 中的 flower</li>
+<li><code>|=</code> : 相当于 <code>starts_with_word</code>，当然这里的单词应是唯一的，或者是用 <code>-</code> 分隔的</li>
+<li><code>^=</code>: 相当于 <code>starts_with</code></li>
+<li><code>$=</code>: 相当于 <code>ends_with</code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h1 id="CSS-3-简记"><a href="#CSS-3-简记" class="headerlink" title="CSS 3 简记"></a>CSS 3 简记</h1><ul>
+<li><p>CSS 3 被拆分成了「模块」，一些重要的模块如下：</p>
+<ul>
+<li>选择器</li>
+<li>盒模型</li>
+<li>背景和边框</li>
+<li>文字特效</li>
+<li>2D/3D 转换</li>
+<li>动态</li>
+<li>多列布局</li>
+<li>用户界面</li>
+</ul>
+</li>
+<li><p>渐变（Gradients）：</p>
+<ul>
+<li><strong>线性渐变</strong>（Linear Gradients）：向下/向上/向左/向右/对角线</li>
+<li><strong>径向渐变</strong>（Radius Gradients）：由相应的中心定义</li>
+<li>语法：<code>background: linear-gradient (direction, color-stop1, color-stop2, ...)</code></li>
+</ul>
+</li>
+<li><code>box-shadow</code> 顺序：<img src="./box-shadow.png" alt=""></li>
+<li><p>2D 转换：</p>
+<ul>
+<li><code>translate</code>, <code>translateX</code>, <code>translateY</code></li>
+<li><code>rotate</code>, <code>rotateX</code>, <code>rotateY</code></li>
+<li><code>scale</code>, <code>scaleX</code>, <code>scaleY</code></li>
+<li><code>skew</code>, <code>skewX</code>, <code>scaleY</code></li>
+<li><p><code>matrix</code>：</p>
+<ul>
+<li>接收六个参数：<code>a, b, c, d, tx, ty</code></li>
+<li><p>对照：</p>
+<ul>
+<li>位移：<code>matrix(1, 0, 0, 1, tx, ty)</code> = <code>translate(tx + &quot;px&quot;, ty + &quot;px&quot;)</code></li>
+<li>缩放：<code>matrix(sx, 0, 0, sy, 0, 0)</code> = <code>scale(sx, sy)</code></li>
+<li>旋转：<code>matrix(cosθ, sinθ, -sinθ, cosθ, 0, 0)</code> = <code>rotate(θ + &quot;deg&quot;)</code></li>
+<li>倾斜：<code>matrix(1, tan(θy), tan(θx), 1, 0, 0)</code> = <code>skew(θx + &quot;deg&quot;, θy + &quot;deg&quot;)</code></li>
+</ul>
+</li>
+<li><p>计算方式：<img src="./matrix-calc.png" alt=""></p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<ul>
+<li><p>过渡效果：<code>transition: property duration timing-function delay</code></p>
+<ul>
+<li>其中，默认情况下，duration 为 0，所以如果不设置该值，将看不到效果</li>
+<li>过渡动画时间曲线：<ul>
+<li>ease：默认值</li>
+<li>linear</li>
+<li>ease-in    </li>
+<li>ease-out</li>
+<li>ease-in-out</li>
+<li>cubic-bezier(n, n, n, n)：贝塞尔曲线函数，可以通过指定值来实现上述效果，同时可以自定义其它值实现自定义效果</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>关键帧动画：</p>
+<ul>
+<li>使用 <code>@keyframes</code> 创建动画，可以使用 <code>n%</code> 设定处于不同阶段时的属性，而 <code>from</code> 和 <code>to</code> 分别代表 <code>0%</code> 和 <code>100%</code></li>
+<li>使用 <code>animation</code> 属性绑定动画到选择器上，需要设定两个值：<ul>
+<li>动画名称</li>
+<li>动画时长</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>Flex 布局：</p>
+<ul>
+<li>当页面需要适应不同的屏幕大小及设备类型时，确保元素拥有恰当的行为布局方式</li>
+<li>提供一种更加有效的方式对一个容器中的子元素进行排列、对齐和分配空间</li>
+<li>组成：<ul>
+<li>Flex container</li>
+<li>Flex item</li>
+</ul>
+</li>
+<li>属性设置：<code>display: flex/inline-flex</code></li>
+<li>设置主轴对齐方式：<code>justify-content</code></li>
+<li>设置侧轴对齐方式：<code>align-items</code></li>
+<li>设置换行：<code>flex-wrap</code></li>
+<li>设置各个行的对齐方式：<code>align-content</code></li>
+</ul>
+</li>
+</ul>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://www.runoob.com/css3" target="_blank" rel="noopener">菜鸟教程：CSS </a></li>
+<li><a href="https://www.cnblogs.com/KeithWang/p/3139517.html" target="_blank" rel="noopener">block, inline-block 对比</a></li>
+<li><a href="https://dev.opera.com/articles/understanding-the-css-transforms-matrix/" target="_blank" rel="noopener">Understanding the CSS Transforms Matrix</a></li>
+<li><a href="https://www.cnblogs.com/cc156676/p/5784629.html" target="_blank" rel="noopener">CSS 2D 转换详解</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/67988244" target="_blank" rel="noopener">CSS 3 中 Flex 弹性布局该如何灵活运用？</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/25303493" target="_blank" rel="noopener">30 分钟学会 Flex 布局</a></li>
+<li><a href="https://www.zhihu.com/question/271492607/answer/364298001" target="_blank" rel="noopener">Flex 布局对性能的影响主要体现在哪方面？</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2019/07/16/css-learning-notes/" title="CSS 学习笔记">http://ifaceless.space/2019/07/16/css-learning-notes/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/CSS/" rel="tag"><i class="fa fa-tag"></i> CSS</a>
+          
+            <a href="/tags/布局/" rel="tag"><i class="fa fa-tag"></i> 布局</a>
+          
+            <a href="/tags/样式/" rel="tag"><i class="fa fa-tag"></i> 样式</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/07/03/react-redux-notes/" rel="next" title="Redux 简记">
+                <i class="fa fa-chevron-left"></i> Redux 简记
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/08/02/go-context-intro/" rel="prev" title="Go 源码学习之 Context">
+                Go 源码学习之 Context <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me@ifaceless.me" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CSS-基础"><span class="nav-number">2.</span> <span class="nav-text">CSS 基础</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CSS-3-简记"><span class="nav-number">3.</span> <span class="nav-text">CSS 3 简记</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

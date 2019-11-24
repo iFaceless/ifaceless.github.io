@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="《数据密集型应用设计》,分布式,数据模型,数据库存储,数据编码,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言《数据密集型应用系统设计》（Design Data-Intensive Applications）是一本非常有诚意、非常优秀的讲解针对数据密集场景下系统设计相关的目标、原则和技术选型等知识。作者结合理论与实践，为我们展现了一些技术的发展趋势以及它们之间的对比；同时还介绍了一些关键技术（如存储引擎、序列化协议、分布式一致性）等的实现原理，让我们能够知其然，更知其所以然。">
+<meta name="keywords" content="《数据密集型应用设计》,分布式,数据模型,数据库存储,数据编码">
+<meta property="og:type" content="article">
+<meta property="og:title" content="野猪🐗书读书笔记之数据系统基础">
+<meta property="og:url" content="http://ifaceless.space/2019/08/14/ddia-data-sys-basics/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言《数据密集型应用系统设计》（Design Data-Intensive Applications）是一本非常有诚意、非常优秀的讲解针对数据密集场景下系统设计相关的目标、原则和技术选型等知识。作者结合理论与实践，为我们展现了一些技术的发展趋势以及它们之间的对比；同时还介绍了一些关键技术（如存储引擎、序列化协议、分布式一致性）等的实现原理，让我们能够知其然，更知其所以然。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://ifaceless.space/2019/08/14/ddia-data-sys-basics/compare-oltp-olap.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/14/ddia-data-sys-basics/etl.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/14/ddia-data-sys-basics/star-pattern.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/14/ddia-data-sys-basics/bitmap.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/14/ddia-data-sys-basics/msg-pack-encode.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/14/ddia-data-sys-basics/thrift-bin-proto-encode.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/14/ddia-data-sys-basics/thrift-comp-proto-encode.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/14/ddia-data-sys-basics/pb-encode.png">
+<meta property="og:image" content="http://ifaceless.space/2019/08/14/ddia-data-sys-basics/avro-encode.png">
+<meta property="og:updated_time" content="2019-11-24T09:45:59.880Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="野猪🐗书读书笔记之数据系统基础">
+<meta name="twitter:description" content="引言《数据密集型应用系统设计》（Design Data-Intensive Applications）是一本非常有诚意、非常优秀的讲解针对数据密集场景下系统设计相关的目标、原则和技术选型等知识。作者结合理论与实践，为我们展现了一些技术的发展趋势以及它们之间的对比；同时还介绍了一些关键技术（如存储引擎、序列化协议、分布式一致性）等的实现原理，让我们能够知其然，更知其所以然。">
+<meta name="twitter:image" content="http://ifaceless.space/2019/08/14/ddia-data-sys-basics/compare-oltp-olap.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2019/08/14/ddia-data-sys-basics/">
+
+
+
+
+
+  <title>野猪🐗书读书笔记之数据系统基础 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/08/14/ddia-data-sys-basics/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">野猪🐗书读书笔记之数据系统基础</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-14T22:12:51+08:00">
+                2019-08-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/系统设计/" itemprop="url" rel="index">
+                    <span itemprop="name">系统设计</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  4.7k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  16
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>《数据密集型应用系统设计》（Design Data-Intensive Applications）是一本非常有诚意、非常优秀的讲解针对数据密集场景下系统设计相关的目标、原则和技术选型等知识。作者结合理论与实践，为我们展现了一些技术的发展趋势以及它们之间的对比；同时还介绍了一些关键技术（如存储引擎、序列化协议、分布式一致性）等的实现原理，让我们能够<strong>知其然，更知其所以然</strong>。</p>
+<a id="more"></a>
+<p>好书自然要精读细品，写点读书笔记才能把握自己的学习进度和理解程度。总的来说，笔记形式将以图文为主，思维导图为辅的方式来呈现。<strong>由于该书的封面是一头野猪🐗，故将本系列读书笔记命名为《野猪书读书笔记》</strong>。<br>书中主要分为三个部分展开：</p>
+<ul>
+<li>讨论有关增强数据密集型应用系统所需要的若干基本原则。</li>
+<li>从单机数据存储专享跨机器的分布式系统。</li>
+<li>主要针对派生数据的系统设计，并讨论批处理和流式处理。</li>
+</ul>
+<p>野猪书学习完成后，可以考虑如下深入学习路线：</p>
+<ul>
+<li>关系型数据库：<ul>
+<li>MySQL </li>
+<li>存储引擎（InnoDB &amp; MyISAM）</li>
+</ul>
+</li>
+<li>分布式数据库：<ul>
+<li>一致性协议（Paxos, Raft, Zookeeper）</li>
+<li>数据库（TiDB ）</li>
+<li>存储引擎（TiKV &amp; RocksDB &amp; LevelDB）</li>
+</ul>
+</li>
+<li>非关系数据库或缓存系统：<ul>
+<li>Redis（设计思想、数据结构、集群管理）</li>
+<li>HBase（设计思想、使用方式和场景、存储管理）</li>
+</ul>
+</li>
+<li>消息队列系统：<ul>
+<li>应用层框架（Celery）</li>
+<li>AMQP 协议实现的消息队列服务（RabbitMQ）</li>
+<li>简易的消息队列服务（Beanstalk）</li>
+<li>高吞吐量的消息队列服务（RocksDB、Kafka）</li>
+</ul>
+</li>
+<li>搜索引擎：ElasticSearch</li>
+</ul>
+<h1 id="可靠、可扩展与可维护的应用系统"><a href="#可靠、可扩展与可维护的应用系统" class="headerlink" title="可靠、可扩展与可维护的应用系统"></a>可靠、可扩展与可维护的应用系统</h1><ol>
+<li><strong>数据密集型（Data-Intensive）</strong>是指对于一个应用系统而言，「数据」是其成败的决定性因素，包括<strong>数据的规模、数据的复杂度或数据产生和变化的速率等</strong>。</li>
+<li><strong>计算密集型（Compute-Intensive）</strong>，以计算为主的系统，CPU 主频通常是它的制约瓶颈</li>
+<li><strong>数据系统</strong>：<ol>
+<li>通常来说，数据库、缓存、消息队列被认为是不同类型的系统，有不同的性能和设计实现；</li>
+<li>但近年来，技术的发展导致它们之间的界限逐渐模糊。比如 Redis 既可以存储，也可以做消息队列；Kafka 可以做消息队列，也具备持久化的能力。因此，统一称为「数据系统（data system）」；</li>
+<li>应用系统的需求更加广泛，单一组件无法满足所有的数据处理和存储需求；通常需要组合多个组件，并通过应用层代码驱动实现衔接。</li>
+</ol>
+</li>
+</ol>
+<h2 id="可靠性（Reliability）"><a href="#可靠性（Reliability）" class="headerlink" title="可靠性（Reliability）"></a>可靠性（Reliability）</h2><ol>
+<li>目标：<strong>当意外情况（包括硬件、软件故障以及人为失误）发生时，系统应该可以继续正常工作。虽然性能会有所降低，但会确保功能正确。</strong></li>
+<li>可能出错的事称为<strong>错误（faults）或故障</strong>，系统可应对错误，则称为<strong>容错（fault-tolerant）</strong>或者**弹性（resilient）。</li>
+<li><strong>失效（failure）</strong>比 fault 严重，意味着整个系统无法对外提供用户所需服务。</li>
+<li>硬件故障问题可以通过增加冗余的方式来有效解决，但为了提高可用性，软件容错的方式也可以用来容忍多机失效的手段，作为硬件容错的补充。</li>
+<li>软件故障问题通常难以预料，且一旦发生产生的影响会非常广泛，横跨整个系统都可能。并无快速解决之法。在使用之处，需要考虑好很多细节，梳理依赖假设和系统间的交互。另外，进行全面测试，做好进程隔离，允许崩溃后自动重启。</li>
+<li>保证系统可靠性，减少人为失误：<ol>
+<li>以最小出错的方式设计系统</li>
+<li>想办法分离最容易出错的地方、容易发生故障的接口</li>
+<li>充分地测试</li>
+<li>当发生人为失误时，提供快速恢复机制，减少故障影响</li>
+<li>提供详细清晰的子系统，包括性能指标和错误率</li>
+<li>推行管理流程并加以培训</li>
+</ol>
+</li>
+</ol>
+<h2 id="可扩展性（Scalability）"><a href="#可扩展性（Scalability）" class="headerlink" title="可扩展性（Scalability）"></a>可扩展性（Scalability）</h2><ol>
+<li>目标：<strong>随着规模增长（包括数据量、流量或者复杂度），系统应用能以合理的方式匹配这种增长。</strong></li>
+<li>用来描述系统应对负载增加能力的术语。</li>
+<li><strong>描述负载</strong>：需要知道什么是负载参数。参数的最佳选择取决于系统的体系结构，可能是 Web 服务的每秒请求量，数据库写入比例，聊天室活动人数，缓存命中率，用户关注者分布情况等。</li>
+<li><strong>描述性能</strong>：<ol>
+<li>批处理系统关注的是吞吐量（throughout）</li>
+<li>Web 服务器更关注请求响应时间，更经常关注的是平均响应时间</li>
+<li>中位数响应时间通常也叫 p50</li>
+<li>常见的还会关注 p95, p99, p999 值</li>
+<li>服务质量目标 Service Level Objectives, SLO</li>
+<li>服务质量协议 Service Level Agreements, SLA</li>
+</ol>
+</li>
+</ol>
+<h2 id="可维护性（Maintainability）"><a href="#可维护性（Maintainability）" class="headerlink" title="可维护性（Maintainability）"></a>可维护性（Maintainability）</h2><ol>
+<li>目标：<strong>随着时间的推移，新的人员参与到系统的开发和运维，以维护现有功能或适配新场景，系统都应该高效运转。</strong></li>
+<li>谁都不情愿维护遗留系统，为什么呢？因为可能要修复别人埋下的坑，做不喜欢的事情。所以在做系统设计之初，就应该关注系统设计的三大原则，尽可能减少维护期的麻烦：<ol>
+<li>可运维性：运维更轻松</li>
+<li>简单性：简化系统复杂度，但并非减少产品功能。可以通过较好的抽象来让系统变得更清晰和易于理解</li>
+<li>可演化性：易于改变</li>
+</ol>
+</li>
+</ol>
+<h1 id="数据模型和查询语言"><a href="#数据模型和查询语言" class="headerlink" title="数据模型和查询语言"></a>数据模型和查询语言</h1><ol>
+<li>复杂的应用程序会有很多层，但核心思想是：每层都通过提供一个简洁的数据模型来隐藏下层的复杂性</li>
+</ol>
+<h2 id="关系数据库和文档数据库"><a href="#关系数据库和文档数据库" class="headerlink" title="关系数据库和文档数据库"></a>关系数据库和文档数据库</h2><ol>
+<li><p>NoSQL 数据库几大驱动因素：</p>
+<ol>
+<li>比关系数据库扩展性好，支持超大数据集或超高写入吞吐量</li>
+<li>开源免费居多</li>
+<li>关系模型不能很好支持某些特定查询</li>
+</ol>
+</li>
+<li><p>任何对人类有意义的东西都可能在将来某个时刻发生改变。所以在数据库中我们使用关联的 ID 作为标志的好处就是它没有直接意义，永远不需要直接改变</p>
+</li>
+<li><p>层次模型：</p>
+<ol>
+<li>代表是 IBM 的 Information Mangagement System, IMS</li>
+<li>类似 JSON 结构，能够很好表示一对多关系；多对多关系很难表示</li>
+</ol>
+</li>
+<li><p>网络模型：</p>
+<ol>
+<li>层次模型的推广，支持多对一和多对多的关系</li>
+<li>查询困难、更新复杂且不够灵活</li>
+<li>对应用程序的数据模型进行更改是非常困难的事情</li>
+<li>应用需要关心复杂的访问路径</li>
+</ol>
+</li>
+<li><p>关系模型：</p>
+<ol>
+<li>定义了所有数据的格式：关系（表）只是元组（行）的集合</li>
+<li>查询优化器可以自动决定查询顺序执行；使用何种索引。相当于自动维护「访问路径」</li>
+<li>应用添加新功能变得容易</li>
+</ol>
+</li>
+<li><p>关系数据库和文档数据库：</p>
+<ol>
+<li>表示多对一和多对多都使用了标识符</li>
+<li>前者叫作外键（或者可以在应用中关联）；后者叫作文档引用</li>
+</ol>
+</li>
+<li><p>读时模式：文档数据库中，数据结构是隐式的，只有在读取时才解释</p>
+</li>
+<li>写时模式：关系数据库中，模式是显式的，数据库保证写入时遵循模式</li>
+<li>融合关系模型和文档模型是未来发展的一个较好的途径</li>
+</ol>
+<h2 id="查询语言"><a href="#查询语言" class="headerlink" title="查询语言"></a>查询语言</h2><ol>
+<li><p>SQL：</p>
+<ol>
+<li>声明式</li>
+<li>简洁、易使用</li>
+<li>很多限制的事实，也成为数据库自动优化提供了空间</li>
+<li>底层易于使用并发查询</li>
+</ol>
+</li>
+<li><p>IMS/CODASYL（层次模型、网络模型）：</p>
+<ol>
+<li>命令式</li>
+</ol>
+</li>
+<li><p>MapReduce：</p>
+<ol>
+<li>一种编程模型，用于在许多机器上批量处理海量数据</li>
+<li>既非声明式，也非完全命令式；介于二者之间</li>
+<li>底层编程模型，用于在计算集群上分布执行；可执行的操作限定为纯函数</li>
+</ol>
+</li>
+</ol>
+<h2 id="图数据库模型"><a href="#图数据库模型" class="headerlink" title="图数据库模型"></a>图数据库模型</h2><ol>
+<li>关系数据库适合处理简单的多对多模型；但随着数据之间的关联越来越复杂，转换为图模型会更加自然</li>
+<li>顶点和边组成</li>
+<li>建模示例：<ol>
+<li>人际关系</li>
+<li>Web 网页</li>
+<li>公路或者铁路网</li>
+</ol>
+</li>
+<li>更强大用处：提供了单个数据存储区保存完全不同类型对象的一致性方式</li>
+</ol>
+<h3 id="属性图模型（Property-Graph）"><a href="#属性图模型（Property-Graph）" class="headerlink" title="属性图模型（Property Graph）"></a>属性图模型（Property Graph）</h3><ol>
+<li>代表：Neo4j, Titan, InfiniteGraph</li>
+<li><p>顶点（vertice）：</p>
+<ol>
+<li>唯一标志</li>
+<li>出边集合</li>
+<li>入边集合</li>
+<li>属性集合</li>
+</ol>
+</li>
+<li><p>边（edge）：</p>
+<ol>
+<li>唯一标志</li>
+<li>边开始顶点</li>
+<li>边结束的顶点</li>
+<li>标签</li>
+<li>属性集合</li>
+</ol>
+</li>
+</ol>
+<h3 id="三元图存储模型（Triplestore）"><a href="#三元图存储模型（Triplestore）" class="headerlink" title="三元图存储模型（Triplestore）"></a>三元图存储模型（Triplestore）</h3><ol>
+<li>代表：Datomic, AllegroGraph</li>
+<li>几乎等同于属性图模型，可能作为构建应用程序的补充</li>
+<li>形式：(主体，谓语，客体)</li>
+<li>主体相当于图中的顶点，客体则是以下两种之一：<ol>
+<li>原始数据类型中的值（字符串或数字），如 <code>(lucy, age, 40)</code></li>
+<li>图的另外一个顶点，如 <code>(lucy, mariedTo, alain)</code></li>
+</ol>
+</li>
+</ol>
+<h3 id="查询语言-1"><a href="#查询语言-1" class="headerlink" title="查询语言"></a>查询语言</h3><ol>
+<li>Cypher，最早用于 Neo4j。声明式查询语言</li>
+<li>SQL:1999 标准后，可以使用递归公用表达式（WITH RECURSIVE）来表示可变的遍历路径查询</li>
+<li>SPARQL：采用 RDF 数据模型的三元存储查询语言</li>
+<li>Datalog：数据模型采用「谓语（主体，客体）」模式；规则可以在不同的查询中组合和复用；对于简单查询虽然繁琐，但针对复杂数据，则更加灵活</li>
+</ol>
+<h1 id="数据存储和检索"><a href="#数据存储和检索" class="headerlink" title="数据存储和检索"></a>数据存储和检索</h1><h2 id="数据库核心：数据结构"><a href="#数据库核心：数据结构" class="headerlink" title="数据库核心：数据结构"></a>数据库核心：数据结构</h2><ol>
+<li>索引可以帮助高效地查询数据库中特定的键；是基于原始数据派生而来的额外数据结构</li>
+<li>任何类型的索引通常都会降低写的速度</li>
+</ol>
+<h3 id="哈希索引"><a href="#哈希索引" class="headerlink" title="哈希索引"></a>哈希索引</h3><ol>
+<li>以 Bitcast 为代表的存储引擎，采用了哈希索引</li>
+<li>适合每个键的值更新频繁的场景</li>
+<li>哈希索引的特点：<ol>
+<li>哈希表必须全部存放在内存中，键值指向的是文件段中的偏移，用于查找具体的数据</li>
+<li>可采用分段的思想，再配合后台合并、压缩等手段来避免磁盘写入耗尽的问题，减少磁盘碎片</li>
+<li>新的数据采用追加而非原地修改的策略，提高写入吞吐量</li>
+<li>区间查询效率不高</li>
+</ol>
+</li>
+</ol>
+<h3 id="SSTables-和-LSM-Tree"><a href="#SSTables-和-LSM-Tree" class="headerlink" title="SSTables 和 LSM-Tree"></a>SSTables 和 LSM-Tree</h3><ol>
+<li>SSTable 的全称：Sorted String Table，排序字符串表</li>
+<li>LSM-Tree 的全称：Log-Structured Merge-Tree</li>
+<li><p>相比哈希索引的优点：</p>
+<ol>
+<li>合并段更简单高效，对于大文件也是如此</li>
+<li>段文件中的 key-value 顺序是按照键排序过的，便于合并和查找</li>
+<li>在文件中查找特定键时无需在内存中保存所有键的索引（稀疏索引放在内存中）</li>
+<li>支持范围查找</li>
+</ol>
+</li>
+<li><p>构建和维护 SSTables</p>
+<ol>
+<li>在内存中维护一个内存表，写入时先写入该表（有序的数据结构，如红黑树或者跳表）</li>
+<li>内存表超过一定阈值时，直接写盘，形成 SSTable；在写盘同时，可添加新的内存表实例，接收后续写请求</li>
+<li>对于读请求，内存表-&gt;最新磁盘段文件-&gt;次新段文件-&gt;…直到找到目标或者为空</li>
+<li>后台定期合并、压缩，丢弃被覆盖或删除的值</li>
+</ol>
+</li>
+<li>避免崩溃的方式：每个写入记录到日志，当内存表写入 SSTable 后才可以丢弃相应日志</li>
+<li>基于合并和压缩排序文件原理的存储引擎通常都叫作 LSM 存储引擎</li>
+<li>性能优化：<ol>
+<li>分层压缩，LevelDB &amp; RocksDB</li>
+<li>按大小分级，HBase, Cassandra 则两种都支持</li>
+<li>布隆过滤器</li>
+</ol>
+</li>
+</ol>
+<h3 id="B-Trees"><a href="#B-Trees" class="headerlink" title="B-Trees"></a>B-Trees</h3><ol>
+<li>广泛使用认可的索引结构，很多数据库中标准索引实现；即使在非关系数据库中也有用到</li>
+<li>B-Tree 是面向块或者页进行设计的，它将数据库分解成固定大小的块或页，一般为 4 KB，页是内部读写的最小单元</li>
+<li>每个页面都有标识符，可被引用</li>
+<li>一个页所包含的页面引用数量称为分支因子</li>
+<li><p>更新策略：</p>
+<ol>
+<li>搜索包含指定键的子页</li>
+<li>修改该页的值</li>
+<li>整页回写到磁盘（相当于覆盖原先的页，对该页的任何引用依然有效）</li>
+</ol>
+</li>
+<li><p>新加键策略：</p>
+<ol>
+<li>找到可容纳新键范围的页，然后添加到该页</li>
+<li>若页面空间不足，则将其分裂为两个半满的页，同时修改父页，记录分裂后的新的键的范围</li>
+</ol>
+</li>
+<li><p>一个具有 N 个键的 B-Tree 的深度为 O(log N)；多数数据库可以适合 3~4 层 B-Tree。分支因子为 500 的 4KB 四级树可存储 256TB 的数据</p>
+</li>
+<li>崩溃恢复：WAL, Write-Ahead Log。通过该日志来恢复</li>
+<li>需要考虑并发控制</li>
+<li>写放大的问题（页分裂）</li>
+<li>事务支持更加容易</li>
+</ol>
+<h2 id="事务处理（OLTP）和分析处理（OLAP）"><a href="#事务处理（OLTP）和分析处理（OLAP）" class="headerlink" title="事务处理（OLTP）和分析处理（OLAP）"></a>事务处理（OLTP）和分析处理（OLAP）</h2><ol>
+<li>二者对比：<br> <img src="./compare-oltp-olap.png" alt=""></li>
+<li>大的企业会单独建立数仓，同步来自 OLTP 系统的数据，在单独的数仓中进行分析处理，不会影响线上业务</li>
+<li>导入数仓：ELT, Extract-&gt;Transform-&gt;Load<br> <img src="./etl.png" alt=""></li>
+<li>常见数仓系统：Apache Hive, Spark SQL, Cloudera Implala</li>
+</ol>
+<h3 id="星型与雪花型分析模式"><a href="#星型与雪花型分析模式" class="headerlink" title="星型与雪花型分析模式"></a>星型与雪花型分析模式</h3><ol>
+<li>常见的是星型模式，也称为维度建模。特点是有一个<strong>事实表</strong>，关联了很多个<strong>维度表</strong>。事实表本身可能会很庞大，其中的每一行都代表一个事件，维度通常代表事件的<strong>Who, What, Where, When, How, Why</strong><br> <img src="./star-pattern.png" alt=""></li>
+<li>雪花❄️ 模型是星型模型的变体，它将维度进一步细分为子空间，从而更加规范化。但是这个会增加分析查询的复杂度，所以星型分析模式更受欢迎</li>
+</ol>
+<h3 id="列存储"><a href="#列存储" class="headerlink" title="列存储"></a>列存储</h3><ol>
+<li>数仓中的列通常很宽，有的可能多达 100 个</li>
+<li>核心思想是将每列中的所有值存储在一起，所有的数据时存储在一组列文件中，每个文件都以相同顺序保存数据行</li>
+<li><p>列压缩：</p>
+<ol>
+<li>很容易进行压缩</li>
+<li>常用位图编码，并配合游程编码降低存储空间（这个主要是针对零位稀疏的情况）<br><img src="./bitmap.png" alt=""></li>
+</ol>
+</li>
+<li><p>列排序：</p>
+<ol>
+<li>可以根据查询需求选择排序的列</li>
+<li>排序可帮助进一步压缩（重复值也可以采用简单的游程编码，所以即便是数十亿行也不怕）</li>
+<li>基于第一个排序键的压缩效果通常最好</li>
+<li>排序类似于关系数据库中用的索引，方便查询</li>
+</ol>
+</li>
+<li>写入可以采取类似 LSM-Tree 的思路</li>
+<li>物化视图：查询结果的实际副本，被写入到磁盘了；虚拟视图则是用于编写查询的快捷方式</li>
+</ol>
+<h1 id="数据编码与演化"><a href="#数据编码与演化" class="headerlink" title="数据编码与演化"></a>数据编码与演化</h1><h2 id="数据编码格式"><a href="#数据编码格式" class="headerlink" title="数据编码格式"></a>数据编码格式</h2><ol>
+<li>程序中至少有两种常用的数据表示形式：<ol>
+<li>内存中，数据保存在对象、结构体、列表、数组、哈希表和树等结构中，对于 CPU 的高效访问和操作做了优化</li>
+<li>数据写入文件或者网络传输时，需要进行编码为字节序列</li>
+</ol>
+</li>
+</ol>
+<h3 id="语言特定的格式"><a href="#语言特定的格式" class="headerlink" title="语言特定的格式"></a>语言特定的格式</h3><ol>
+<li>常见的包括：<ol>
+<li>java.io.Serializable</li>
+<li>Ruby 中的 Marshal</li>
+<li>Python 中的 pickle</li>
+</ol>
+</li>
+<li>优点：对于某种语言自身来说，编解码会很方便，不需要引入第三方依赖</li>
+<li>缺点：<ol>
+<li>与特定语言绑定，不利于和其它语言的异构系统通讯</li>
+<li>可能会有安全性问题</li>
+<li>兼容性不能保证</li>
+<li>效率通常比较低，需要花费较多的 CPU 时间或者内存空间</li>
+</ol>
+</li>
+</ol>
+<h3 id="JSON、XML-和二进制变体"><a href="#JSON、XML-和二进制变体" class="headerlink" title="JSON、XML 和二进制变体"></a>JSON、XML 和二进制变体</h3><ol>
+<li>JSON、CSV、XML 都是文本格式，可读性较好</li>
+<li><p>存在的问题：</p>
+<ol>
+<li>数字编码不明确（比如 CSV 中就无法区分是数字还是数字组成的字符串；JSON 中对于大于 2^53 的整数就傻眼了）</li>
+<li>不支持二进制（虽然可以用 base64 搞事情，但是会增加空间和编解码的时间）</li>
+<li>CSV 无任何模式</li>
+<li>XML 和 JSON 均有可选的模式</li>
+</ol>
+</li>
+<li><p>一些变种，它们的应用并不是很广泛：</p>
+<ol>
+<li>JSON（BSON、BJSON、UBJSON、BISON、Smile 和 Message Pack）</li>
+<li>XML（WBXML 和 Fast Infoset）</li>
+</ol>
+</li>
+<li><p>后面的🌰都以表达下面的信息为例，来做对照：</p>
+ <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"userName"</span>: <span class="string">"Martin"</span>,</span><br><span class="line">    <span class="attr">"favoriteNumber"</span>: <span class="number">1337</span>,</span><br><span class="line">    <span class="attr">"interests"</span>: [<span class="string">"daydreaming"</span>, <span class="string">"hacking"</span>]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Message Pack 是 JSON 的二进制编码，示例如下：<br> <img src="./msg-pack-encode.png" alt=""></p>
+</li>
+</ol>
+<h3 id="Thrift-amp-Protocol-Buffers"><a href="#Thrift-amp-Protocol-Buffers" class="headerlink" title="Thrift &amp; Protocol Buffers"></a>Thrift &amp; Protocol Buffers</h3><ol>
+<li>Thrift 是 Facebook 开发，2007~2008 年开源</li>
+<li>Thrift 是一个比较完整的 RPC 框架，在它的协议层提供了多种 Protocol 的实现，方便应付多种场景。比如常见的 <code>BinaryProtocol</code> 和 <code>CompactProtocol</code>。</li>
+<li><p>BinaryProtocol 编码示例：</p>
+<ol>
+<li>与 Message Pack 编码相比，没有了字段名</li>
+<li>使用了 field tag 来映射 IDL 定义的各个字段<br><img src="./thrift-bin-proto-encode.png" alt=""></li>
+</ol>
+</li>
+<li><p>CompactProtocol 编码示例：</p>
+<ol>
+<li>field tag 和 type 使用一个字节表示</li>
+<li>field tag 使用了偏移计算</li>
+<li>整数采用变长字节，而非 BinaryProtocol 中 1337 使用的 8 字节，换成变长字节只需要 2 字节即可<br><img src="./thrift-comp-proto-encode.png" alt=""></li>
+</ol>
+</li>
+<li><p>Protocol Buffers Google 开发，2007~2008 年开源</p>
+</li>
+<li><p>使用 PB 编码的示例：<br> <img src="./pb-encode.png" alt=""></p>
+</li>
+<li><p><code>required</code> 和 <code>optional</code> 这种修饰是不会体现在编码中的，而是在运行时做的检查</p>
+</li>
+<li>保证前后向兼容：<ol>
+<li>field tag 至关重要，不可随便更改</li>
+<li>optional 字段的 field tag 可以删除，但不要复用已删除的 field tag</li>
+<li>新增字段必须是 optional 或者带有默认值，保证向后兼容</li>
+<li>不可轻易修改 field 类型</li>
+</ol>
+</li>
+</ol>
+<h3 id="Avro"><a href="#Avro" class="headerlink" title="Avro"></a>Avro</h3><ol>
+<li>Apache Avro 是 Hadoop 的子项目，提供了两种模式语言：Avro IDL 和 JSON 格式</li>
+<li><p>特点：</p>
+<ol>
+<li>没有标签号</li>
+<li>编码非常紧凑</li>
+<li>编码中没有字段类型</li>
+</ol>
+</li>
+<li><p>编码示例：<br> <img src="./avro-encode.png" alt=""></p>
+</li>
+<li><p>区分读模式和写模式。写模式和读模式不必完全一模一样，只需要保持兼容</p>
+</li>
+<li>写模式和读模式中的字段顺序可不同，因为在模式解析时会使用字段名匹配</li>
+<li>动态生成模式是最大的特点，不需要像 PB 或者 Thrift 中那样，显式分配 field tag，比较灵活。特别适合编码数据库表。</li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://book.douban.com/subject/30329536/" target="_blank" rel="noopener">数据密集型应用设计：第一部分</a></li>
+<li><a href="http://thrift.apache.org/" target="_blank" rel="noopener">Thrift</a></li>
+<li><a href="https://developers.google.cn/protocol-buffers/" target="_blank" rel="noopener">Protocol Buffers</a></li>
+<li><a href="http://avro.apache.org/docs/current/gettingstartedpython.html" target="_blank" rel="noopener">Avro Python Examples</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2019/08/14/ddia-data-sys-basics/" title="野猪🐗书读书笔记之数据系统基础">http://ifaceless.space/2019/08/14/ddia-data-sys-basics/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/《数据密集型应用设计》/" rel="tag"><i class="fa fa-tag"></i> 《数据密集型应用设计》</a>
+          
+            <a href="/tags/分布式/" rel="tag"><i class="fa fa-tag"></i> 分布式</a>
+          
+            <a href="/tags/数据模型/" rel="tag"><i class="fa fa-tag"></i> 数据模型</a>
+          
+            <a href="/tags/数据库存储/" rel="tag"><i class="fa fa-tag"></i> 数据库存储</a>
+          
+            <a href="/tags/数据编码/" rel="tag"><i class="fa fa-tag"></i> 数据编码</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/08/02/go-context-intro/" rel="next" title="Go 源码学习之 Context">
+                <i class="fa fa-chevron-left"></i> Go 源码学习之 Context
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/08/18/ddia-data-replication-and-partition/" rel="prev" title="野猪🐗书读书笔记之数据复制和分区">
+                野猪🐗书读书笔记之数据复制和分区 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me@ifaceless.me" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#可靠、可扩展与可维护的应用系统"><span class="nav-number">2.</span> <span class="nav-text">可靠、可扩展与可维护的应用系统</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#可靠性（Reliability）"><span class="nav-number">2.1.</span> <span class="nav-text">可靠性（Reliability）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可扩展性（Scalability）"><span class="nav-number">2.2.</span> <span class="nav-text">可扩展性（Scalability）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#可维护性（Maintainability）"><span class="nav-number">2.3.</span> <span class="nav-text">可维护性（Maintainability）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数据模型和查询语言"><span class="nav-number">3.</span> <span class="nav-text">数据模型和查询语言</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#关系数据库和文档数据库"><span class="nav-number">3.1.</span> <span class="nav-text">关系数据库和文档数据库</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#查询语言"><span class="nav-number">3.2.</span> <span class="nav-text">查询语言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#图数据库模型"><span class="nav-number">3.3.</span> <span class="nav-text">图数据库模型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#属性图模型（Property-Graph）"><span class="nav-number">3.3.1.</span> <span class="nav-text">属性图模型（Property Graph）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三元图存储模型（Triplestore）"><span class="nav-number">3.3.2.</span> <span class="nav-text">三元图存储模型（Triplestore）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#查询语言-1"><span class="nav-number">3.3.3.</span> <span class="nav-text">查询语言</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数据存储和检索"><span class="nav-number">4.</span> <span class="nav-text">数据存储和检索</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据库核心：数据结构"><span class="nav-number">4.1.</span> <span class="nav-text">数据库核心：数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#哈希索引"><span class="nav-number">4.1.1.</span> <span class="nav-text">哈希索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#SSTables-和-LSM-Tree"><span class="nav-number">4.1.2.</span> <span class="nav-text">SSTables 和 LSM-Tree</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B-Trees"><span class="nav-number">4.1.3.</span> <span class="nav-text">B-Trees</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#事务处理（OLTP）和分析处理（OLAP）"><span class="nav-number">4.2.</span> <span class="nav-text">事务处理（OLTP）和分析处理（OLAP）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#星型与雪花型分析模式"><span class="nav-number">4.2.1.</span> <span class="nav-text">星型与雪花型分析模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#列存储"><span class="nav-number">4.2.2.</span> <span class="nav-text">列存储</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#数据编码与演化"><span class="nav-number">5.</span> <span class="nav-text">数据编码与演化</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据编码格式"><span class="nav-number">5.1.</span> <span class="nav-text">数据编码格式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#语言特定的格式"><span class="nav-number">5.1.1.</span> <span class="nav-text">语言特定的格式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JSON、XML-和二进制变体"><span class="nav-number">5.1.2.</span> <span class="nav-text">JSON、XML 和二进制变体</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Thrift-amp-Protocol-Buffers"><span class="nav-number">5.1.3.</span> <span class="nav-text">Thrift &amp; Protocol Buffers</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Avro"><span class="nav-number">5.1.4.</span> <span class="nav-text">Avro</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

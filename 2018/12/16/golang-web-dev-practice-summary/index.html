@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Go,Web,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言早期我们在一些小的 Web 项目中使用了 Go 来开发简单的 REST API，主要参考的是其它部门的核心项目。但当时只是为了尝鲜和入门 Go Web 开发，并没有花较多的时间考虑工程结构、项目质量这些至关重要的问题。 再后来，组内陆续多个项目使用了 Go 语言开发。整体来说，项目结构上大体是相同的，但是在工程实践上还是有不太统一的地方。我们希望新的项目能够在项目结构、工程质量上有所改善，提高">
+<meta name="keywords" content="Go,Web">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go Web 工程实践总结">
+<meta property="og:url" content="http://ifaceless.space/2018/12/16/golang-web-dev-practice-summary/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言早期我们在一些小的 Web 项目中使用了 Go 来开发简单的 REST API，主要参考的是其它部门的核心项目。但当时只是为了尝鲜和入门 Go Web 开发，并没有花较多的时间考虑工程结构、项目质量这些至关重要的问题。 再后来，组内陆续多个项目使用了 Go 语言开发。整体来说，项目结构上大体是相同的，但是在工程实践上还是有不太统一的地方。我们希望新的项目能够在项目结构、工程质量上有所改善，提高">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-11-24T09:45:59.949Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Go Web 工程实践总结">
+<meta name="twitter:description" content="引言早期我们在一些小的 Web 项目中使用了 Go 来开发简单的 REST API，主要参考的是其它部门的核心项目。但当时只是为了尝鲜和入门 Go Web 开发，并没有花较多的时间考虑工程结构、项目质量这些至关重要的问题。 再后来，组内陆续多个项目使用了 Go 语言开发。整体来说，项目结构上大体是相同的，但是在工程实践上还是有不太统一的地方。我们希望新的项目能够在项目结构、工程质量上有所改善，提高">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2018/12/16/golang-web-dev-practice-summary/">
+
+
+
+
+
+  <title>Go Web 工程实践总结 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2018/12/16/golang-web-dev-practice-summary/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Go Web 工程实践总结</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-16T13:00:52+08:00">
+                2018-12-16
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Web-开发/" itemprop="url" rel="index">
+                    <span itemprop="name">Web 开发</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  5.3k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  21
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>早期我们在一些小的 Web 项目中使用了 Go 来开发简单的 REST API，主要参考的是其它部门的核心项目。但当时只是为了尝鲜和入门 Go Web 开发，并没有花较多的时间考虑工程结构、项目质量这些至关重要的问题。</p>
+<p>再后来，组内陆续多个项目使用了 Go 语言开发。整体来说，项目结构上大体是相同的，但是在工程实践上还是有不太统一的地方。<strong>我们希望新的项目能够在项目结构、工程质量上有所改善，提高工程稳定性与开发幸福感是需要我们共同努力的目标</strong>。</p>
+<a id="more"></a>
+<p>后来找到机会从一个大的项目中拆出可以完全独立的服务，这次并没有完全照搬其它 Go 项目的工程实践。很多时候，<strong>所谓的最佳实践是需要权衡各种利弊得来的</strong>。在这次实践中，我们着重于改善如下几个方面：</p>
+<ul>
+<li><strong>项目结构</strong>：层次结构调整、包命名风格统一</li>
+<li><strong>统一 Model 层接口</strong>：通过一个类似 GORM 的工具实现</li>
+<li><strong>可能更加优雅的 REST API 写法</strong>：基于 chi 框架做了一层封装；路由注册尽可能统一到一个文件，集中管理</li>
+<li><strong>API Schema 数据聚合</strong>：实现了一个类似我们在 Python 项目中使用的 marshmallow 库解决</li>
+<li><strong>单元测试</strong>：运行时 Patch，不需要在写 Handler/Controller/RPC 时都以 interface 优先的方式</li>
+<li><strong>返回 Error 而不是 Panic 掉</strong></li>
+</ul>
+<h1 id="项目结构"><a href="#项目结构" class="headerlink" title="项目结构"></a>项目结构</h1><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line">.</span><br><span class="line">├── Gopkg.lock（Dep 包管理工具自动生成、维护）</span><br><span class="line">├── Gopkg.toml（依赖包管理）</span><br><span class="line">├── Makefile</span><br><span class="line">├── README.md（项目文档）</span><br><span class="line">├── bin（二进制可执行文件，可以直接运行的服务：RPC 和 HTTP 服务等）</span><br><span class="line">├── cmd</span><br><span class="line">│   ├── service（对外提供的 RPC 服务入口）</span><br><span class="line">│   │   └── main.go</span><br><span class="line">│   └── web（对外提供的 HTTP API 服务入口）</span><br><span class="line">│       └── main.go</span><br><span class="line">├── gen-go（基于 thrift 编译生成的文件，在实现对外提供的 RPC 服务接口时需要使用）</span><br><span class="line">├── joker.yml</span><br><span class="line">├── pkg（核心代码放到这个目录下）</span><br><span class="line">│   ├── configs（资源配置：MySQL, Redis 等）</span><br><span class="line">│   │   ├── mysql.go</span><br><span class="line">│   │   ├── redis.go</span><br><span class="line">│   ├── consts（常量定义，包括枚举）</span><br><span class="line">│   │   ├── enum.go</span><br><span class="line">│   │   └── macro.go</span><br><span class="line">│   ├── controllers（复杂的业务逻辑放到这儿实现）</span><br><span class="line">│   │   ├── foo.go</span><br><span class="line">│   ├── errs（业务自定义错误类型）</span><br><span class="line">│   ├── middlewares（业务相关的中间件，如果可以复用，就抽到公共仓库维护）</span><br><span class="line">│   ├── models（顾名思义，定义 Model，关联数据库表）</span><br><span class="line">│   ├── rpcs（依赖的第三方 RPC 服务）</span><br><span class="line">│   │   ├── bar.go</span><br><span class="line">│   ├── service（对外提供的 RPC 服务实现）</span><br><span class="line">│   │   ├── demo-service.go</span><br><span class="line">│   │   └── protos</span><br><span class="line">│   │       └── demo-service.thrift</span><br><span class="line">│   ├── utils（可复用的工具：单元测试等）</span><br><span class="line">│   └── web（REST API 服务）</span><br><span class="line">│       ├── handlers</span><br><span class="line">│       ├── routers</span><br><span class="line">│       │   ├── router.go（路由注册）</span><br><span class="line">│       │   └── urls.go（URL 与 Handler 的绑定）</span><br><span class="line">│       ├── schemas</span><br><span class="line">│       │   ├── dump（聚合数据源，定义对外的 API Schema）</span><br><span class="line">│       │   └── load（处理输入，字段校验规则配置）</span><br><span class="line">│       └── validators（可复用的自定义校验规则定义）</span><br><span class="line">├── scripts（脚本）</span><br><span class="line">├── testdata（业务逻辑测试需要用的测试数据）</span><br><span class="line">│   ├── fixtures（造一些测试数据放在里面，默认使用 YAML 格式）</span><br><span class="line">│   │   ├── foo.yml</span><br><span class="line">│   └── schema.sql（数据库表创建语句集合）</span><br><span class="line">└── vendor（各种依赖包）</span><br></pre></td></tr></table></figure>
+<h1 id="MVC-怎么实践"><a href="#MVC-怎么实践" class="headerlink" title="MVC 怎么实践"></a>MVC 怎么实践</h1><h2 id="Model"><a href="#Model" class="headerlink" title="Model"></a>Model</h2><p>关于 Model 层怎么写，这个看起来还是有点争议。之前去听了其它部门 Go 实践经验分享，提倡半手写 SQL（本质上使用了 SQL 构建器）的方式。但这么做感觉还是存在很多问题（主要是考虑到后期维护者的感受）：</p>
+<ul>
+<li>接口复用性不够好</li>
+<li>写法难以统一，且代码量容易膨胀</li>
+<li>手工组装 SQL 比较繁琐，且不易于后期变更（如新增字段）</li>
+<li>重复逻辑不可避免</li>
+</ul>
+<p>应用层更应该关注的是核心业务逻辑，而非繁琐重复的代码编写（<strong>Keep It Simple</strong>）。参照我们在 Python 中的实践，采用了轻量级的 ORM 工具后很大程度上统一了增删改查接口，这样每个维护者都不用烦心了解各种类似 <code>get_xxx_by_wtf_balabala</code> 函数了。<strong>因为加了一层抽象，可被复用的逻辑完全从我们的业务层抽离出去维护，也可以大大简化应用层代码</strong>。</p>
+<p>对于常规业务，如果我们能够接受一定的性能开销，不妨引入一些工具，来改善项目质量并且提高开发效率。</p>
+<p>为了方便我们在自己的 Go 项目中，能够使用较为一致的方式实现常规的增删改查需求，所以就花了些时间造了个类似 GORM 的工具 BORM。在经历多次迭代后，目前基本趋于稳定。目前我们已经在多个内部项目中使用，并在实践中修复了不少细节问题，增加了一些非常实用的功能。</p>
+<p>以下是该工具提供的一些常用接口：</p>
+<table>
+<thead>
+<tr>
+<th>接口</th>
+<th>注释</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> Create/MustCreate</td>
+<td>新建记录  </td>
+</tr>
+<tr>
+<td> Save/MustSave</td>
+<td>全量更新  </td>
+</tr>
+<tr>
+<td> Update/MustUpdate</td>
+<td>更新指定单个字段</td>
+</tr>
+<tr>
+<td> Updates/MustUpdates</td>
+<td>更新指定多个字段</td>
+</tr>
+<tr>
+<td> Delete/MustDelete</td>
+<td>删除记录</td>
+</tr>
+<tr>
+<td> One/MustOne</td>
+<td>根据条件匹配一条记录</td>
+</tr>
+<tr>
+<td> All/MustAll</td>
+<td>匹配所有符合条件的记录</td>
+</tr>
+<tr>
+<td> FindByPK/MustFindByPK</td>
+<td>基于主键查询记录</td>
+</tr>
+<tr>
+<td> Begin/Commit/Rollback</td>
+<td>事务相关接口</td>
+</tr>
+</tbody>
+</table>
+<p>总的来说，希望 BORM 能够解决以下几个问题：</p>
+<ol>
+<li>统一且清晰的增删改查接口</li>
+<li>SQL 自动组装，无需人肉拼接</li>
+<li>基于 Model 层的缓存管理统一到工具层解决</li>
+</ol>
+<h3 id="引入-BORM"><a href="#引入-BORM" class="headerlink" title="引入 BORM"></a>引入 BORM</h3><p>如果需要在项目中引入 BORM，可以采用类似下面的目录结构：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">pkg/models</span><br><span class="line">├── init.<span class="keyword">go</span></span><br><span class="line">└── material.<span class="keyword">go</span></span><br></pre></td></tr></table></figure>
+<p>在 <code>init.go</code> 中，配置 BORM 的数据库连接（或者添加缓存支持）：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> models</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">   <span class="string">"url/to/borm"</span></span><br><span class="line">   <span class="string">"project/pkg/configs"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</span><br><span class="line">   mysqlConfig := configs.GetMySQLConfig(<span class="string">"demo"</span>)</span><br><span class="line">   borm.Setup(borm.NewMySQLConfig(</span><br><span class="line">      mysqlConfig.Masters[<span class="number">0</span>],</span><br><span class="line">      mysqlConfig.Slaves,</span><br><span class="line">   ))</span><br><span class="line"></span><br><span class="line">   <span class="comment">// 如果需要的话，可以添加 Model 缓存支持</span></span><br><span class="line">   <span class="comment">// borm.Use(cache.New(configs.GetRedisConfig("cache-redis"), false))</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="编写-Model"><a href="#编写-Model" class="headerlink" title="编写 Model"></a>编写 Model</h3><p>接下来，表演下如何编写 Model，以及如何给 Model 以「属性」的方式关联资源（类似于我们在 Python 中使用 <code>property</code> 获取某个 Model 关联的资源）等：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// MaterialModel 是广告素材资源</span></span><br><span class="line"><span class="keyword">type</span> MaterialModel <span class="keyword">struct</span> &#123;</span><br><span class="line">   <span class="comment">// 对于 BORM 而言，默认会使用名叫 `id` 的字段作为主键（注意，这里的大写字段名在生成 SQL 时会自动变成小写模式）</span></span><br><span class="line">   <span class="comment">// 假如你需要指定某个字段为主键，可以另加 tag `borm:pk`</span></span><br><span class="line">   ID          <span class="keyword">int64</span></span><br><span class="line">   Category    <span class="keyword">string</span></span><br><span class="line"></span><br><span class="line">   <span class="comment">// 可以看到，这里使用了一个自定义的类型（实际数据库是 tinyint，BORM 会根据自定义类型实现的接口完成自动映射）</span></span><br><span class="line">   <span class="comment">// 另外，使用 `column:type` 表示可以让 Model 的对外暴露的字段名和数据库实际字段名不同</span></span><br><span class="line">   Kind        consts.TemplateKind <span class="string">`borm:"column:type"`</span></span><br><span class="line"></span><br><span class="line">   <span class="comment">// 这里的 AdScale 在数据实际上是个 JSON 字符串，但由于 *AdScale 类型实现了 BORM </span></span><br><span class="line">   <span class="comment">// 指定的接口，便能实现自动反序列化，这样你不需要在上层左一个又一个 `json.Unmarshal` 操作</span></span><br><span class="line">   AdScale     *AdScale            <span class="string">`borm:"column:adscale" portal:"nested"`</span></span><br><span class="line"></span><br><span class="line">   <span class="comment">// 由于默认的自动转换字段名的策略会将 LandURL 转换成 land_url，与实际数据库字段名不符</span></span><br><span class="line">   <span class="comment">// 这里依然用 `column:landurl` 自定义字段名</span></span><br><span class="line">   LandURL     <span class="keyword">string</span>              <span class="string">`borm:"column:landurl"`</span></span><br><span class="line">   DeepLinkURL <span class="keyword">string</span>              <span class="string">`borm:"column:deeplinkurl"`</span></span><br><span class="line"></span><br><span class="line">   <span class="comment">// 之所以不能直接用 bool 类型，是因为数据库是 tinyint</span></span><br><span class="line">   <span class="comment">// borm.Bool 实现了指定接口，所以可以实现自动映射</span></span><br><span class="line">   IsDeleted   borm.Bool</span><br><span class="line"></span><br><span class="line">   <span class="comment">// 这里使用了 `readonly` 表明我们不用关心这个时间戳的更新，交给数据库自动更新即可</span></span><br><span class="line">   CreatedAt   time.Time <span class="string">`borm:"readonly"`</span></span><br><span class="line">   UpdatedAt   time.Time <span class="string">`borm:"readonly"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment">// TableName 告诉 BORM 查哪张表</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *MaterialModel)</span> <span class="title">TableName</span><span class="params">()</span> <span class="title">string</span></span> &#123;</span><br><span class="line">   <span class="keyword">return</span> <span class="string">"material"</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>下面表演下如何通过实现特定接口完成数据库的 JSON 字符串与自定义结构体类型之间的转换的。<strong>通过把这种低级别的转换操作放在 Model 层完成，可以让业务上层写起来更爽</strong>！</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> AdScale <span class="keyword">struct</span> &#123;</span><br><span class="line">   Width  <span class="keyword">int</span> <span class="string">`json:"width"`</span></span><br><span class="line">   Height <span class="keyword">int</span> <span class="string">`json:"height"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewAdScale</span><span class="params">(w, h <span class="keyword">int</span>)</span> *<span class="title">AdScale</span></span> &#123;</span><br><span class="line">   <span class="keyword">return</span> &amp;AdScale&#123;w, h&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Value 接口会在写入数据库时调用，在实现该接口</span></span><br><span class="line"><span class="comment">// 时调用了 json.Marshal 转换成了 JSON 字符串</span></span><br><span class="line"><span class="comment">// 这样在业务层就可以快快乐乐使用 AdScale 结构体</span></span><br><span class="line"><span class="comment">// 如果需要存储，BORM 会自动获取这里序列化后的结果</span></span><br><span class="line"><span class="comment">// 换成 YAML 都不是梦，上层对此无感知！</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(a *AdScale)</span> <span class="title">Value</span><span class="params">()</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, error)</span></span> &#123;</span><br><span class="line">   result, err := json.Marshal(a)</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> <span class="keyword">string</span>(result), <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// SetValue 会在读取数据时调用，当处理到该类型时，</span></span><br><span class="line"><span class="comment">// 通过 `json.Unmarshal` 自动反序列化成 AdScale 类型了</span></span><br><span class="line"><span class="comment">// 对于上层来说依然是透明的</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(a *AdScale)</span> <span class="title">SetValue</span><span class="params">(v <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">   jsonBody, ok := v.([]<span class="keyword">byte</span>)</span><br><span class="line">   <span class="keyword">if</span> !ok &#123;</span><br><span class="line">      <span class="keyword">return</span> errors.New(<span class="string">"models.material: expect []byte type"</span>)</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">if</span> <span class="built_in">len</span>(jsonBody) != <span class="number">0</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> json.Unmarshal(jsonBody, &amp;a)</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>对了，还有资源的关联呢？在 Python 中我们可以用属性的方式实现，在 Go 中依然可以实现类似的功能，只是写法不太相同而已：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Attributes 是广告素材关联的一组自定义「属性」</span></span><br><span class="line"><span class="comment">// 这里就涉及到对另一张关联表的查询</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *MaterialModel)</span> <span class="title">Attributes</span><span class="params">(ctx context.Context)</span> []*<span class="title">AttributeModel</span></span> &#123;</span><br><span class="line">   <span class="keyword">var</span> results []*AttributeModel</span><br><span class="line">   err := borm.New().Filter(<span class="string">"material_id"</span>, m.ID).OrderBy(<span class="string">"created_at"</span>).All(ctx, &amp;results)</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      log.Errorf(<span class="string">"models.material: failed to get attributes of material '%d': %s"</span>, m.ID, err)</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> results</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>当然啦，如果有资源关联的属性值来自 RPC，也可以放在 Model 层编写一个类似上面的属性。我们希望能够在 Model 层绑定资源的关联数据，这样在业务上层只需要 <code>.Foo()</code> 即可获取关联资源。</p>
+<p>注意到，上面的「属性」函数接收了一个 <code>ctx</code> 参数，那是因为在进行数据库查询或者 RPC 服务调用时需要。但有时候我们的「属性」函数并不需要 <code>ctx</code> 参数，比如下面这样这样：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// IsInPromotion 是否在促销中</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(m *Model)</span> <span class="title">IsInPromotion</span><span class="params">()</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">   now := time.Now().Unix()</span><br><span class="line">   <span class="keyword">return</span> now &gt;= m.PromotionStartsAt &amp;&amp; now &lt; m.PromotionEndsAt</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Controller"><a href="#Controller" class="headerlink" title="Controller"></a>Controller</h2><h3 id="其它项目的写法"><a href="#其它项目的写法" class="headerlink" title="其它项目的写法"></a>其它项目的写法</h3><p>我们先来看下其它项目中是如何编写 Controller 层的。首先看下目录结构：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">controller</span><br><span class="line">├── user.go</span><br><span class="line">├── impl</span><br><span class="line">│   ├── user.go</span><br><span class="line">│   └── user_test.go</span><br><span class="line">└── mock</span><br><span class="line">    └── user.go</span><br></pre></td></tr></table></figure>
+<p>其中在 <code>controller/user.go</code> 中定义了该 Controller 的接口，而在 <code>mock</code> 目录下的文件则是由 mock 工具生成的文件。而在 <code>impl</code> 放置的是真正的实现逻辑，写法如下：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> UserControllerImpl <span class="keyword">struct</span> &#123;</span><br><span class="line">        userDao dao.UserDao</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> _ controller.UserController = (*UserControllerImpl)(<span class="literal">nil</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> DefaultUserController *UserControllerImpl</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">init</span><span class="params">()</span></span> &#123;</span><br><span class="line">        DefaultUserController = NewUserController()</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewUserController</span><span class="params">()</span> *<span class="title">UserControllerImpl</span></span> &#123;</span><br><span class="line">        <span class="keyword">return</span> &amp;UserControllerImpl&#123;</span><br><span class="line">                userDao: daoImpl.DefaultUserDao,</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *UserControllerImpl)</span> <span class="title">GetBar</span><span class="params">(ctx context.Context, uid <span class="keyword">int64</span>)</span> <span class="title">int64</span></span> &#123;</span><br><span class="line">        <span class="keyword">return</span> c.userDao.GetBar(ctx, uid)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>之所以采用这样的目录结构和实现方法，可能也是为了方便编写单元测试时 Mock 掉关键接口。但通过分析这些代码，也发现了几个问题：</p>
+<ul>
+<li>Controller 层好像也没干啥，调用了 Dao 层的接口？</li>
+<li>不太符合 Go 圣经中所倡导的方式，接口写太多了</li>
+<li>每个 Controller 都必须写一个结构体？</li>
+</ul>
+<p>但是为了满足 mock 工具苛刻的生成条件（总是基于 interface 生成），也不得不那样实现。但我们在实践中，有个单元测试需要去 Mock <code>time.Now()</code> 函数。这时就遇到了问题，虽然可以基于 <code>time</code> 再定义一个结构体来，再定义下接口，让  mock 工具生成 Mock 版本。但是这样感觉还是比较繁琐，且容易让代码膨胀。明明就是要解决一个看起来并不复杂的问题，却要因为单元测试引入那么多啰嗦的代码。其实我们并不希望因为单元测试而造成业务代码以某种妥协的方式实现。在经过一番调研和实践后，我们发现运行时 Mock 也是能够做到的（细节会在讲单元测试时说明），自然也就不必写得如此啰嗦~</p>
+<h3 id="我们的做法"><a href="#我们的做法" class="headerlink" title="我们的做法"></a>我们的做法</h3><p>对于比较复杂的业务逻辑，我们依然推荐你在 Controller 层去实现，但是不用教条式地定义一个结构体，再定义一个方法。基本原则就是，能有简单清晰明了的写法即可。比如下面这个例子：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// UpdateMaterial 做一次全量更新吧</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">UpdateMaterial</span><span class="params">(ctx context.Context, materialID <span class="keyword">int64</span>, schema *MaterialSchema)</span> <span class="params">(err error)</span></span> &#123;</span><br><span class="line">   material, err := GetMaterial(ctx, materialID)</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span></span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   tx := borm.New().Begin(ctx)</span><br><span class="line"></span><br><span class="line">   <span class="comment">// 素材更新，这里分为两块</span></span><br><span class="line">   err = updateMaterial(ctx, tx, material, schema)</span><br><span class="line">   <span class="comment">// 然后是素材的属性更新（但由于是全量，为了方便，会删除先前的属性，然后替换成新的）</span></span><br><span class="line">   err = updateMaterialAttributes(ctx, tx, material, schema)</span><br><span class="line"></span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      tx.Rollback(ctx)</span><br><span class="line">   &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      tx.Commit(ctx)</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="View"><a href="#View" class="headerlink" title="View"></a>View</h2><h3 id="Handler"><a href="#Handler" class="headerlink" title="Handler"></a>Handler</h3><p>为了方便编写 REST API，实现了一个基于 <code>go-chi</code> 的轻量级 API 框架，其原型可以参考 <a href="https://github.com/iFaceless/rest" target="_blank" rel="noopener">REST</a> 项目。</p>
+<p>REST 工具提供了如下特性：</p>
+<ul>
+<li>能够以更加优雅简洁的方式基于一个 ResourceHandler 编写 <code>GET/POST/PATCH/DELETE</code> 等方法</li>
+<li>采用 <code>return resp, err</code> 模式替代原先 <code>RenderJSON/RenderError</code> 的方式：</li>
+<li>框架层可以自动去匹配调用 <code>renderJSON</code> 或者 <code>renderError</code></li>
+<li>再也不怕原先调用 <code>RenderError</code> 后又忘记 <code>return</code> 的问题了</li>
+<li>可以更好的支持返回错误，意味着我们不用到处 <code>panic</code> 业务错误，然后在上层又 <code>recover</code> </li>
+<li>封装了一些常用的接口：</li>
+<li>通用的分页 Schema 渲染</li>
+<li>各种易用的参数获取接口</li>
+</ul>
+<p>接下来，看看一个典型的 REST API Handler 实现：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> MaterialsHandler <span class="keyword">struct</span> &#123;</span><br><span class="line">   rest.BaseHandler</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Get 获取素材列表页</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(hd *MaterialsHandler)</span> <span class="title">Get</span><span class="params">()</span> <span class="params">(rest.Response, error)</span></span> &#123;</span><br><span class="line">   ctx := hd.R.Context()</span><br><span class="line">   output, err := controllers.ListMaterials(</span><br><span class="line">      ctx,</span><br><span class="line">      hd.OffsetInt64(),</span><br><span class="line">      hd.LimitInt64(),</span><br><span class="line">      hd.QueryArgumentWithFallback(<span class="string">"order_by"</span>, <span class="string">"-created_at"</span>))</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">var</span> schemas []dump.MaterialSchema</span><br><span class="line">   <span class="keyword">return</span> rest.Pagination&#123;</span><br><span class="line">      Context:     ctx,</span><br><span class="line">      Data:        output.Materials,</span><br><span class="line">      ToSchemaPtr: &amp;schemas,</span><br><span class="line">      IsAdmin:     <span class="literal">true</span>,</span><br><span class="line">      Total:       <span class="keyword">int</span>(output.Total),</span><br><span class="line">   &#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Post 新建广告素材</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(hd *MaterialsHandler)</span> <span class="title">Post</span><span class="params">()</span> <span class="params">(rest.Response, error)</span></span> &#123;</span><br><span class="line">   <span class="keyword">var</span> materialSchema load.MaterialSchema</span><br><span class="line">   err := JSONArgs(hd.R, &amp;materialSchema)</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   err = controllers.CreateMaterial(hd.R.Context(), &amp;materialSchema)</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">bool</span>&#123;<span class="string">"success"</span>: <span class="literal">true</span>&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> MaterialHandler <span class="keyword">struct</span> &#123;</span><br><span class="line">   rest.BaseHandler</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Get 获取某个广告素材详情</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(hd *MaterialHandler)</span> <span class="title">Get</span><span class="params">()</span> <span class="params">(rest.Response, error)</span></span> &#123;</span><br><span class="line">   id, err := hd.getMaterialID()</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   material, err := controllers.GetMaterial(hd.R.Context(), id)</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">var</span> schema dump.MaterialSchema</span><br><span class="line">   err = portal.New().Dump(hd.R.Context(), material, &amp;schema)</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      log.Errorf(<span class="string">"handlers.material.get: failed to dump material: %s"</span>, err)</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">return</span> schema, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Put 更新素材信息</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(hd *MaterialHandler)</span> <span class="title">Put</span><span class="params">()</span> <span class="params">(rest.Response, error)</span></span> &#123;</span><br><span class="line">   <span class="comment">// 参数处理</span></span><br><span class="line">   materialID, err := hd.getMaterialID()</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">var</span> materialSchema load.MaterialSchema</span><br><span class="line">   err = JSONArgs(hd.R, &amp;materialSchema)</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="comment">// 更新逻辑交给 controller 完成</span></span><br><span class="line">   err = controllers.UpdateMaterial(hd.R.Context(), materialID, &amp;materialSchema)</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   <span class="keyword">return</span> <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">bool</span>&#123;<span class="string">"success"</span>: <span class="literal">true</span>&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Delete 删除指定素材</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(hd *MaterialHandler)</span> <span class="title">Delete</span><span class="params">()</span> <span class="params">(rest.Response, error)</span></span> &#123;</span><br><span class="line">   id, err := hd.getMaterialID()</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   err = controllers.DeleteMaterial(hd.R.Context(), id)</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> <span class="literal">nil</span>, err</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> <span class="keyword">map</span>[<span class="keyword">string</span>]<span class="keyword">bool</span>&#123;<span class="string">"success"</span>: <span class="literal">true</span>&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Schema"><a href="#Schema" class="headerlink" title="Schema"></a>Schema</h3><p>我们通常会在 Schema 层定义接口需要的字段及其类型，并在这层完成数据聚合后，生成 JSON 格式的内容吐给前端使用。由于感受到 <code>marshamllow</code> 引入后给我们的 Python 项目带来了诸多好处后（如更加一致清晰的 Schema 定义方式），就斗胆实现了一个 Go 版本的 <code>marshmallow</code> 工具 PORTAL（写得太菜，尚未开源）。但 PORTAL 实际上只是注重数据的聚合，因为 Go 社区已经有很多成熟的工具可以实现 Schema Struct 校验了，自然不用重复造轮子。</p>
+<p>PORTAL 的主要特点如下：</p>
+<ul>
+<li>Schema 支持组合，提高 Schema 复用性</li>
+<li>Schema 字段值支持灵活的取值方式（联想 marshamallow 中常用的方式）</li>
+<li>支持并发填充字段（如不同的字段值可能来源于 RPC/数据库等）</li>
+<li>字段支持灵活的类型定义，PORTAL 负责尝试类型转换</li>
+<li>支持可选字段渲染（赋值）</li>
+<li>尽可能减少冗余且愚蠢且不应该让人类来写的代码（机械式赋值）（脑补下给一个 Schema 的嵌套 List Schema 填充值要写得多么壮观，那如果再嵌套比较深呢？）！</li>
+</ul>
+<p>接下来我们看看如何定义用于聚合数据的 Schema：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// TrackSchema 音频信息</span></span><br><span class="line"><span class="keyword">type</span> TrackSchema <span class="keyword">struct</span> &#123;</span><br><span class="line">   ID            <span class="keyword">string</span> <span class="string">`json:"id"`</span></span><br><span class="line">   Title         <span class="keyword">string</span> <span class="string">`json:"title"`</span></span><br><span class="line">   <span class="comment">// 这里我们对外的字段名实际是 audio，但对应取值来源 Model 的 AudioURL</span></span><br><span class="line">   Audio         <span class="keyword">string</span> <span class="string">`json:"audio,omitempty" portal:"attr:AudioURL"`</span></span><br><span class="line">   AudioDuration <span class="keyword">int</span>    <span class="string">`json:"audio_duration" portal:"attr:Duration"`</span></span><br><span class="line">   <span class="comment">// 这里我们可以使用自定义的方法取值</span></span><br><span class="line">   PlayedAt      <span class="keyword">int</span>    <span class="string">`json:"played_at" portal:"meth:GetPlayedAt"`</span></span><br><span class="line">   Description   <span class="keyword">string</span> <span class="string">`json:"description,omitempty" portal:"attr:Description.Description"`</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// GetPlayedAt 返回用户播放的进度</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(*TrackSchema)</span> <span class="title">GetPlayedAt</span><span class="params">(ctx context.Context, track <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">   <span class="keyword">return</span> <span class="number">90</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// SpeakerSchema 主讲人信息</span></span><br><span class="line"><span class="keyword">type</span> SpeakerSchema <span class="keyword">struct</span> &#123;</span><br><span class="line">   <span class="comment">// 嵌套一个可复用的 MemberSchema</span></span><br><span class="line">   UserSchema</span><br><span class="line"></span><br><span class="line">   <span class="comment">// 额外信息</span></span><br><span class="line">   Role    <span class="keyword">string</span> <span class="string">`json:"role"`</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接下来表演下如何使用类似上面定义的 Schema：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 从 DB 查询得到 Model 示例</span></span><br><span class="line"><span class="keyword">var</span> track models.Track</span><br><span class="line">borm.New().FindByPK(ctx, &amp;track, pk)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 调用 Dump 即可完成 Schema 字段数据填充</span></span><br><span class="line"><span class="keyword">var</span> trackSchema dump.TrackSchema</span><br><span class="line">portal.New().Dump(ctx, &amp;track, &amp;trackSchema)</span><br><span class="line"></span><br><span class="line"><span class="comment">// 接下来将 trackSchema 序列化成 JSON 返回即可</span></span><br></pre></td></tr></table></figure>
+<p>当然，虽然引入 PORTAL 可以让我们更加聚焦业务逻辑的编写，尽可能减少冗余且机械的代码，但也由此带来了一些问题：</p>
+<ul>
+<li>使用 <code>reflect</code> 机制带来的性能损耗就看能不能接受</li>
+<li>有些因为类型转换的不成功的问题可能到运行时才会发现，排查较困难（但出现情况很少）</li>
+</ul>
+<p><strong>所以，这还是一个需要权衡的利弊后才能考虑的方案，但个人觉得它还是有一定价值的~</strong></p>
+<h1 id="聊聊路由注册"><a href="#聊聊路由注册" class="headerlink" title="聊聊路由注册"></a>聊聊路由注册</h1><p>说到路由注册，个人觉得其它部门的 Go 项目采用的方式并不是很优雅，且相对比较分散。所以，就给 REST 工具引入了类似我们在使用 Tornado 时采用的那种路由注册方式。因为是基于 <code>chi.Mux</code> 封装的 Router，所以完全兼容原先的接口。</p>
+<p>对于比较简单的路由，可以采用下面的注册方式：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">r.MountHandler(<span class="string">"/hello"</span>, &amp;hello.DemoHandler&#123;&#125;)</span><br></pre></td></tr></table></figure>
+<p>而对于 API 较多的那种项目，推荐的目录结构如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">routers</span><br><span class="line">├── router.go</span><br><span class="line">└── urls.go</span><br></pre></td></tr></table></figure>
+<p>在 <code>router.go</code> 中编写 Router 初始化的代码，包括中间件配置和路由注册：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// NewRouter web 路由实例创建</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">NewRouter</span><span class="params">()</span> <span class="title">Router</span></span> &#123;</span><br><span class="line">   r := rest.NewRouter()</span><br><span class="line"></span><br><span class="line">   <span class="comment">// 注册各种需要的中间件</span></span><br><span class="line">   r.Use(FooMiddleware)</span><br><span class="line"></span><br><span class="line">   r.MountHandlers(handlers)</span><br><span class="line">   <span class="keyword">return</span> r</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接下来在 <code>urls.go</code> 中定义 URL 和 Handler 的映射：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> handlers = <span class="keyword">map</span>[<span class="keyword">string</span>]rest.Handler&#123;</span><br><span class="line">   <span class="string">"/tasks"</span>:                           &amp;task.TasksHandler&#123;&#125;,</span><br><span class="line">   <span class="string">"/tasks/&#123;id:(\\d+)&#125;"</span>:               &amp;task.TaskHandler&#123;&#125;,</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="单元测试很重要"><a href="#单元测试很重要" class="headerlink" title="单元测试很重要"></a>单元测试很重要</h1><p>先说结论，我们使用了 <a href="https://github.com/agiledragon/gomonkey" target="_blank" rel="noopener">gomonkey</a> 实现运行时 Monkey Patch。这样我们的 Controller/Handler/RPC 等层无需写得特别啰嗦。</p>
+<p>如果想知道其工作原理的话，可以参考 <a href="https://github.com/bouk/monkey" target="_blank" rel="noopener">monkey</a> 项目和 <a href="https://bou.ke/blog/monkey-patching-in-go/" target="_blank" rel="noopener">Monkey Patching in Go</a>。当然，下面几篇和单元测试有关的文章也可以看看：</p>
+<ul>
+<li><a href="https://www.jianshu.com/p/e3b2b1194830" target="_blank" rel="noopener">GoConvey框架使用指南</a></li>
+<li><a href="https://www.jianshu.com/p/2f675d5e334e" target="_blank" rel="noopener">Monkey 框架使用指南</a></li>
+<li><a href="https://www.jianshu.com/p/70a93a9ed186" target="_blank" rel="noopener">GoStub 框架使用指南</a></li>
+<li><a href="https://www.jianshu.com/p/f4e773a1b11f" target="_blank" rel="noopener">GoMock 框架使用指南</a></li>
+<li><a href="https://www.jianshu.com/p/633b55d73ddd" target="_blank" rel="noopener">gomonkey 1.0 正式发布！</a></li>
+</ul>
+<p>此外，还有个用于初始化测试数据的工具也很有帮助，详细可以参见 <a href="https://github.com/iFaceless/fixture" target="_blank" rel="noopener">Fixture</a> 项目。</p>
+<h1 id="Panic-还是直接返回-Error"><a href="#Panic-还是直接返回-Error" class="headerlink" title="Panic 还是直接返回 Error"></a>Panic 还是直接返回 Error</h1><p>对于业务异常来说，相对系统级错误等严重错误发生地更加频繁，这样一来频繁地 Panic/Recover 会带来一些额外开销。此外，无脑地对任何业务异常都采取 Panic 的式方，真的好吗？不过看起来其它组的项目的确很乐意采用这种方式。</p>
+<p><strong>但个人推荐的方式是对于业务错误，依然采用 Go 中典型的方式：返回错误</strong>！如果是比较严重的错误（如网络中断等），则可以进行 Panic，然后在上层捕获。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// DeleteMaterial 删除素材</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">DeleteMaterial</span><span class="params">(ctx context.Context, materialID <span class="keyword">int64</span>)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">   material, err := GetMaterial(ctx, materialID)</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> err</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">   err = borm.New().Model(&amp;material).Update(ctx, <span class="string">"is_deleted"</span>, <span class="literal">true</span>)</span><br><span class="line">   <span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">      log.Errorf(<span class="string">"controllers.material.DeleteMaterial: failed to update: %s"</span>, err)</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="keyword">return</span> err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="枚举定义"><a href="#枚举定义" class="headerlink" title="枚举定义"></a>枚举定义</h1><p>我们一般定义完枚举后，都希望能够根据给定的值获得对应的枚举变量，或者得到枚举变量名映射的名称。这里给出一种可行的定义方式：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// AuditStatus 审核状态</span></span><br><span class="line"><span class="keyword">type</span> AuditStatus <span class="keyword">int</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 定义三种审核状态</span></span><br><span class="line"><span class="keyword">const</span> (</span><br><span class="line">   AuditAwaiting AuditStatus = <span class="literal">iota</span></span><br><span class="line">   AuditPassed</span><br><span class="line">   AuditRefused</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// auditStatusNames 定义每种枚举状态对应的名称</span></span><br><span class="line"><span class="keyword">var</span> auditStatusNames = []<span class="keyword">string</span>&#123;</span><br><span class="line">   <span class="string">"awaiting"</span>,</span><br><span class="line">   <span class="string">"passed"</span>,</span><br><span class="line">   <span class="string">"refused"</span>,</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s AuditStatus)</span> <span class="title">String</span><span class="params">()</span> <span class="title">string</span></span> &#123;</span><br><span class="line">   <span class="keyword">return</span> auditStatusNames[s]</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// AuditStatusByName 可以根据名称映射得到枚举变量</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">AuditStatusByName</span><span class="params">(name <span class="keyword">string</span>)</span> <span class="title">AuditStatus</span></span> &#123;</span><br><span class="line">   <span class="keyword">for</span> i, v := <span class="keyword">range</span> auditStatusNames &#123;</span><br><span class="line">      <span class="keyword">if</span> v == name &#123;</span><br><span class="line">         <span class="keyword">return</span> AuditStatus(i)</span><br><span class="line">      &#125;</span><br><span class="line">   &#125;</span><br><span class="line">   <span class="built_in">panic</span>(fmt.Sprintf(<span class="string">"audit status name not found: '%s'"</span>, name))</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Value 实现的是 BORM 指定的接口，完成和数据库类型（tinyint）映射（写入）</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *AuditStatus)</span> <span class="title">Value</span><span class="params">()</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, error)</span></span> &#123;</span><br><span class="line">   <span class="keyword">return</span> <span class="keyword">int</span>(*s), <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// SetValue 实现的是 BORM 指定的接口，完成和数据库类型（tinyint）映射（读取）</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *AuditStatus)</span> <span class="title">SetValue</span><span class="params">(v <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">error</span></span> &#123;</span><br><span class="line">   *s = AuditStatus(cast.ToInt(v))</span><br><span class="line">   <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2018/12/16/golang-web-dev-practice-summary/" title="Go Web 工程实践总结">http://ifaceless.space/2018/12/16/golang-web-dev-practice-summary/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Go/" rel="tag"><i class="fa fa-tag"></i> Go</a>
+          
+            <a href="/tags/Web/" rel="tag"><i class="fa fa-tag"></i> Web</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/12/02/thoughts-about-writing-restful-api-in-go/" rel="next" title="Go 语言编写 RESTful API 的一些思考">
+                <i class="fa fa-chevron-left"></i> Go 语言编写 RESTful API 的一些思考
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/12/22/clean-arch-notes-intro/" rel="prev" title="《架构整洁之道》学习笔记之介绍">
+                《架构整洁之道》学习笔记之介绍 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me@ifaceless.me" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#项目结构"><span class="nav-number">2.</span> <span class="nav-text">项目结构</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#MVC-怎么实践"><span class="nav-number">3.</span> <span class="nav-text">MVC 怎么实践</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Model"><span class="nav-number">3.1.</span> <span class="nav-text">Model</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#引入-BORM"><span class="nav-number">3.1.1.</span> <span class="nav-text">引入 BORM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编写-Model"><span class="nav-number">3.1.2.</span> <span class="nav-text">编写 Model</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Controller"><span class="nav-number">3.2.</span> <span class="nav-text">Controller</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#其它项目的写法"><span class="nav-number">3.2.1.</span> <span class="nav-text">其它项目的写法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#我们的做法"><span class="nav-number">3.2.2.</span> <span class="nav-text">我们的做法</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#View"><span class="nav-number">3.3.</span> <span class="nav-text">View</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Handler"><span class="nav-number">3.3.1.</span> <span class="nav-text">Handler</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Schema"><span class="nav-number">3.3.2.</span> <span class="nav-text">Schema</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#聊聊路由注册"><span class="nav-number">4.</span> <span class="nav-text">聊聊路由注册</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#单元测试很重要"><span class="nav-number">5.</span> <span class="nav-text">单元测试很重要</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Panic-还是直接返回-Error"><span class="nav-number">6.</span> <span class="nav-text">Panic 还是直接返回 Error</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#枚举定义"><span class="nav-number">7.</span> <span class="nav-text">枚举定义</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

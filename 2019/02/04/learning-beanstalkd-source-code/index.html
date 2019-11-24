@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="源码阅读,消息队列,Beanstalkd,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言Beanstalkd 是一个比较轻量级的消息队列服务，对于性能和稳定性要求不是特别高（相对于 RabbitMQ, Redis, Kafka 等），并且需要延迟执行任务的场景非常合适；此外，它也支持给任务设置不同的优先级、执行超时时间等。">
+<meta name="keywords" content="源码阅读,消息队列,Beanstalkd">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Beanstalkd 源码初探">
+<meta property="og:url" content="http://ifaceless.space/2019/02/04/learning-beanstalkd-source-code/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言Beanstalkd 是一个比较轻量级的消息队列服务，对于性能和稳定性要求不是特别高（相对于 RabbitMQ, Redis, Kafka 等），并且需要延迟执行任务的场景非常合适；此外，它也支持给任务设置不同的优先级、执行超时时间等。">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="http://ifaceless.space/2019/02/04/learning-beanstalkd-source-code/任务状态流转.png">
+<meta property="og:image" content="http://ifaceless.space/2019/02/04/learning-beanstalkd-source-code/任务典型生命周期.png">
+<meta property="og:image" content="http://ifaceless.space/2019/02/04/learning-beanstalkd-source-code/启动%20beansktalkd.png">
+<meta property="og:image" content="http://ifaceless.space/2019/02/04/learning-beanstalkd-source-code/编译与调试.png">
+<meta property="og:image" content="http://ifaceless.space/2019/02/04/learning-beanstalkd-source-code/模块分类.png">
+<meta property="og:image" content="http://ifaceless.space/2019/02/04/learning-beanstalkd-source-code/模块%20UML.png">
+<meta property="og:image" content="http://ifaceless.space/2019/02/04/learning-beanstalkd-source-code/字典.png">
+<meta property="og:image" content="http://ifaceless.space/2019/02/04/learning-beanstalkd-source-code/启动流程.png">
+<meta property="og:updated_time" content="2019-11-24T09:45:59.950Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Beanstalkd 源码初探">
+<meta name="twitter:description" content="引言Beanstalkd 是一个比较轻量级的消息队列服务，对于性能和稳定性要求不是特别高（相对于 RabbitMQ, Redis, Kafka 等），并且需要延迟执行任务的场景非常合适；此外，它也支持给任务设置不同的优先级、执行超时时间等。">
+<meta name="twitter:image" content="http://ifaceless.space/2019/02/04/learning-beanstalkd-source-code/任务状态流转.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2019/02/04/learning-beanstalkd-source-code/">
+
+
+
+
+
+  <title>Beanstalkd 源码初探 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/02/04/learning-beanstalkd-source-code/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Beanstalkd 源码初探</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-02-04T18:22:05+08:00">
+                2019-02-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/消息队列/" itemprop="url" rel="index">
+                    <span itemprop="name">消息队列</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  5.1k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  21
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>Beanstalkd 是一个比较轻量级的消息队列服务，对于性能和稳定性要求不是特别高（相对于 RabbitMQ, Redis, Kafka 等），并且需要延迟执行任务的场景非常合适；此外，它也支持给任务设置不同的优先级、执行超时时间等。<br><a id="more"></a><br>在我们的业务中，经常会借助 Beanstalkd 执行队列任务，常见的用例如下：</p>
+<ol>
+<li>用户完成会员购买并激活后，发送私信通知、重置账号重命名状态等；</li>
+<li>用户完成评论后，异步更新评论计数；</li>
+<li>用户对私家课收听记录上报后，异步更新最近收听的小节、累积收听时长、同步到其它系统等；</li>
+<li>用户记录添加后，会同步至 Redis，为保证数据库和 Redis 的数据最终一致性，会提前启动一个延迟校验的任务（如 5s 后），检查 Redis 中与数据库记录是否一致。</li>
+</ol>
+<h1 id="Beanstalkd-初识"><a href="#Beanstalkd-初识" class="headerlink" title="Beanstalkd 初识"></a>Beanstalkd 初识</h1><h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><ol>
+<li>基于 TCP 并采用 ASCII 编码的文本协议。详细定义参见：<a href="https://github.com/beanstalkd/beanstalkd/blob/master/doc/protocol.txt" target="_blank" rel="noopener">protocol.txt</a>：<ol>
+<li>客户端负责与服务端的交互：<strong>连接</strong>、<strong>发送命令和数据</strong>、<strong>等待响应</strong>、<strong>关闭连接</strong></li>
+<li>服务端串行处理每个客户端连接</li>
+<li>协议由两个部分组成：文本行（用于客户端命令和服务端响应）和非结构化的数据块（用于传送任务 body 和 stats 信息）</li>
+</ol>
+</li>
+</ol>
+<ol>
+<li>队列消息是存储在内存中的，但用户可以选择开启 WAL 机制（binlog），这样重启后可以回放任务，提高了可用性</li>
+<li>采用类似 Redis 的单线程模型（IO 多路复用机制），因此不必考虑多线程环境下线程同步、加锁等，简化实现</li>
+</ol>
+<h2 id="关键词"><a href="#关键词" class="headerlink" title="关键词"></a>关键词</h2><ol>
+<li>Tube：类似 Kafka 中的 Topic，或者其它队列系统中的 Channel</li>
+<li>Job：客户端生产和消费的基本单元。每个任务都有特定的 id，可设定优先级，超时时间，延迟执行时间等</li>
+<li>WAL (Write Ahead Log)：负责 binlog 管理（写入、压缩、日志文件清理、任务恢复等）</li>
+<li>Server：Beanstalkd 服务端</li>
+<li>Conn：Beanstalkd 客户端连接处理</li>
+</ol>
+<h2 id="任务状态流转"><a href="#任务状态流转" class="headerlink" title="任务状态流转"></a>任务状态流转</h2><p><img src="./任务状态流转.png" alt="image.png"></p>
+<h3 id="任务典型生命周期"><a href="#任务典型生命周期" class="headerlink" title="任务典型生命周期"></a>任务典型生命周期</h3><p><img src="./任务典型生命周期.png" alt="image.png"></p>
+<h2 id="工作方式描述"><a href="#工作方式描述" class="headerlink" title="工作方式描述"></a>工作方式描述</h2><ol>
+<li><strong>服务端</strong>会有一到多个 tubes（在数组中维护）。每个 tube 都会包含一个<strong>就绪队列</strong>（在最小堆维护）以及一个<strong>延迟队列</strong>（也在最小堆维护）。每个任务都会在一个特定的 tube 中度过全部的生命周期</li>
+<li><strong>客户端</strong>可以使用 <code>watch</code> 指令订阅某个 tube，也可以使用 <code>ignore</code> 取消订阅，消费者可以同时订阅多个 tube，当消费者 <code>reserve</code> 任务时，该任务可能来自其 <code>watch list</code> 中的任意一个 tube</li>
+<li>当客户端连接时，默认会使用 <code>default</code> tube，可以使用 <code>use</code> 切换 tube</li>
+<li>tube 是会根据需要随时创建的，当没有客户端引用时，就会被删除</li>
+</ol>
+<h1 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h1><p>借助 Docker 启动一个 Beanstalkd 服务非常轻松，请运行下面的命令行即可：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -d -p 11300:11300 schickling/beanstalkd</span><br></pre></td></tr></table></figure>
+<p>如果上述命令行执行正常，则 Beanstalkd 服务应该启动了，其默认监听的端口号为 <code>11300</code>，运行 <code>docker ps</code> 可以查看服务是否正常启动并运行：</p>
+<p><img src="./启动 beansktalkd.png" alt="image.png"></p>
+<h1 id="编译-amp-运行-amp-调试"><a href="#编译-amp-运行-amp-调试" class="headerlink" title="编译 &amp; 运行 &amp; 调试"></a>编译 &amp; 运行 &amp; 调试</h1><p>首先，需要前往 <a href="https://github.com/beanstalkd/beanstalkd" target="_blank" rel="noopener">beanstalkd</a> 仓库克隆 Master 分支源码至本地。</p>
+<p>为了方便管理 C 项目，这里使用了 JET BRAINS 家族的 <a href="https://www.jetbrains.com/clion/" target="_blank" rel="noopener">Clion</a>。当然，你也可以使用自己喜欢的工具打开。</p>
+<p>由于 Clion 使用了 <a href="https://cmake.org/" target="_blank" rel="noopener">CMake</a> 管理 C&amp;C++ 项目，所以打开项目时需要在其根目录下创建一个 CMakeLists.txt 文件，并填写如下内容：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">cmake_minimum_required(VERSION 3.13)</span><br><span class="line">project(beanstalkd C)</span><br><span class="line">set(BUILD_DIR .)</span><br><span class="line">add_custom_target(beanstalkd ALL COMMAND make WORKING_DIRECTORY $&#123;CMAKE_CURRENT_SOURCE_DIR&#125;)</span><br><span class="line">add_custom_command(TARGET beanstalkd POST_BUILD</span><br><span class="line">        COMMAND echo copy $&#123;PROJECT_NAME&#125; to $&#123;CMAKE_CURRENT_BINARY_DIR&#125;</span><br><span class="line">        COMMAND cp $&#123;CMAKE_CURRENT_SOURCE_DIR&#125;/beanstalkd $&#123;CMAKE_CURRENT_BINARY_DIR&#125;</span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<p>🎉 至此，准备工作已经做完啦。接下来，可以尝试点击「构建」按钮，进行编译。编译结束后，就可以点击运行启动 Beanstalkd 服务啦。哦，对了，如果需要调试支持的话，直接在需要的地方打上断点，并点击「调试」按钮即可开始。</p>
+<p><img src="./编译与调试.png" alt="image.png"></p>
+<h2 id="关于-Makefile"><a href="#关于-Makefile" class="headerlink" title="关于 Makefile"></a>关于 Makefile</h2><p>查看 Makefile 文件，可以看到有如下几个命令可以执行：</p>
+<ol>
+<li><code>make all</code>: 编译、链接并生成可执行的二进制文件 <code>beanstalkd</code>。由于我们已经将该命令放到 <code>CMakeLists.txt</code> 文件中，在使用 Clion 构建时可自动触发</li>
+<li><code>make install</code>: 将生成的可执行文件 <code>beanstalkd</code> 安装到 <code>BINDIR=$(DESTDIR)/usr/local/bin</code> 目录下</li>
+<li><code>make clean</code>: 清理生成的 <code>*.o</code> 文件</li>
+<li><code>make bench</code>: 跑 Benchmark 用</li>
+</ol>
+<h1 id="客户端使用示例"><a href="#客户端使用示例" class="headerlink" title="客户端使用示例"></a>客户端使用示例</h1><p>下面看一个简单的例子。生产者负责将一组待抓取的 URLs 放到队列中，再由一组消费者并发访问队列中的 URLs。主流程的示例代码如下：</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 会首先启动 NUM_WORKERS 个消费者在不同的线程中监听</span></span><br><span class="line"><span class="comment">// 然后让生产者向队列中填充 URLs，供消费者使用</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    <span class="keyword">const</span> NUM_WORKERS: <span class="built_in">isize</span> = <span class="number">5</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> handles = <span class="built_in">vec!</span>[];</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> <span class="number">0</span>..NUM_WORKERS &#123;</span><br><span class="line">        <span class="comment">// 启动 NUM_WORKERS 个消费者</span></span><br><span class="line">        <span class="keyword">let</span> hd = thread::spawn(<span class="keyword">move</span> || consume_urls(i));</span><br><span class="line">        handles.push(hd);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    produce_urls();</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 等待消费者结束</span></span><br><span class="line">    <span class="keyword">for</span> hd <span class="keyword">in</span> handles &#123;</span><br><span class="line">        hd.join().unwrap();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="生产者"><a href="#生产者" class="headerlink" title="生产者"></a>生产者</h2><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">produce_urls</span></span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> client = Beanstalkd::localhost().unwrap();</span><br><span class="line">    client.tube(<span class="string">"urls"</span>).unwrap();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">let</span> urls = <span class="built_in">vec!</span>[</span><br><span class="line">        <span class="string">"https://github.com/iFaceless/ifaceless.github.io"</span>,</span><br><span class="line">        <span class="string">"https://github.com/iFaceless/gic"</span>,</span><br><span class="line">        <span class="string">"https://github.com/iFaceless/rust-exercises"</span>,</span><br><span class="line">        <span class="string">"https://github.com/iFaceless/learning-rust"</span>,</span><br><span class="line">        <span class="string">"https://github.com/iFaceless/fixture"</span>,</span><br><span class="line">        <span class="string">"https://github.com/iFaceless/rest"</span>,</span><br><span class="line">        <span class="string">"https://github.com/iFaceless/bigcache"</span>,</span><br><span class="line">        <span class="string">"https://github.com/iFaceless/leetgogo"</span>,</span><br><span class="line">        <span class="string">"https://github.com/iFaceless/freecache"</span>,</span><br><span class="line">    ];</span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> url <span class="keyword">in</span> urls &#123;</span><br><span class="line">        client.put(url, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1000</span>).unwrap();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="消费者"><a href="#消费者" class="headerlink" title="消费者"></a>消费者</h2><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">consume_urls</span></span>(id: <span class="built_in">isize</span>) &#123;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">"[Consumer &#123;&#125;] started..."</span>, id);</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> client = Beanstalkd::localhost().unwrap();</span><br><span class="line">    client.watch(<span class="string">"urls"</span>).unwrap();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">loop</span> &#123;</span><br><span class="line">        <span class="keyword">let</span> (job_id, url) = <span class="keyword">match</span> client.reserve() &#123;</span><br><span class="line">            <span class="literal">Ok</span>(job) =&gt; job,</span><br><span class="line">            <span class="literal">Err</span>(e) =&gt; &#123;</span><br><span class="line">                <span class="built_in">println!</span>(<span class="string">"[Consumer &#123;&#125;] error happens: &#123;&#125;"</span>, id, e);</span><br><span class="line">                <span class="keyword">break</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">println!</span>(<span class="string">"[Consumer &#123;&#125;] got job &lt;&#123;&#125;&gt;: &#123;&#125;"</span>, id, job_id, url);</span><br><span class="line">        client.delete(job_id).unwrap();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="源码探索"><a href="#源码探索" class="headerlink" title="源码探索"></a>源码探索</h1><h2 id="模块分类图"><a href="#模块分类图" class="headerlink" title="模块分类图"></a>模块分类图</h2><p>为了方便阅读源码，粗略地根据自己的理解给各个文件做了简单的分类：</p>
+<p><img src="./模块分类.png" alt="image.png"></p>
+<h2 id="模块-UML-图"><a href="#模块-UML-图" class="headerlink" title="模块 UML 图"></a>模块 UML 图</h2><p>虽说 Beanstalkd 的源码是使用 C 编写的，但是其中的设计思想依然可以从面向对象的角度来解释。比如模块化设计、接口设计、多态等。根据自己的理解，对其中的一些核心模块做了梳理，并绘制了一个简单的 UML 图来加深理解：</p>
+<p><img src="./模块 UML.png" alt="image.png"></p>
+<h2 id="基本数据结构"><a href="#基本数据结构" class="headerlink" title="基本数据结构"></a>基本数据结构</h2><h3 id="最小堆"><a href="#最小堆" class="headerlink" title="最小堆"></a>最小堆</h3><p><strong>二叉堆（Heap）</strong> 是一种很常见的数据结构，本质上是一棵完全二叉树。其分为<strong>最大堆（也叫大根堆）</strong> 和 <strong>最小堆（也叫小根堆）</strong>：</p>
+<ol>
+<li>最大堆：根结点的键值是所有堆结点键值中最大者的堆</li>
+<li>最小堆：根结点的键值是所有堆结点键值中最小者的堆</li>
+</ol>
+<p>在 <a href="https://github.com/beanstalkd/beanstalkd/blob/master/heap.c" target="_blank" rel="noopener">beanstalkd/heap.c</a> 是对最小堆的实现。那么，beanstalkd 中哪些地方用到了最小堆呢？</p>
+<ol>
+<li>Tube 中的延迟任务队列（最先到期的任务会在堆顶，这样可以在 O(1) 时间复杂度获取到）</li>
+<li>Tube 中的就绪任务队列（基于优先级排列，优先级最高的任务会在堆顶）</li>
+<li>Server 中的客户端连接队列（基于 tickat 时间排列）</li>
+</ol>
+<p>接下来，我们看看最小堆的实现：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span></span><br><span class="line">heapinsert(Heap *h, <span class="keyword">void</span> *x)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">int</span> k;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 扩容策略：2 倍长度</span></span><br><span class="line">    <span class="keyword">if</span> (h-&gt;len == h-&gt;cap) &#123;</span><br><span class="line">        <span class="keyword">void</span> **ndata;</span><br><span class="line">        <span class="keyword">int</span> ncap = (h-&gt;len+<span class="number">1</span>) * <span class="number">2</span>; <span class="comment">/* allocate twice what we need */</span></span><br><span class="line"></span><br><span class="line">        ndata = <span class="built_in">malloc</span>(<span class="keyword">sizeof</span>(<span class="keyword">void</span>*) * ncap);</span><br><span class="line">        <span class="keyword">if</span> (!ndata) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="built_in">memcpy</span>(ndata, h-&gt;data, <span class="keyword">sizeof</span>(<span class="keyword">void</span>*)*h-&gt;len);</span><br><span class="line">        <span class="built_in">free</span>(h-&gt;data);</span><br><span class="line">        <span class="comment">// 指向新的位置</span></span><br><span class="line">        h-&gt;data = ndata;</span><br><span class="line">        <span class="comment">// 更新容量</span></span><br><span class="line">        h-&gt;cap = ncap;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    k = h-&gt;len;</span><br><span class="line">    h-&gt;len++;</span><br><span class="line">    <span class="built_in">set</span>(h, k, x);</span><br><span class="line">    siftdown(h, k);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span> *</span><br><span class="line">heapremove(Heap *h, <span class="keyword">int</span> k)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">void</span> *x;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (k &gt;= h-&gt;len) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    x = h-&gt;data[k];</span><br><span class="line">    h-&gt;len--;</span><br><span class="line">    <span class="comment">// 用原来的数组最后一位覆盖被删除的位置</span></span><br><span class="line">    <span class="built_in">set</span>(h, k, h-&gt;data[h-&gt;len]);</span><br><span class="line">    siftdown(h, k);</span><br><span class="line">    siftup(h, k);</span><br><span class="line">    h-&gt;rec(x, <span class="number">-1</span>);</span><br><span class="line">    <span class="keyword">return</span> x;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line"><span class="built_in">set</span>(Heap *h, <span class="keyword">int</span> k, <span class="keyword">void</span> *x)</span><br><span class="line">&#123;</span><br><span class="line">    h-&gt;data[k] = x;</span><br><span class="line">    <span class="comment">// 这里会去调用相应的回调函数</span></span><br><span class="line">    h-&gt;rec(x, k);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 判断位置 a 指向的对象是否小于 b 指向的对象</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span></span><br><span class="line">less(Heap *h, <span class="keyword">int</span> a, <span class="keyword">int</span> b)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// h-&gt;less 是一个判断大小的回调</span></span><br><span class="line">    <span class="comment">// 其实要在面向对象的语言中，完全可以自定一个实现了比较大小的接口</span></span><br><span class="line">    <span class="comment">// 比如在 Rust 中，可以使用 `PartialEq` 限定...</span></span><br><span class="line">    <span class="keyword">return</span> h-&gt;less(h-&gt;data[a], h-&gt;data[b]);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="变长数组"><a href="#变长数组" class="headerlink" title="变长数组"></a>变长数组</h3><p>在 C 语言标准库中是没有可变长度的数组实现的，所以在 <a href="https://github.com/beanstalkd/beanstalkd/blob/master/ms.c" target="_blank" rel="noopener">beanstalkd/ms.c</a> 实现了一种类似的数据结构，它具有如下特点：</p>
+<ol>
+<li><code>ms</code> 结构体维护一个可动态扩容的数组（**items）</li>
+<li>扩容策略很粗暴，直接扩充为原来容量的两倍</li>
+<li>插入的平均时间复杂度为 O(1)</li>
+<li>删除的平均时间复杂度为 O(1)</li>
+<li>由于删除时，会将尾部 item 替换掉被删除的 item，所以不能依赖数组中的元素顺序（顺序不保证和添加时一致）</li>
+<li>删除 item 后，其实数组占用的内存空间还在（并没有动态缩容的策略）</li>
+</ol>
+<p>那具体在哪些地方用到了 <code>ms</code> 这种数据结构呢？梳理后，主要发现以下几处：</p>
+<ol>
+<li>全局的 <a href="https://github.com/beanstalkd/beanstalkd/blob/b5a6f7a23a368ffb31fbf48cdffe95541166d3fa/tube.c#L6" target="_blank" rel="noopener">Tube 列表</a></li>
+<li>客户端连接的 <code>Conn</code> 中维护的 <a href="https://github.com/beanstalkd/beanstalkd/blob/b5a6f7a23a368ffb31fbf48cdffe95541166d3fa/dat.h#L296" target="_blank" rel="noopener">watch list</a></li>
+<li>与 Tube 关联的<a href="https://github.com/beanstalkd/beanstalkd/blob/b5a6f7a23a368ffb31fbf48cdffe95541166d3fa/dat.h#L161" target="_blank" rel="noopener">等待连接（conns）列表</a></li>
+</ol>
+<p>下面看看其具体的实现：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 初始化数组，并注册插入和移除的回调函数</span></span><br><span class="line"><span class="keyword">void</span></span><br><span class="line">ms_init(ms a, ms_event_fn oninsert, ms_event_fn onremove)</span><br><span class="line">&#123;</span><br><span class="line">    a-&gt;used = a-&gt;cap = a-&gt;last = <span class="number">0</span>;</span><br><span class="line">    a-&gt;items = <span class="literal">NULL</span>;</span><br><span class="line">    a-&gt;oninsert = oninsert;</span><br><span class="line">    a-&gt;onremove = onremove;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 控制数组增长</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">grow(ms a)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">void</span> **nitems;</span><br><span class="line">    <span class="comment">// 倍速增长：1, 2, 4, ...</span></span><br><span class="line">    <span class="keyword">size_t</span> ncap = (a-&gt;cap &lt;&lt; <span class="number">1</span>) ? : <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    nitems = <span class="built_in">malloc</span>(ncap * <span class="keyword">sizeof</span>(<span class="keyword">void</span> *));</span><br><span class="line">    <span class="keyword">if</span> (!nitems) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 旧的数据拷贝到新开辟的空间</span></span><br><span class="line">    <span class="built_in">memcpy</span>(nitems, a-&gt;items, a-&gt;used * <span class="keyword">sizeof</span>(<span class="keyword">void</span> *));</span><br><span class="line">    <span class="comment">// 释放旧的内存空间</span></span><br><span class="line">    <span class="built_in">free</span>(a-&gt;items);</span><br><span class="line">    <span class="comment">// 指向新的位置</span></span><br><span class="line">    a-&gt;items = nitems;</span><br><span class="line">    <span class="comment">// 更新数组容量</span></span><br><span class="line">    a-&gt;cap = ncap;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 在数组尾部插入新的 item</span></span><br><span class="line"><span class="comment">// O(1)</span></span><br><span class="line"><span class="keyword">int</span></span><br><span class="line">ms_append(ms a, <span class="keyword">void</span> *item)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 按需扩展容量</span></span><br><span class="line">    <span class="keyword">if</span> (a-&gt;used &gt;= a-&gt;cap) grow(a);</span><br><span class="line">    <span class="comment">// 扩容失败，就返回，也就是不能再新增 item 了</span></span><br><span class="line">    <span class="keyword">if</span> (a-&gt;used &gt;= a-&gt;cap) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    a-&gt;items[a-&gt;used++] = item;</span><br><span class="line">    <span class="comment">// 如果有回调，则触发回调函数</span></span><br><span class="line">    <span class="keyword">if</span> (a-&gt;oninsert) a-&gt;oninsert(a, item, a-&gt;used - <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 删除指定位置的 item</span></span><br><span class="line"><span class="comment">// O(1)</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">int</span></span><br><span class="line">ms_delete(ms a, <span class="keyword">size_t</span> i)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">void</span> *item;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (i &gt;= a-&gt;used) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    item = a-&gt;items[i];</span><br><span class="line">    <span class="comment">// 相当于把尾部 item 写到被删除的位置，并「缩容」</span></span><br><span class="line">    a-&gt;items[i] = a-&gt;items[--a-&gt;used];</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* it has already been removed now */</span></span><br><span class="line">    <span class="keyword">if</span> (a-&gt;onremove) a-&gt;onremove(a, item, i);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="字典"><a href="#字典" class="headerlink" title="字典"></a>字典</h3><p><img src="./字典.png" alt="image.png"></p>
+<p>在 <a href="https://github.com/beanstalkd/beanstalkd/blob/master/job.c" target="_blank" rel="noopener">beanstalkd/job.c</a> 中，为了方便基于 <code>job_id</code> 快速定位到具体的任务，作者实现了一个字典数据结构。这里是和 job 耦合在一起实现的，根据对源码的分析，可以得出该字典数据结构的特点如下：</p>
+<ol>
+<li>采用基于 <code>job_id</code> 哈希取模的方式计算 <code>slot_id</code></li>
+<li>使用链地址法解决哈希冲突</li>
+<li>根据负载因子自动进行 rehash（进行扩容或缩容），扩容或者缩容的系数根据 <a href="https://github.com/beanstalkd/beanstalkd/blob/master/primes.c" target="_blank" rel="noopener">beanstalkd/primes.c</a> 设置</li>
+<li>rehash 过程并没有采用类似 Redis 中渐进式 rehash 机制，而是阻塞式完成整个哈希表的 rehash 后才可以进行后续操作</li>
+</ol>
+<p>存放 job 及 rehash 的详细源码分析如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="comment">// 存放一个 job</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">store_job(job j)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">int</span> index = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    index = _get_job_hash_index(j-&gt;r.id);</span><br><span class="line"></span><br><span class="line">    j-&gt;ht_next = all_jobs[index]; <span class="comment">// 如果存在冲突，就采用链地址法</span></span><br><span class="line">    all_jobs[index] = j;</span><br><span class="line">    all_jobs_used++;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* accept a load factor of 4 */</span></span><br><span class="line">    <span class="comment">// 负载因子设置为 4，超过阈值时就会进行 rehash</span></span><br><span class="line">    <span class="comment">// 看起这里是阻塞的方式来进行 rehash 了，如果 hash 表太大，会被阻塞</span></span><br><span class="line">    <span class="comment">// 并没有使用类似 redis 那样渐进式 rehash 思路</span></span><br><span class="line">    <span class="keyword">if</span> (all_jobs_used &gt; (all_jobs_cap &lt;&lt; <span class="number">2</span>)) rehash(<span class="number">1</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 支持扩容和缩容</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">rehash(<span class="keyword">int</span> is_upscaling)</span><br><span class="line">&#123;</span><br><span class="line">    job *old = all_jobs;</span><br><span class="line">    <span class="comment">// 记录下旧的 hash 表容量，元素个数</span></span><br><span class="line">    <span class="keyword">size_t</span> old_cap = all_jobs_cap, old_used = all_jobs_used, i;</span><br><span class="line">    <span class="keyword">int</span> old_prime = cur_prime;</span><br><span class="line">    <span class="keyword">int</span> d = is_upscaling ? <span class="number">1</span> : <span class="number">-1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (cur_prime + d &gt;= NUM_PRIMES) <span class="keyword">return</span>;</span><br><span class="line">    <span class="keyword">if</span> (cur_prime + d &lt; <span class="number">0</span>) <span class="keyword">return</span>;</span><br><span class="line">    <span class="keyword">if</span> (is_upscaling &amp;&amp; hash_table_was_oom) <span class="keyword">return</span>;</span><br><span class="line"></span><br><span class="line">    cur_prime += d;</span><br><span class="line"></span><br><span class="line">    all_jobs_cap = primes[cur_prime];</span><br><span class="line">    all_jobs = <span class="built_in">calloc</span>(all_jobs_cap, <span class="keyword">sizeof</span>(job));</span><br><span class="line">    <span class="keyword">if</span> (!all_jobs) &#123; <span class="comment">// 针对扩容失败的处理，恢复原来的不变，但是标记 OOM</span></span><br><span class="line">        twarnx(<span class="string">"Failed to allocate %zu new hash buckets"</span>, all_jobs_cap);</span><br><span class="line">        hash_table_was_oom = <span class="number">1</span>;</span><br><span class="line">        cur_prime = old_prime;</span><br><span class="line">        all_jobs = old;</span><br><span class="line">        all_jobs_cap = old_cap;</span><br><span class="line">        all_jobs_used = old_used;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 重置 hash 表状态</span></span><br><span class="line">    all_jobs_used = <span class="number">0</span>;</span><br><span class="line">    hash_table_was_oom = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 其实就是把 Hash 表上所有的 jobs 全部映射到新的空间</span></span><br><span class="line">    <span class="keyword">for</span> (i = <span class="number">0</span>; i &lt; old_cap; i++) &#123;</span><br><span class="line">        <span class="keyword">while</span> (old[i]) &#123;</span><br><span class="line">            job j = old[i];</span><br><span class="line">            old[i] = j-&gt;ht_next;</span><br><span class="line">            j-&gt;ht_next = <span class="literal">NULL</span>;</span><br><span class="line">            store_job(j);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 然后把原来的内存空间释放掉</span></span><br><span class="line">    <span class="keyword">if</span> (old != all_jobs_init) &#123;</span><br><span class="line">        <span class="built_in">free</span>(old);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="链表"><a href="#链表" class="headerlink" title="链表"></a>链表</h3><p>链表这种数据结构在 Beanstalkd 实现中用得比较频繁，比如</p>
+<ol>
+<li><a href="https://github.com/beanstalkd/beanstalkd/blob/master/walg.c" target="_blank" rel="noopener">beanstalkd/walg.c</a> 中使用了单向链表的串联了一些列的日志文件（参见三个游标指针：<code>head</code>, <code>cur</code>, <code>tail</code>）</li>
+<li><a href="https://github.com/beanstalkd/beanstalkd/blob/master/conn.c" target="_blank" rel="noopener">beanstalkd/conn.c</a> 使用双向链表连接了一些列被 <code>reserve</code> 的任务</li>
+</ol>
+<p>在 <a href="https://github.com/beanstalkd/beanstalkd/blob/master/job.c" target="_blank" rel="noopener">beastalkd/job.c</a>，可以看到任务双向链表实现：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span></span><br><span class="line">job_list_any_p(job head)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> head-&gt;next != head || head-&gt;prev != head;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">job</span><br><span class="line">job_remove(job j)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (!j) <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">if</span> (!job_list_any_p(j)) <span class="keyword">return</span> <span class="literal">NULL</span>; <span class="comment">/* not in a doubly-linked list */</span></span><br><span class="line"></span><br><span class="line">    j-&gt;next-&gt;prev = j-&gt;prev;</span><br><span class="line">    j-&gt;prev-&gt;next = j-&gt;next;</span><br><span class="line"></span><br><span class="line">    j-&gt;prev = j-&gt;next = j;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> j;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">void</span></span><br><span class="line">job_insert(job head, job j)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (job_list_any_p(j)) <span class="keyword">return</span>; <span class="comment">/* already in a linked list */</span></span><br><span class="line"></span><br><span class="line">    j-&gt;prev = head-&gt;prev;</span><br><span class="line">    j-&gt;next = head;</span><br><span class="line">    head-&gt;prev-&gt;next = j;</span><br><span class="line">    head-&gt;prev = j;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="部分模块源码学习"><a href="#部分模块源码学习" class="headerlink" title="部分模块源码学习"></a>部分模块源码学习</h2><h3 id="main-c"><a href="#main-c" class="headerlink" title="main.c"></a>main.c</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span></span><br><span class="line">main(<span class="keyword">int</span> argc, <span class="keyword">char</span> **argv) &#123;</span><br><span class="line">    <span class="keyword">int</span> r;</span><br><span class="line">    <span class="comment">// 存放任务的链表</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">job</span> <span class="title">list</span> = &#123;</span>&#125;;</span><br><span class="line"></span><br><span class="line">    progname = argv[<span class="number">0</span>];</span><br><span class="line">    <span class="comment">// 设置使用行缓存，表使用标准输出作为打印目标</span></span><br><span class="line">    <span class="comment">// 详细文档参见：https://linux.die.net/man/3/setlinebuf</span></span><br><span class="line">    <span class="comment">// 意思是，只有在满足一行（换行）时才输出</span></span><br><span class="line">    setlinebuf(<span class="built_in">stdout</span>);</span><br><span class="line">    <span class="comment">// 命令行处理</span></span><br><span class="line">    optparse(&amp;srv, argv + <span class="number">1</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (verbose) &#123;</span><br><span class="line">        <span class="built_in">printf</span>(<span class="string">"pid %d\n"</span>, getpid());</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 服务器端 socket 初始化等，返回一个指向 socket 的 file descriptor</span></span><br><span class="line">    r = make_server_socket(srv.addr, srv.port);</span><br><span class="line">    <span class="keyword">if</span> (r == <span class="number">-1</span>) twarnx(<span class="string">"make_server_socket()"</span>), <span class="built_in">exit</span>(<span class="number">111</span>);</span><br><span class="line">    srv.sock.fd = r;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 协议处理模块初始化</span></span><br><span class="line">    prot_init();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (srv.user) su(srv.user);</span><br><span class="line">    set_sig_handlers();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (srv.wal.use) &#123;</span><br><span class="line">        <span class="comment">// We want to make sure that only one beanstalkd tries</span></span><br><span class="line">        <span class="comment">// to use the wal directory at a time. So acquire a lock</span></span><br><span class="line">        <span class="comment">// now and never release it.</span></span><br><span class="line">        <span class="comment">// WAL 即 Write Ahead Log Directory，主要是记录日志用</span></span><br><span class="line">        <span class="comment">// 这里是要保证每次只能有一个 beanstalkd 实例使用 WAL 目录，防止相互写入冲突</span></span><br><span class="line">        <span class="comment">// 那估计以后就没法从 binlog 恢复任务了。。。</span></span><br><span class="line">        <span class="keyword">if</span> (!waldirlock(&amp;srv.wal)) &#123;</span><br><span class="line">            twarnx(<span class="string">"failed to lock wal dir %s"</span>, srv.wal.dir);</span><br><span class="line">            <span class="built_in">exit</span>(<span class="number">10</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 初始化任务链表（双向链表）</span></span><br><span class="line">        <span class="built_in">list</span>.prev = <span class="built_in">list</span>.next = &amp;<span class="built_in">list</span>;</span><br><span class="line">        <span class="comment">// 初始化 WAL，如果 log 中有任务，还要恢复回来，挂载到 job list</span></span><br><span class="line">        walinit(&amp;srv.wal, &amp;<span class="built_in">list</span>);</span><br><span class="line">        <span class="comment">// 回放任务执行</span></span><br><span class="line">        r = prot_replay(&amp;srv, &amp;<span class="built_in">list</span>);</span><br><span class="line">        <span class="keyword">if</span> (!r) &#123;</span><br><span class="line">            twarnx(<span class="string">"failed to replay log"</span>);</span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 正式启动 server，并监听请求，处理请求了</span></span><br><span class="line">    srvserve(&amp;srv);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><img src="./启动流程.png" alt="image.png"></p>
+<h3 id="serv-c"><a href="#serv-c" class="headerlink" title="serv.c"></a>serv.c</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span></span><br><span class="line">srvserve(Server *s)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">int</span> r;</span><br><span class="line">    Socket *sock;</span><br><span class="line">    int64 period;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (sockinit() == <span class="number">-1</span>) &#123;</span><br><span class="line">        twarnx(<span class="string">"sockinit"</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    s-&gt;sock.x = s;</span><br><span class="line">    <span class="comment">// 指定回调，当接收到 `r` 事件后，就会触发这个回调</span></span><br><span class="line">    s-&gt;sock.f = (Handle)srvaccept;</span><br><span class="line">    <span class="comment">// Server 维护了关联的客户端连接（最小堆）</span></span><br><span class="line">    s-&gt;conns.less = (Less)connless;</span><br><span class="line">    s-&gt;conns.rec = (Record)connrec;</span><br><span class="line"></span><br><span class="line">    r = listen(s-&gt;sock.fd, <span class="number">1024</span>);</span><br><span class="line">    <span class="keyword">if</span> (r == <span class="number">-1</span>) &#123;</span><br><span class="line">        twarn(<span class="string">"listen"</span>);</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 注册</span></span><br><span class="line">    r = sockwant(&amp;s-&gt;sock, <span class="string">'r'</span>);</span><br><span class="line">    <span class="keyword">if</span> (r == <span class="number">-1</span>) &#123;</span><br><span class="line">        twarn(<span class="string">"sockwant"</span>);</span><br><span class="line">        <span class="built_in">exit</span>(<span class="number">2</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    <span class="keyword">for</span> (;;) &#123;</span><br><span class="line">        <span class="comment">// 执行周期性的任务</span></span><br><span class="line">        <span class="comment">// 如果 tick 中执行的任务时间过久，会阻塞后面的 socket connection 处理</span></span><br><span class="line">        <span class="comment">// 严重会导致超时，而如果客户端重试过多，则回增加服务端负载</span></span><br><span class="line">        period = prottick(s);</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 轮询是否有就绪的请求（rw），其实就是个适配器，将具体平台下返回的状态</span></span><br><span class="line">        <span class="comment">// 转换成统一的 `r`, `w`, `h`</span></span><br><span class="line">        <span class="comment">// Linux 使用 epoll 封装（参见 `linux.c`）</span></span><br><span class="line">        <span class="comment">// Unix 使用 kqueue 封装（参见 `darwin.c`）</span></span><br><span class="line">        <span class="keyword">int</span> rw = socknext(&amp;sock, period);</span><br><span class="line">        <span class="keyword">if</span> (rw == <span class="number">-1</span>) &#123;</span><br><span class="line">            twarnx(<span class="string">"socknext"</span>);</span><br><span class="line">            <span class="built_in">exit</span>(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">if</span> (rw) &#123;</span><br><span class="line">            <span class="comment">// 如果轮询到需要处理的请求，则执行相应的回调 Handle</span></span><br><span class="line">            <span class="comment">// 注意，这里的回调依然在主线程中执行的，所以如果主线程被阻塞，就呵呵哒了</span></span><br><span class="line">            sock-&gt;f(sock-&gt;x, rw);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="tube-c"><a href="#tube-c" class="headerlink" title="tube.c"></a>tube.c</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 新建 tube，这里需要给定 tube 名称</span></span><br><span class="line"><span class="comment">// 这里可以看到一个 tube 有几个比较重要的组成：</span></span><br><span class="line"><span class="comment">// 1. 维护就绪任务的堆</span></span><br><span class="line"><span class="comment">// 2. 维护延迟执行任务的堆</span></span><br><span class="line"><span class="comment">// 3. 维护处于 buried 状态的任务链表</span></span><br><span class="line"><span class="comment">// 4. 维护一个等待列表</span></span><br><span class="line">tube</span><br><span class="line">make_tube(<span class="keyword">const</span> <span class="keyword">char</span> *name)</span><br><span class="line">&#123;</span><br><span class="line">    tube t;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 分配内存空间，用于存储 tube 结构体值</span></span><br><span class="line">    t = <span class="keyword">new</span>(struct tube);</span><br><span class="line">    <span class="keyword">if</span> (!t) <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 初始化 tube 名称</span></span><br><span class="line">    t-&gt;name[MAX_TUBE_NAME_LEN - <span class="number">1</span>] = <span class="string">'\0'</span>;</span><br><span class="line">    <span class="built_in">strncpy</span>(t-&gt;name, name, MAX_TUBE_NAME_LEN - <span class="number">1</span>);</span><br><span class="line">    <span class="keyword">if</span> (t-&gt;name[MAX_TUBE_NAME_LEN - <span class="number">1</span>] != <span class="string">'\0'</span>) twarnx(<span class="string">"truncating tube name"</span>);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// ready 堆维护着一些已经就绪的 jobs，这里是指定按照 job 优先级的方式比较大小</span></span><br><span class="line">    <span class="comment">// 这样，这个堆顶就是优先级最高的 job</span></span><br><span class="line">    t-&gt;ready.less = job_pri_less;</span><br><span class="line">    <span class="comment">// delay 堆维护着一些被延迟执行的 jobs，这里是按照 job delay 时间比较大小</span></span><br><span class="line">    <span class="comment">// 这样，这个堆顶就是延迟时间最短的 job</span></span><br><span class="line">    t-&gt;delay.less = job_delay_less;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 用于记录 job 在堆上的位置</span></span><br><span class="line">    t-&gt;ready.rec = job_setheappos;</span><br><span class="line">    t-&gt;delay.rec = job_setheappos;</span><br><span class="line">    t-&gt;buried = (struct job) &#123; &#125;;</span><br><span class="line">    <span class="comment">// 使用链表维护着被 bury 掉的 job</span></span><br><span class="line">    t-&gt;buried.prev = t-&gt;buried.next = &amp;t-&gt;buried;</span><br><span class="line">    <span class="comment">// 初始化排队列表</span></span><br><span class="line">    ms_init(&amp;t-&gt;waiting, <span class="literal">NULL</span>, <span class="literal">NULL</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> t;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 释放 tube</span></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">void</span></span><br><span class="line">tube_free(tube t)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="comment">// 实际就是从全局的 tubes 列表中移除该 tube</span></span><br><span class="line">    prot_remove_tube(t);</span><br><span class="line">    <span class="comment">// 释放就绪的任务</span></span><br><span class="line">    <span class="built_in">free</span>(t-&gt;ready.data);</span><br><span class="line">    <span class="comment">// 释放延迟的任务</span></span><br><span class="line">    <span class="built_in">free</span>(t-&gt;delay.data);</span><br><span class="line">    <span class="comment">// 清空等待列表</span></span><br><span class="line">    ms_clear(&amp;t-&gt;waiting);</span><br><span class="line">    <span class="comment">// 释放 tube 指向的内存</span></span><br><span class="line">    <span class="built_in">free</span>(t);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 引用计数：减引用</span></span><br><span class="line"><span class="keyword">void</span></span><br><span class="line">tube_dref(tube t)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (!t) <span class="keyword">return</span>;</span><br><span class="line">    <span class="keyword">if</span> (t-&gt;refs &lt; <span class="number">1</span>) <span class="keyword">return</span> twarnx(<span class="string">"refs is zero for tube: %s"</span>, t-&gt;name);</span><br><span class="line"></span><br><span class="line">    --t-&gt;refs;</span><br><span class="line">    <span class="comment">// 没有引用后就可以释放该 tube 了</span></span><br><span class="line">    <span class="keyword">if</span> (t-&gt;refs &lt; <span class="number">1</span>) tube_free(t);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 引用计数：增加引用</span></span><br><span class="line"><span class="keyword">void</span></span><br><span class="line">tube_iref(tube t)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">if</span> (!t) <span class="keyword">return</span>;</span><br><span class="line">    ++t-&gt;refs;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 新建一个 tube，然后注册到全局 tubes 列表</span></span><br><span class="line"><span class="keyword">static</span> tube</span><br><span class="line">make_and_insert_tube(<span class="keyword">const</span> <span class="keyword">char</span> *name)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">int</span> r;</span><br><span class="line">    tube t = <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    t = make_tube(name);</span><br><span class="line">    <span class="keyword">if</span> (!t) <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/* We want this global tube list to behave like "weak" refs, so don't</span></span><br><span class="line"><span class="comment">     * increment the ref count. */</span></span><br><span class="line">    <span class="comment">// 这里是想让全局 tube 列表表现为弱引用，所这里并没有做增加引用的操作</span></span><br><span class="line">    r = ms_append(&amp;tubes, t);</span><br><span class="line">    <span class="comment">// 如果注册 tube 失败，减引用，必要的话会被释放掉</span></span><br><span class="line">    <span class="keyword">if</span> (!r) <span class="keyword">return</span> tube_dref(t), (tube) <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> t;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="job-c"><a href="#job-c" class="headerlink" title="job.c"></a>job.c</h3><p>在 Tube 中有两个最小堆数据结构分别存放被延迟的任何和就绪的任务，这两种使用的排序方式是不同的。我们看到在上面的 Tube 初始化时，给两个堆绑定了不同的比较大小的回调：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">t-&gt;ready.less = job_pri_less;</span><br><span class="line">t-&gt;delay.less = job_delay_less;</span><br></pre></td></tr></table></figure>
+<p>以下可以看到具体的排序方式：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 回调函数，先基于优先级比较哪个小，再基于 id 比较哪个小</span></span><br><span class="line"><span class="keyword">int</span></span><br><span class="line">job_pri_less(<span class="keyword">void</span> *ax, <span class="keyword">void</span> *bx)</span><br><span class="line">&#123;</span><br><span class="line">    job a = ax, b = bx;</span><br><span class="line">    <span class="keyword">if</span> (a-&gt;r.pri &lt; b-&gt;r.pri) <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">if</span> (a-&gt;r.pri &gt; b-&gt;r.pri) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> a-&gt;r.id &lt; b-&gt;r.id;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 回调函数，先基于到期时间比较哪个小，再基于 id 比较哪个小</span></span><br><span class="line"><span class="keyword">int</span></span><br><span class="line">job_delay_less(<span class="keyword">void</span> *ax, <span class="keyword">void</span> *bx)</span><br><span class="line">&#123;</span><br><span class="line">    job a = ax, b = bx;</span><br><span class="line">    <span class="keyword">if</span> (a-&gt;r.deadline_at &lt; b-&gt;r.deadline_at) <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">if</span> (a-&gt;r.deadline_at &gt; b-&gt;r.deadline_at) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">return</span> a-&gt;r.id &lt; b-&gt;r.id;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="读后感"><a href="#读后感" class="headerlink" title="读后感"></a>读后感</h1><p>整个 Beanstalkd 的核心的代码不过五千行左右，但这就实现了一个生产级别的消息队列，的确是很厉害。不过，也正因为其实现比较简单，所以也没有提供类似 Redis 的主从机制等。当然，在这篇文章中，并没有完整地剖析所有的模块实现，只是列出了个人比较感兴趣的模块；关于 binlog 管理的源码（比如垃圾回收，压缩，预留空间申请，任务恢复等）只是粗略地阅读了下，就不在此处献丑啦~</p>
+<p>总的来说，对于单机消息队列实现感兴趣的同学还是推荐阅读下该系统的源码，可以学习其中的一些设计思想，实现思路等~</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li><a href="http://www.hulkdev.com/posts/think_in_beanstalkd" target="_blank" rel="noopener">beanstalkd 的一些看法</a></li>
+<li><a href="https://github.com/beanstalkd/beanstalkd" target="_blank" rel="noopener">beanstalkd repo</a></li>
+<li><a href="https://beanstalkd.github.io/" target="_blank" rel="noopener">beanstalkd docs</a></li>
+<li><a href="https://segmentfault.com/a/1190000016067218" target="_blank" rel="noopener">消息队列 beanstalkd 源码详解</a></li>
+<li><a href="https://zh.wikipedia.org/wiki/%E6%9C%80%E5%A4%A7%E2%80%94%E6%9C%80%E5%B0%8F%E5%A0%86" target="_blank" rel="noopener">最大—最小堆</a></li>
+</ol>
+<h1 id="延伸阅读"><a href="#延伸阅读" class="headerlink" title="延伸阅读"></a>延伸阅读</h1><ol>
+<li><a href="https://www.cnblogs.com/FG123/p/5256553.html" target="_blank" rel="noopener">Kqueue 与 Epoll 机制</a></li>
+<li><a href="https://juejin.im/entry/59376d450ce4630057427d53" target="_blank" rel="noopener">从 0到 100——知乎架构变迁史</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2019/02/04/learning-beanstalkd-source-code/" title="Beanstalkd 源码初探">http://ifaceless.space/2019/02/04/learning-beanstalkd-source-code/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/源码阅读/" rel="tag"><i class="fa fa-tag"></i> 源码阅读</a>
+          
+            <a href="/tags/消息队列/" rel="tag"><i class="fa fa-tag"></i> 消息队列</a>
+          
+            <a href="/tags/Beanstalkd/" rel="tag"><i class="fa fa-tag"></i> Beanstalkd</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/01/03/clean-arch-notes-paradigms/" rel="next" title="《架构整洁之道》学习笔记之编程范式">
+                <i class="fa fa-chevron-left"></i> 《架构整洁之道》学习笔记之编程范式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/02/18/explore-thrift/" rel="prev" title="Thrift 初探">
+                Thrift 初探 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me@ifaceless.me" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Beanstalkd-初识"><span class="nav-number">2.</span> <span class="nav-text">Beanstalkd 初识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#特点"><span class="nav-number">2.1.</span> <span class="nav-text">特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#关键词"><span class="nav-number">2.2.</span> <span class="nav-text">关键词</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#任务状态流转"><span class="nav-number">2.3.</span> <span class="nav-text">任务状态流转</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#任务典型生命周期"><span class="nav-number">2.3.1.</span> <span class="nav-text">任务典型生命周期</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#工作方式描述"><span class="nav-number">2.4.</span> <span class="nav-text">工作方式描述</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#安装"><span class="nav-number">3.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#编译-amp-运行-amp-调试"><span class="nav-number">4.</span> <span class="nav-text">编译 &amp; 运行 &amp; 调试</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#关于-Makefile"><span class="nav-number">4.1.</span> <span class="nav-text">关于 Makefile</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#客户端使用示例"><span class="nav-number">5.</span> <span class="nav-text">客户端使用示例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#生产者"><span class="nav-number">5.1.</span> <span class="nav-text">生产者</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消费者"><span class="nav-number">5.2.</span> <span class="nav-text">消费者</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#源码探索"><span class="nav-number">6.</span> <span class="nav-text">源码探索</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#模块分类图"><span class="nav-number">6.1.</span> <span class="nav-text">模块分类图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#模块-UML-图"><span class="nav-number">6.2.</span> <span class="nav-text">模块 UML 图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#基本数据结构"><span class="nav-number">6.3.</span> <span class="nav-text">基本数据结构</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#最小堆"><span class="nav-number">6.3.1.</span> <span class="nav-text">最小堆</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#变长数组"><span class="nav-number">6.3.2.</span> <span class="nav-text">变长数组</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#字典"><span class="nav-number">6.3.3.</span> <span class="nav-text">字典</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#链表"><span class="nav-number">6.3.4.</span> <span class="nav-text">链表</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部分模块源码学习"><span class="nav-number">6.4.</span> <span class="nav-text">部分模块源码学习</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#main-c"><span class="nav-number">6.4.1.</span> <span class="nav-text">main.c</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#serv-c"><span class="nav-number">6.4.2.</span> <span class="nav-text">serv.c</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#tube-c"><span class="nav-number">6.4.3.</span> <span class="nav-text">tube.c</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#job-c"><span class="nav-number">6.4.4.</span> <span class="nav-text">job.c</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#读后感"><span class="nav-number">7.</span> <span class="nav-text">读后感</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#延伸阅读"><span class="nav-number">9.</span> <span class="nav-text">延伸阅读</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

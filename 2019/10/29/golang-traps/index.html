@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Go,坑,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="一般情况下，interface 可以直接进行值传递，除非你需要修改 interface 指向的数据。interface 本身很轻量，其包括指向数据类型的指针和存储数据的指针。 Value Receiver 方法可以通过值或者指针调用；Pointer Receiver 则只接受指针调用。换句话说，指针调用方法更加轻松，限制更少。 Mutex 和 RWMutex 可以直接使用其零值，零值表示 Unl">
+<meta name="keywords" content="Go,坑">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go 编写姿势">
+<meta property="og:url" content="http://ifaceless.space/2019/10/29/golang-traps/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="一般情况下，interface 可以直接进行值传递，除非你需要修改 interface 指向的数据。interface 本身很轻量，其包括指向数据类型的指针和存储数据的指针。 Value Receiver 方法可以通过值或者指针调用；Pointer Receiver 则只接受指针调用。换句话说，指针调用方法更加轻松，限制更少。 Mutex 和 RWMutex 可以直接使用其零值，零值表示 Unl">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-11-24T09:45:59.948Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Go 编写姿势">
+<meta name="twitter:description" content="一般情况下，interface 可以直接进行值传递，除非你需要修改 interface 指向的数据。interface 本身很轻量，其包括指向数据类型的指针和存储数据的指针。 Value Receiver 方法可以通过值或者指针调用；Pointer Receiver 则只接受指针调用。换句话说，指针调用方法更加轻松，限制更少。 Mutex 和 RWMutex 可以直接使用其零值，零值表示 Unl">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2019/10/29/golang-traps/">
+
+
+
+
+
+  <title>Go 编写姿势 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/10/29/golang-traps/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Go 编写姿势</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-29T21:44:19+08:00">
+                2019-10-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Go/" itemprop="url" rel="index">
+                    <span itemprop="name">Go</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  942
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  3
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <ul>
+<li>一般情况下，interface 可以直接进行值传递，除非你需要修改 interface 指向的数据。interface 本身很轻量，其包括指向数据类型的指针和存储数据的指针。</li>
+<li>Value Receiver 方法可以通过值或者指针调用；Pointer Receiver 则只接受指针调用。换句话说，指针调用方法更加轻松，限制更少。</li>
+<li>Mutex 和 RWMutex 可以直接使用其零值，零值表示 Unlock 状态。已经被使用的 Mutex 不能被拷贝。</li>
+<li><p>对于 Map &amp; Slice，需要注意其作为参数和返回值的时候，可能会受到外界操作的影响。 安全的做法是在内部做一次拷贝，内部可安全使用。</p>
+  <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">d.trips = <span class="built_in">make</span>([]Trip, <span class="built_in">len</span>(trips))</span><br><span class="line"><span class="built_in">copy</span>(d.trips, trips)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Channel 的 size 要么是 1，要么是无缓冲的（这个还是要看情况吧）</p>
+</li>
+<li>常规情况下，枚举从 1 开始计数；除非 0 是有一定意义的。如：<code>LogToStdout = 0</code></li>
+<li><p>直接导出自定义错误要小心，最好<strong>只公开错误匹配器</strong>，方便进行错误检查：</p>
+  <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> errNotFound <span class="keyword">struct</span> &#123;</span><br><span class="line">file <span class="keyword">string</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(e errNotFound)</span> <span class="title">Error</span><span class="params">()</span> <span class="title">string</span></span> &#123;</span><br><span class="line"><span class="keyword">return</span> fmt.Sprintf(<span class="string">"file %q not found"</span>, e.file)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">IsNotFoundError</span><span class="params">(err error)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">_, ok := err.(errNotFound)</span><br><span class="line"><span class="keyword">return</span> ok</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>合理使用 Error Wrapping，不用添加过多冗余信息，如：<code>failed to : error message</code>。</p>
+</li>
+<li>在生产环境中，运行的程序避免 panic，panic/recover 不是错误处理策略，而是当不可恢复的事情发生时，程序才必须 panic。</li>
+<li>使用 <a href="https://godoc.org/go.uber.org/atomic" target="_blank" rel="noopener">go.uber.org/atomic</a> 替代标准库 <code>sync/atomic</code>，避免忘记使用原子操作。</li>
+<li><code>import _</code> 应该只用于 <code>main</code> 文件中，尽可能靠近程序启动位置。</li>
+</ul>
+<h2 id="性能"><a href="#性能" class="headerlink" title="性能"></a>性能</h2><ul>
+<li>优先使用 <code>strconv</code> 而非 <code>fmt</code> 转换类型，性能更好。</li>
+<li>不要反复（如循环中）从固定字符串创建字节 slice，反之亦然。</li>
+<li>map 创建时尽量提供容量 hint，这样可以避免在添加元素期间过多次地分配。map 虽然不能保证分配 hint 个容量，添加元素时依然可以进行分配，但它可以在运行时有更少的分配。</li>
+</ul>
+<h2 id="规范"><a href="#规范" class="headerlink" title="规范"></a>规范</h2><ol>
+<li>保证一致性，便于代码的维护、减少学习成本</li>
+<li>相似的声明放在一个分组（import/var/const/type）。仅将相关的声明放到一起！</li>
+<li>包命名规则：<ol>
+<li>全部小写。无大写或下划线</li>
+<li>多数使用命名导入的情况下，无需重命名包</li>
+<li>简短 &amp; 简洁</li>
+<li>不要使用复数</li>
+</ol>
+</li>
+<li>函数分组与顺序：<ol>
+<li>函数粗略按照调用顺序排序</li>
+<li>同一个文件中，函数应该按照接收者分组</li>
+<li>导出的函数应该先出现在文件中，放在 <code>var</code>, <code>struct</code>, <code>const</code> 定义的后面</li>
+</ol>
+</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> something <span class="keyword">struct</span>&#123; ... &#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">newSomething</span><span class="params">()</span> *<span class="title">something</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> &amp;something&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *something)</span> <span class="title">Cost</span><span class="params">()</span></span> &#123;</span><br><span class="line">  <span class="keyword">return</span> calcCost(s.weights)</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(s *something)</span> <span class="title">Stop</span><span class="params">()</span></span> &#123;...&#125;</span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">calcCost</span><span class="params">(n []<span class="keyword">int</span>)</span> <span class="title">int</span></span> &#123;...&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>对于未导出的顶层常量和变量，使用 <code>_</code> 作为前缀</strong>。未导出的错误值，使用 <code>err</code> 开头。原因：顶层变量和常量具有包范围作用域，使用通用名称可能会导致在其他文件中意外使用错误值。</li>
+<li>结构体嵌入，多一行空行隔开</li>
+<li><p><code>nil</code> 是一个有效的 slice；<strong>零值切片（使用 <code>var</code> 声明的切片）可立即使用，无需调用 <code>make()</code> 创建。</strong></p>
+  <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> nums []<span class="keyword">int</span></span><br><span class="line"><span class="keyword">if</span> add1 &#123;</span><br><span class="line">nums = <span class="built_in">append</span>(nums, <span class="number">1</span>)</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> add2 &#123;</span><br><span class="line">nums = <span class="built_in">append</span>(nums, <span class="number">2</span>)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>如果要声明格式字符串，设置为 <code>const</code> 类型，有助于 <code>go vet</code> 执行字符串静态检查：</p>
+  <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> msg = <span class="string">"unexpected values %v, %v\n"</span></span><br><span class="line">fmt.Printf(msg, <span class="number">1</span>, <span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+</li>
+</ul>
+<h1 id="更多参考"><a href="#更多参考" class="headerlink" title="更多参考"></a>更多参考</h1><ul>
+<li><a href="https://github.com/xxjwxc/uber_go_guide_cn" target="_blank" rel="noopener">Uber Go Guide</a></li>
+<li><a href="https://github.com/golang/go/wiki/CodeReviewComments" target="_blank" rel="noopener">The Go common mistakes guide</a></li>
+<li><a href="https://www.kancloud.cn/kancloud/effective/72199" target="_blank" rel="noopener">Effective 中文版</a></li>
+<li><a href="https://golang.org/doc/effective_go.html#pointers_vs_values" target="_blank" rel="noopener">Pointers v.s. Values</a></li>
+<li><a href="https://dave.cheney.net/2016/04/27/dont-just-check-errors-handle-them-gracefully" target="_blank" rel="noopener">Don’t just checked errors, handle them gracefully</a></li>
+<li><a href="https://blog.golang.org/package-names" target="_blank" rel="noopener">Package Names</a></li>
+<li><a href="https://rakyll.org/style-packages/" target="_blank" rel="noopener">Go 包样式指南</a></li>
+<li><a href="https://commandcenter.blogspot.com/2014/01/self-referential-functions-and-design.html" target="_blank" rel="noopener">Self-referential functions and the design of options</a></li>
+<li><a href="https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis" target="_blank" rel="noopener">Functional options for friendly APIs</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2019/10/29/golang-traps/" title="Go 编写姿势">http://ifaceless.space/2019/10/29/golang-traps/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Go/" rel="tag"><i class="fa fa-tag"></i> Go</a>
+          
+            <a href="/tags/坑/" rel="tag"><i class="fa fa-tag"></i> 坑</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/08/24/ddia-transaction/" rel="next" title="野猪🐗书读书笔记之事务">
+                <i class="fa fa-chevron-left"></i> 野猪🐗书读书笔记之事务
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/10/31/linux-kernel-dev-notes/" rel="prev" title="Linux Kernel Development 学习与总结">
+                Linux Kernel Development 学习与总结 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me@ifaceless.me" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#性能"><span class="nav-number">1.</span> <span class="nav-text">性能</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#规范"><span class="nav-number">2.</span> <span class="nav-text">规范</span></a></li></ol><li class="nav-item nav-level-1"><a class="nav-link" href="#更多参考"><span class="nav-number"></span> <span class="nav-text">更多参考</span></a></li></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

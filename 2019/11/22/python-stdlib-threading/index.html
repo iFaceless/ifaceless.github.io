@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Python,多线程,源码学习,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言虽然说 Python 受限于 CPython 的实现，存在的 GIL 会导致我们在使用多线程的时候，没法利用多核跑多线程。但是有的时候还是会用到线程的，尤其是针对一些 I/O 密集型的任务，也可以使用它们。 在使用多线程编程时，我们随时需要注意竞态条件（race condition）和数据竞争（data race）的问题，前者会导致我们在不同的时间点运行程序得到的输出可能不同；而后者则更为可怕">
+<meta name="keywords" content="Python,多线程,源码学习">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Python 标准库源码之 threading 模块">
+<meta property="og:url" content="http://ifaceless.space/2019/11/22/python-stdlib-threading/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言虽然说 Python 受限于 CPython 的实现，存在的 GIL 会导致我们在使用多线程的时候，没法利用多核跑多线程。但是有的时候还是会用到线程的，尤其是针对一些 I/O 密集型的任务，也可以使用它们。 在使用多线程编程时，我们随时需要注意竞态条件（race condition）和数据竞争（data race）的问题，前者会导致我们在不同的时间点运行程序得到的输出可能不同；而后者则更为可怕">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pic2.zhimg.com/80/v2-ee4c29657d4deb6d0953bc8531241697_hd.png">
+<meta property="og:image" content="https://pic2.zhimg.com/80/v2-b4516542d0e21eab291382ac3f8ed364_hd.png">
+<meta property="og:image" content="https://pic3.zhimg.com/80/v2-976ddfaeddc70d04ee29843cfd125713_hd.png">
+<meta property="og:updated_time" content="2019-11-24T09:45:59.962Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Python 标准库源码之 threading 模块">
+<meta name="twitter:description" content="引言虽然说 Python 受限于 CPython 的实现，存在的 GIL 会导致我们在使用多线程的时候，没法利用多核跑多线程。但是有的时候还是会用到线程的，尤其是针对一些 I/O 密集型的任务，也可以使用它们。 在使用多线程编程时，我们随时需要注意竞态条件（race condition）和数据竞争（data race）的问题，前者会导致我们在不同的时间点运行程序得到的输出可能不同；而后者则更为可怕">
+<meta name="twitter:image" content="https://pic2.zhimg.com/80/v2-ee4c29657d4deb6d0953bc8531241697_hd.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2019/11/22/python-stdlib-threading/">
+
+
+
+
+
+  <title>Python 标准库源码之 threading 模块 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/11/22/python-stdlib-threading/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Python 标准库源码之 threading 模块</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-22T21:03:33+08:00">
+                2019-11-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3.8k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  19
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>虽然说 Python 受限于 CPython 的实现，存在的 GIL 会导致我们在使用多线程的时候，没法利用多核跑多线程。但是有的时候还是会用到线程的，尤其是针对一些 I/O 密集型的任务，也可以使用它们。</p>
+<p>在使用多线程编程时，我们随时需要注意<strong>竞态条件（race condition）</strong>和<strong>数据竞争（data race）</strong>的问题，前者会导致我们在不同的时间点运行程序得到的输出可能不同；而后者则更为可怕，容易导致共享的数据结构被错误修改，甚至导致程序崩溃或者出现莫名其妙的 Bug。这个时候自然就要用到 Python threading 模块为我们提供的若干同步原语了。</p>
+<p>那么，我们常用的 Lock、RLock、条件变量（Condition Variables）、信号量（Semaphore）等是如何实现的呢？接下来的源码学习是基于 <a href="https://github.com/python/cpython/blob/master/Lib/threading.py" target="_blank" rel="noopener">CPython master 分支的线程模块</a>。希望在学习完它们的实现后，能够加深理解，合理运用。</p>
+<h1 id="源码学习"><a href="#源码学习" class="headerlink" title="源码学习"></a>源码学习</h1><p>CPython 的 threading 模块实际上是基于 Java 的线程模型实现的，所以熟悉 Java 的话，自然也不会对该模块的实现感到陌生。该模块是基于更底层的 <code>_thread</code> 模块，抽象出更加方便使用的线程模型，核心包括 <code>threading.Thread</code> 线程类封装，便于用户继承或组合；此外还有一些同步原语的实现。<code>Python/thread_nt.h</code> 文件中是 C 语言实现的底层和线程有关的函数（如锁的创建和维护、线程的创建和管理）。</p>
+<h2 id="同步原语"><a href="#同步原语" class="headerlink" title="同步原语"></a>同步原语</h2><h3 id="Lock"><a href="#Lock" class="headerlink" title="Lock"></a>Lock</h3><p>该模块中，<code>Lock</code> 其实是使用了底层 <code>_thread.allocate_lock</code> 函数来创建锁的。代码也很简单：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Lock = _allocate_lock</span><br></pre></td></tr></table></figure>
+<p>Lock 为我们提供了 <code>acquire()</code> 和 <code>release()</code> 这两个主要的方法。当一个线程持有锁时，其它线程调用 <code>acquire()</code> 方法时会被阻塞（此时线程一般就是睡眠等待了），直到主动 <code>release()</code> 后，等待锁的线程会被唤醒。</p>
+<p>关于 Lock 有两点值得注意：</p>
+<ol>
+<li>该锁是不可重入的，也就是如果在一个函数中递归 <code>acquire()</code> 会导致死锁的问题。为了避免这种问题，一般会使用 <code>RLock</code> 来代替</li>
+<li>Lock 并非 Mutex（互斥锁），且它底层是通过信号量那样实现的，本身不会记录谁持有了该锁，也就是说 Lock 可以在不同的线程中被引用，可以在主线程获取，而在子线程释放它。具体可以在 <code>CPython/Python/thread_nt.h:PyThread_allocate_lock</code> 可以看到它的实现如下：<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment"> * Lock support. It has to be implemented as semaphores.</span></span><br><span class="line"><span class="comment"> * I [Dag] tried to implement it with mutex but I could find a way to</span></span><br><span class="line"><span class="comment"> * tell whether a thread already own the lock or not.</span></span><br><span class="line"><span class="comment"> * Lock 支持：它必须以信号量的方式来实现。我尝试使用互斥锁实现过，但是我</span></span><br><span class="line"><span class="comment"> * 发现了另外一种方式可以得知一个线程是否持有了锁。</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line">PyThread_type_lock</span><br><span class="line">PyThread_allocate_lock(<span class="keyword">void</span>)</span><br><span class="line">&#123;</span><br><span class="line">    PNRMUTEX aLock;</span><br><span class="line">    dprintf((<span class="string">"PyThread_allocate_lock called\n"</span>));</span><br><span class="line">    <span class="keyword">if</span> (!initialized)</span><br><span class="line">        PyThread_init_thread();</span><br><span class="line">    aLock = AllocNonRecursiveMutex() ;</span><br><span class="line">    dprintf((<span class="string">"%lu: PyThread_allocate_lock() -&gt; %p\n"</span>, PyThread_get_thread_ident(), aLock));</span><br><span class="line">    <span class="keyword">return</span> (PyThread_type_lock) aLock;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 其中 PNRMUTEX 定义如下，它并不会告诉我们当前是哪个线程</span></span><br><span class="line"><span class="comment">// 持有了锁</span></span><br><span class="line"><span class="keyword">typedef</span> <span class="class"><span class="keyword">struct</span> _<span class="title">NRMUTEX</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    PyMUTEX_T cs;</span><br><span class="line">    PyCOND_T cv;</span><br><span class="line">    <span class="keyword">int</span> locked;</span><br><span class="line">&#125; NRMUTEX;</span><br><span class="line"><span class="keyword">typedef</span> NRMUTEX *PNRMUTEX;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>比较有趣的是，其实 <code>PyCOND</code> 即条件变量是通过信号量来实现的；而接下来我们会看到，在 Python 的 threading 模块中，我们使用了 Condition 实现了信号量。</p>
+<p><img src="https://pic2.zhimg.com/80/v2-ee4c29657d4deb6d0953bc8531241697_hd.png" alt=""></p>
+<h3 id="RLock"><a href="#RLock" class="headerlink" title="RLock"></a>RLock</h3><p>RLock 就是可重入锁（Reentrant Lock），它可以被持有锁的线程多次执行 <code>acquire()</code>，而不会发生阻塞和死锁的问题。它的实现思路很简单：</p>
+<ol>
+<li>规定如果一个线程成功持有了该锁，则将该锁的所有权交给该线程，并且只有该线程可以释放锁，其它线程无法释放；</li>
+<li>当在持有锁的线程中递归获取锁的时候，实际并不会执行底层的 <code>_lock.acquire()</code> 方法，而是只给计数器递增；且释放锁的时候也是先给计数器递减，直到为 0 后才会释放锁。</li>
+</ol>
+<p>所以在使用 RLock 的时候一定要记得 <code>acquire()</code> 和 <code>release()</code> 的调用次数得匹配才能真正释放锁。接下来简单看下源码实现：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">RLock</span><span class="params">(*args, **kwargs)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> _CRLock <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">        <span class="comment"># 接下来重点看 Python 版本的 RLock 实现</span></span><br><span class="line">        <span class="keyword">return</span> _PyRLock(*args, **kwargs)</span><br><span class="line">    <span class="keyword">return</span> _CRLock(*args, **kwargs)</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">_RLock</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># 这里是真正的锁</span></span><br><span class="line">        self._block = _allocate_lock()</span><br><span class="line">        <span class="comment"># 记录谁对该锁有所有权</span></span><br><span class="line">        self._owner = <span class="keyword">None</span></span><br><span class="line">        <span class="comment"># 记录该锁被获取的次数，类似引用计数</span></span><br><span class="line">        self._count = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">acquire</span><span class="params">(self, blocking=True, timeout=<span class="number">-1</span>)</span>:</span></span><br><span class="line">        me = get_ident()</span><br><span class="line">        <span class="keyword">if</span> self._owner == me:</span><br><span class="line">            <span class="comment"># 如果当前持有锁的线程就是当前需要获得锁的线程，计数器递增即可</span></span><br><span class="line">            self._count += <span class="number">1</span></span><br><span class="line">            <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">        rc = self._block.acquire(blocking, timeout)</span><br><span class="line">        <span class="keyword">if</span> rc:</span><br><span class="line">            <span class="comment"># 如果成功获取到锁后，会把持有锁的线程记录下来，标记该线程是所有权拥有者</span></span><br><span class="line">            self._owner = me</span><br><span class="line">            self._count = <span class="number">1</span></span><br><span class="line">        <span class="keyword">return</span> rc</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">release</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self._owner != get_ident():</span><br><span class="line">            <span class="comment"># 显而易见，非拥有者不能释放锁，想都不用想！</span></span><br><span class="line">            <span class="keyword">raise</span> RuntimeError(<span class="string">"cannot release un-acquired lock"</span>)</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 这里只是递减计数器，只有_count 减没了才会真正释放</span></span><br><span class="line">        self._count = count = self._count - <span class="number">1</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> count:</span><br><span class="line">            self._owner = <span class="keyword">None</span></span><br><span class="line">            self._block.release()</span><br><span class="line"></span><br><span class="line">    <span class="comment"># 下面的方法是用于条件变量实现时使用</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_acquire_restore</span><span class="params">(self, state)</span>:</span></span><br><span class="line">        <span class="comment"># 恢复锁的获取，并且恢复嵌套层次</span></span><br><span class="line">        self._block.acquire()</span><br><span class="line">        self._count, self._owner = state</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_release_save</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># 需要保证不管有多少层嵌套，都能真正释放锁，但同时返回当前的嵌套状态等信息便于恢复</span></span><br><span class="line">        <span class="keyword">if</span> self._count == <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">raise</span> RuntimeError(<span class="string">"cannot release un-acquired lock"</span>)</span><br><span class="line">        count = self._count</span><br><span class="line">        self._count = <span class="number">0</span></span><br><span class="line">        owner = self._owner</span><br><span class="line">        self._owner = <span class="keyword">None</span></span><br><span class="line">        self._block.release()</span><br><span class="line">        <span class="keyword">return</span> (count, owner)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_is_owned</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> self._owner == get_ident()</span><br></pre></td></tr></table></figure></p>
+<h3 id="Condition"><a href="#Condition" class="headerlink" title="Condition"></a>Condition</h3><p>条件变量是后面几个同步原语实现的基础，值得重点学习下。条件变量的实现原理比较简单：所有等待的线程会被加入到等待队列中，只有在需要的时候会被唤醒（可以想想如何实现 waiter 线程的等待和唤醒呢？）。</p>
+<p><img src="https://pic2.zhimg.com/80/v2-b4516542d0e21eab291382ac3f8ed364_hd.png" alt=""></p>
+<p>在分析源码前，我们可以看看 <code>Condition</code> 类提供了哪些主要接口：</p>
+<ul>
+<li><code>wait(timeout=None)</code>，线程可以调用该接口等待被唤醒</li>
+<li><code>notify()</code>，线程可以调用该接口通知队列中一个或多个等待线程被唤醒</li>
+</ul>
+<p>接下来看看源码实现：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Condition</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, lock=None)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> lock <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">            lock = RLock()</span><br><span class="line">        self._lock = lock</span><br><span class="line">        <span class="comment"># Export the lock's acquire() and release() methods</span></span><br><span class="line">        self.acquire = lock.acquire</span><br><span class="line">        self.release = lock.release</span><br><span class="line">        <span class="comment"># If the lock defines _release_save() and/or _acquire_restore(),</span></span><br><span class="line">        <span class="comment"># these override the default implementations (which just call</span></span><br><span class="line">        <span class="comment"># release() and acquire() on the lock). Ditto for _is_owned().</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self._release_save = lock._release_save</span><br><span class="line">        <span class="keyword">except</span> AttributeError:</span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self._acquire_restore = lock._acquire_restore</span><br><span class="line">        <span class="keyword">except</span> AttributeError:</span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self._is_owned = lock._is_owned</span><br><span class="line">        <span class="keyword">except</span> AttributeError:</span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line">        self._waiters = _deque()</span><br><span class="line">     </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_release_save</span><span class="params">(self)</span>:</span></span><br><span class="line">        self._lock.release() <span class="comment"># No state to save</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_acquire_restore</span><span class="params">(self, x)</span>:</span></span><br><span class="line">        self._lock.acquire() <span class="comment"># Ignore saved state</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_is_owned</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># Return True if lock is owned by current_thread.</span></span><br><span class="line">        <span class="comment"># This method is called only if _lock doesn't have _is_owned().</span></span><br><span class="line">        <span class="keyword">if</span> self._lock.acquire(<span class="keyword">False</span>):</span><br><span class="line">            self._lock.release()</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">False</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">True</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wait</span><span class="params">(self, timeout=None)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self._is_owned():</span><br><span class="line">            <span class="keyword">raise</span> RuntimeError(<span class="string">"cannot wait on un-acquired lock"</span>)</span><br><span class="line">        waiter = _allocate_lock()</span><br><span class="line">        waiter.acquire()</span><br><span class="line">        self._waiters.append(waiter)</span><br><span class="line">        saved_state = self._release_save()</span><br><span class="line">        gotit = <span class="keyword">False</span></span><br><span class="line">        <span class="keyword">try</span>: <span class="comment"># restore state no matter what (e.g., KeyboardInterrupt)</span></span><br><span class="line">            <span class="keyword">if</span> timeout <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">                waiter.acquire()</span><br><span class="line">                gotit = <span class="keyword">True</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">if</span> timeout &gt; <span class="number">0</span>:</span><br><span class="line">                    gotit = waiter.acquire(<span class="keyword">True</span>, timeout)</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    gotit = waiter.acquire(<span class="keyword">False</span>)</span><br><span class="line">            <span class="keyword">return</span> gotit</span><br><span class="line">        <span class="keyword">finally</span>:</span><br><span class="line">            self._acquire_restore(saved_state)</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> gotit:</span><br><span class="line">                <span class="keyword">try</span>:</span><br><span class="line">                    self._waiters.remove(waiter)</span><br><span class="line">                <span class="keyword">except</span> ValueError:</span><br><span class="line">                    <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wait_for</span><span class="params">(self, predicate, timeout=None)</span>:</span></span><br><span class="line">        endtime = <span class="keyword">None</span></span><br><span class="line">        waittime = timeout</span><br><span class="line">        result = predicate()</span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">not</span> result:</span><br><span class="line">            <span class="keyword">if</span> waittime <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</span><br><span class="line">                <span class="keyword">if</span> endtime <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">                    endtime = _time() + waittime</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    waittime = endtime - _time()</span><br><span class="line">                    <span class="keyword">if</span> waittime &lt;= <span class="number">0</span>:</span><br><span class="line">                        <span class="keyword">break</span></span><br><span class="line">            self.wait(waittime)</span><br><span class="line">            result = predicate()</span><br><span class="line">        <span class="keyword">return</span> result</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">notify</span><span class="params">(self, n=<span class="number">1</span>)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self._is_owned():</span><br><span class="line">            <span class="keyword">raise</span> RuntimeError(<span class="string">"cannot notify on un-acquired lock"</span>)</span><br><span class="line">        all_waiters = self._waiters</span><br><span class="line">        waiters_to_notify = _deque(_islice(all_waiters, n))</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> waiters_to_notify:</span><br><span class="line">            <span class="keyword">return</span></span><br><span class="line">        <span class="keyword">for</span> waiter <span class="keyword">in</span> waiters_to_notify:</span><br><span class="line">            waiter.release()</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                all_waiters.remove(waiter)</span><br><span class="line">            <span class="keyword">except</span> ValueError:</span><br><span class="line">                <span class="keyword">pass</span></span><br></pre></td></tr></table></figure></p>
+<h3 id="Semaphore"><a href="#Semaphore" class="headerlink" title="Semaphore"></a>Semaphore</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Semaphore</span>:</span></span><br><span class="line">    <span class="string">"""This class implements semaphore objects.</span></span><br><span class="line"><span class="string">    Semaphores manage a counter representing the number of release() calls minus</span></span><br><span class="line"><span class="string">    the number of acquire() calls, plus an initial value. The acquire() method</span></span><br><span class="line"><span class="string">    blocks if necessary until it can return without making the counter</span></span><br><span class="line"><span class="string">    negative. If not given, value defaults to 1.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="comment"># After Tim Peters' semaphore class, but not quite the same (no maximum)</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, value=<span class="number">1</span>)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> value &lt; <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">"semaphore initial value must be &gt;= 0"</span>)</span><br><span class="line">        self._cond = Condition(Lock())</span><br><span class="line">        self._value = value</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">acquire</span><span class="params">(self, blocking=True, timeout=None)</span>:</span></span><br><span class="line">        <span class="string">"""Acquire a semaphore, decrementing the internal counter by one.</span></span><br><span class="line"><span class="string">        When invoked without arguments: if the internal counter is larger than</span></span><br><span class="line"><span class="string">        zero on entry, decrement it by one and return immediately. If it is zero</span></span><br><span class="line"><span class="string">        on entry, block, waiting until some other thread has called release() to</span></span><br><span class="line"><span class="string">        make it larger than zero. This is done with proper interlocking so that</span></span><br><span class="line"><span class="string">        if multiple acquire() calls are blocked, release() will wake exactly one</span></span><br><span class="line"><span class="string">        of them up. The implementation may pick one at random, so the order in</span></span><br><span class="line"><span class="string">        which blocked threads are awakened should not be relied on. There is no</span></span><br><span class="line"><span class="string">        return value in this case.</span></span><br><span class="line"><span class="string">        When invoked with blocking set to true, do the same thing as when called</span></span><br><span class="line"><span class="string">        without arguments, and return true.</span></span><br><span class="line"><span class="string">        When invoked with blocking set to false, do not block. If a call without</span></span><br><span class="line"><span class="string">        an argument would block, return false immediately; otherwise, do the</span></span><br><span class="line"><span class="string">        same thing as when called without arguments, and return true.</span></span><br><span class="line"><span class="string">        When invoked with a timeout other than None, it will block for at</span></span><br><span class="line"><span class="string">        most timeout seconds. If acquire does not complete successfully in</span></span><br><span class="line"><span class="string">        that interval, return false. Return true otherwise.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> blocking <span class="keyword">and</span> timeout <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">"can't specify timeout for non-blocking acquire"</span>)</span><br><span class="line">        rc = <span class="keyword">False</span></span><br><span class="line">        endtime = <span class="keyword">None</span></span><br><span class="line">        <span class="keyword">with</span> self._cond:</span><br><span class="line">            <span class="keyword">while</span> self._value == <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">if</span> <span class="keyword">not</span> blocking:</span><br><span class="line">                    <span class="keyword">break</span></span><br><span class="line">                <span class="keyword">if</span> timeout <span class="keyword">is</span> <span class="keyword">not</span> <span class="keyword">None</span>:</span><br><span class="line">                    <span class="keyword">if</span> endtime <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">                        endtime = _time() + timeout</span><br><span class="line">                    <span class="keyword">else</span>:</span><br><span class="line">                        timeout = endtime - _time()</span><br><span class="line">                        <span class="keyword">if</span> timeout &lt;= <span class="number">0</span>:</span><br><span class="line">                            <span class="keyword">break</span></span><br><span class="line">                self._cond.wait(timeout)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                self._value -= <span class="number">1</span></span><br><span class="line">                rc = <span class="keyword">True</span></span><br><span class="line">        <span class="keyword">return</span> rc</span><br><span class="line">    </span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">release</span><span class="params">(self, n=<span class="number">1</span>)</span>:</span></span><br><span class="line">        <span class="string">"""Release a semaphore, incrementing the internal counter by one or more.</span></span><br><span class="line"><span class="string">        When the counter is zero on entry and another thread is waiting for it</span></span><br><span class="line"><span class="string">        to become larger than zero again, wake up that thread.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">if</span> n &lt; <span class="number">1</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">'n must be one or more'</span>)</span><br><span class="line">        <span class="keyword">with</span> self._cond:</span><br><span class="line">            self._value += n</span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> range(n):</span><br><span class="line">                self._cond.notify()</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">BoundedSemaphore</span><span class="params">(Semaphore)</span>:</span></span><br><span class="line">    <span class="string">"""Implements a bounded semaphore.</span></span><br><span class="line"><span class="string">    A bounded semaphore checks to make sure its current value doesn't exceed its</span></span><br><span class="line"><span class="string">    initial value. If it does, ValueError is raised. In most situations</span></span><br><span class="line"><span class="string">    semaphores are used to guard resources with limited capacity.</span></span><br><span class="line"><span class="string">    If the semaphore is released too many times it's a sign of a bug. If not</span></span><br><span class="line"><span class="string">    given, value defaults to 1.</span></span><br><span class="line"><span class="string">    Like regular semaphores, bounded semaphores manage a counter representing</span></span><br><span class="line"><span class="string">    the number of release() calls minus the number of acquire() calls, plus an</span></span><br><span class="line"><span class="string">    initial value. The acquire() method blocks if necessary until it can return</span></span><br><span class="line"><span class="string">    without making the counter negative. If not given, value defaults to 1.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, value=<span class="number">1</span>)</span>:</span></span><br><span class="line">        Semaphore.__init__(self, value)</span><br><span class="line">        self._initial_value = value</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">release</span><span class="params">(self, n=<span class="number">1</span>)</span>:</span></span><br><span class="line">        <span class="string">"""Release a semaphore, incrementing the internal counter by one or more.</span></span><br><span class="line"><span class="string">        When the counter is zero on entry and another thread is waiting for it</span></span><br><span class="line"><span class="string">        to become larger than zero again, wake up that thread.</span></span><br><span class="line"><span class="string">        If the number of releases exceeds the number of acquires,</span></span><br><span class="line"><span class="string">        raise a ValueError.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">if</span> n &lt; <span class="number">1</span>:</span><br><span class="line">            <span class="keyword">raise</span> ValueError(<span class="string">'n must be one or more'</span>)</span><br><span class="line">        <span class="keyword">with</span> self._cond:</span><br><span class="line">            <span class="keyword">if</span> self._value + n &gt; self._initial_value:</span><br><span class="line">                <span class="keyword">raise</span> ValueError(<span class="string">"Semaphore released too many times"</span>)</span><br><span class="line">            self._value += n</span><br><span class="line">            <span class="keyword">for</span> i <span class="keyword">in</span> range(n):</span><br><span class="line">                self._cond.notify()</span><br></pre></td></tr></table></figure>
+<h3 id="Event"><a href="#Event" class="headerlink" title="Event"></a>Event</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Event</span>:</span></span><br><span class="line">    <span class="string">"""Class implementing event objects.</span></span><br><span class="line"><span class="string">    Events manage a flag that can be set to true with the set() method and reset</span></span><br><span class="line"><span class="string">    to false with the clear() method. The wait() method blocks until the flag is</span></span><br><span class="line"><span class="string">    true. The flag is initially false.</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="comment"># After Tim Peters' event class (without is_posted())</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self)</span>:</span></span><br><span class="line">        self._cond = Condition(Lock())</span><br><span class="line">        self._flag = <span class="keyword">False</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_reset_internal_locks</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># private! called by Thread._reset_internal_locks by _after_fork()</span></span><br><span class="line">        self._cond.__init__(Lock())</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">is_set</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""Return true if and only if the internal flag is true."""</span></span><br><span class="line">        <span class="keyword">return</span> self._flag</span><br><span class="line"></span><br><span class="line">    isSet = is_set</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">set</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""Set the internal flag to true.</span></span><br><span class="line"><span class="string">        All threads waiting for it to become true are awakened. Threads</span></span><br><span class="line"><span class="string">        that call wait() once the flag is true will not block at all.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">with</span> self._cond:</span><br><span class="line">            self._flag = <span class="keyword">True</span></span><br><span class="line">            self._cond.notify_all()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">clear</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""Reset the internal flag to false.</span></span><br><span class="line"><span class="string">        Subsequently, threads calling wait() will block until set() is called to</span></span><br><span class="line"><span class="string">        set the internal flag to true again.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">with</span> self._cond:</span><br><span class="line">            self._flag = <span class="keyword">False</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wait</span><span class="params">(self, timeout=None)</span>:</span></span><br><span class="line">        <span class="string">"""Block until the internal flag is true.</span></span><br><span class="line"><span class="string">        If the internal flag is true on entry, return immediately. Otherwise,</span></span><br><span class="line"><span class="string">        block until another thread calls set() to set the flag to true, or until</span></span><br><span class="line"><span class="string">        the optional timeout occurs.</span></span><br><span class="line"><span class="string">        When the timeout argument is present and not None, it should be a</span></span><br><span class="line"><span class="string">        floating point number specifying a timeout for the operation in seconds</span></span><br><span class="line"><span class="string">        (or fractions thereof).</span></span><br><span class="line"><span class="string">        This method returns the internal flag on exit, so it will always return</span></span><br><span class="line"><span class="string">        True except if a timeout is given and the operation times out.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">with</span> self._cond:</span><br><span class="line">            signaled = self._flag</span><br><span class="line">            <span class="keyword">if</span> <span class="keyword">not</span> signaled:</span><br><span class="line">                signaled = self._cond.wait(timeout)</span><br><span class="line">            <span class="keyword">return</span> signaled</span><br></pre></td></tr></table></figure>
+<h3 id="Barrier"><a href="#Barrier" class="headerlink" title="Barrier"></a>Barrier</h3><p>通常可以使用 Barrier 实现并发初始化，然后一切就绪后才会进入下一个阶段。应用示例如下：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding: utf-8</span></span><br><span class="line"><span class="keyword">from</span> threading <span class="keyword">import</span> get_ident <span class="keyword">as</span> get_ident</span><br><span class="line"><span class="keyword">from</span> threading <span class="keyword">import</span> Barrier, Thread</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">signal_prepared</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">"All are ready"</span>)</span><br><span class="line"></span><br><span class="line">barrier = Barrier(parties=<span class="number">4</span>, action=signal_prepared)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">()</span>:</span></span><br><span class="line">    Thread(target=load_disk_files).start()</span><br><span class="line">    Thread(target=make_cache).start()</span><br><span class="line">    Thread(target=init_db_pool).start()</span><br><span class="line">    print(<span class="string">"I'm ready, wait for other workers"</span>)</span><br><span class="line">    barrier.wait()</span><br><span class="line">    print(<span class="string">"Time to start our server"</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">load_disk_files</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">u"[&#123;&#125;] load_disk_files"</span>.format(get_ident()))</span><br><span class="line">    barrier.wait()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">make_cache</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">u"[&#123;&#125;] make cache"</span>.format(get_ident()))</span><br><span class="line">    barrier.wait()</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">init_db_pool</span><span class="params">()</span>:</span></span><br><span class="line">    print(<span class="string">u"[&#123;&#125;] init db pool"</span>.format(get_ident()))</span><br><span class="line">    barrier.wait()</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    main()</span><br></pre></td></tr></table></figure></p>
+<p>运行效果：<br><img src="https://pic3.zhimg.com/80/v2-976ddfaeddc70d04ee29843cfd125713_hd.png" alt=""></p>
+<p>接下来看看 Barrier 是如何实现的：<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Barrier 是基于部分的 `pthread_barrier_*` API 和 Java 中的 `CyclicBarrier`</span></span><br><span class="line"><span class="comment"># 参考：</span></span><br><span class="line"><span class="comment"># 1. http://sourceware.org/pthreads-win32/manual/pthread_barrier_init.html and</span></span><br><span class="line"><span class="comment"># 2. http://java.sun.com/j2se/1.5.0/docs/api/java/util/concurrent/CyclicBarrier.html</span></span><br><span class="line"><span class="comment"># 在内部维护了两种主要的状态：`filling` 和 `draining`，从而让屏障变成可循环使用的。</span></span><br><span class="line"><span class="comment"># 只有上一个周期完全排水（`drained`）完毕才可以允许新的线程进入（对比下漏桶限流算法）</span></span><br><span class="line"><span class="comment"># 此外，这里还提供了 `resetting` 状态，它类似于 `draining`，但是会让线程离开的时候抛出 `BrokeBarrierError`</span></span><br><span class="line"><span class="comment"># `broken` 状态表示所有的线程都产生了异常</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Barrier</span>:</span></span><br><span class="line">    <span class="string">"""I</span></span><br><span class="line"><span class="string">    我们通常可以使用屏障让多个线程在相同的同步点同步开始（可以想象下有个水缸，水不断地流进来</span></span><br><span class="line"><span class="string">    但是会在某个点一起放开，形成洪流...）。所有调用了 `wait()` 的线程会在条件满足时几乎同时被唤醒，</span></span><br><span class="line"><span class="string">    然后大家就可以一起快乐地干活了。</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, parties, action=None, timeout=None)</span>:</span></span><br><span class="line">        <span class="string">"""Create a barrier, initialised to 'parties' threads.</span></span><br><span class="line"><span class="string">        'action' is a callable which, when supplied, will be called by one of</span></span><br><span class="line"><span class="string">        the threads after they have all entered the barrier and just prior to</span></span><br><span class="line"><span class="string">        releasing them all. If a 'timeout' is provided, it is used as the</span></span><br><span class="line"><span class="string">        default for all subsequent 'wait()' calls.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self._cond = Condition(Lock())</span><br><span class="line">        self._action = action</span><br><span class="line">        self._timeout = timeout</span><br><span class="line">        self._parties = parties</span><br><span class="line">        self._state = <span class="number">0</span> <span class="comment">#0 filling, 1, draining, -1 resetting, -2 broken</span></span><br><span class="line">        self._count = <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">wait</span><span class="params">(self, timeout=None)</span>:</span></span><br><span class="line">        <span class="string">"""Wait for the barrier.</span></span><br><span class="line"><span class="string">        When the specified number of threads have started waiting, they are all</span></span><br><span class="line"><span class="string">        simultaneously awoken. If an 'action' was provided for the barrier, one</span></span><br><span class="line"><span class="string">        of the threads will have executed that callback prior to returning.</span></span><br><span class="line"><span class="string">        Returns an individual index number from 0 to 'parties-1'.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">if</span> timeout <span class="keyword">is</span> <span class="keyword">None</span>:</span><br><span class="line">            timeout = self._timeout</span><br><span class="line">        <span class="keyword">with</span> self._cond:</span><br><span class="line">            self._enter() <span class="comment"># Block while the barrier drains.</span></span><br><span class="line">            index = self._count</span><br><span class="line">            self._count += <span class="number">1</span></span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                <span class="keyword">if</span> index + <span class="number">1</span> == self._parties:</span><br><span class="line">                    <span class="comment"># We release the barrier</span></span><br><span class="line">                    self._release()</span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="comment"># We wait until someone releases us</span></span><br><span class="line">                    self._wait(timeout)</span><br><span class="line">                <span class="keyword">return</span> index</span><br><span class="line">            <span class="keyword">finally</span>:</span><br><span class="line">                self._count -= <span class="number">1</span></span><br><span class="line">                <span class="comment"># Wake up any threads waiting for barrier to drain.</span></span><br><span class="line">                self._exit()</span><br><span class="line">    <span class="comment"># Block until the barrier is ready for us, or raise an exception</span></span><br><span class="line">    <span class="comment"># if it is broken.</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_enter</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">while</span> self._state <span class="keyword">in</span> (<span class="number">-1</span>, <span class="number">1</span>):</span><br><span class="line">            <span class="comment"># It is draining or resetting, wait until done</span></span><br><span class="line">            self._cond.wait()</span><br><span class="line">        <span class="comment">#see if the barrier is in a broken state</span></span><br><span class="line">        <span class="keyword">if</span> self._state &lt; <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">raise</span> BrokenBarrierError</span><br><span class="line">        <span class="keyword">assert</span> self._state == <span class="number">0</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># Optionally run the 'action' and release the threads waiting</span></span><br><span class="line">    <span class="comment"># in the barrier.</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_release</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            <span class="keyword">if</span> self._action:</span><br><span class="line">                self._action()</span><br><span class="line">            <span class="comment"># enter draining state</span></span><br><span class="line">            self._state = <span class="number">1</span></span><br><span class="line">            self._cond.notify_all()</span><br><span class="line">        <span class="keyword">except</span>:</span><br><span class="line">            <span class="comment">#an exception during the _action handler. Break and reraise</span></span><br><span class="line">            self._break()</span><br><span class="line">            <span class="keyword">raise</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># Wait in the barrier until we are released. Raise an exception</span></span><br><span class="line">    <span class="comment"># if the barrier is reset or broken.</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_wait</span><span class="params">(self, timeout)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> self._cond.wait_for(<span class="keyword">lambda</span> : self._state != <span class="number">0</span>, timeout):</span><br><span class="line">            <span class="comment">#timed out. Break the barrier</span></span><br><span class="line">            self._break()</span><br><span class="line">            <span class="keyword">raise</span> BrokenBarrierError</span><br><span class="line">        <span class="keyword">if</span> self._state &lt; <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">raise</span> BrokenBarrierError</span><br><span class="line">        <span class="keyword">assert</span> self._state == <span class="number">1</span></span><br><span class="line"></span><br><span class="line">    <span class="comment"># If we are the last thread to exit the barrier, signal any threads</span></span><br><span class="line">    <span class="comment"># waiting for the barrier to drain.</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_exit</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">if</span> self._count == <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">if</span> self._state <span class="keyword">in</span> (<span class="number">-1</span>, <span class="number">1</span>):</span><br><span class="line">                <span class="comment">#resetting or draining</span></span><br><span class="line">                self._state = <span class="number">0</span></span><br><span class="line">                self._cond.notify_all()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">reset</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""Reset the barrier to the initial state.</span></span><br><span class="line"><span class="string">        Any threads currently waiting will get the BrokenBarrier exception</span></span><br><span class="line"><span class="string">        raised.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">with</span> self._cond:</span><br><span class="line">            <span class="keyword">if</span> self._count &gt; <span class="number">0</span>:</span><br><span class="line">                <span class="keyword">if</span> self._state == <span class="number">0</span>:</span><br><span class="line">                    <span class="comment">#reset the barrier, waking up threads</span></span><br><span class="line">                    self._state = <span class="number">-1</span></span><br><span class="line">                <span class="keyword">elif</span> self._state == <span class="number">-2</span>:</span><br><span class="line">                    <span class="comment">#was broken, set it to reset state</span></span><br><span class="line">                    <span class="comment">#which clears when the last thread exits</span></span><br><span class="line">                    self._state = <span class="number">-1</span></span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                self._state = <span class="number">0</span></span><br><span class="line">            self._cond.notify_all()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">abort</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""Place the barrier into a 'broken' state.</span></span><br><span class="line"><span class="string">        Useful in case of error. Any currently waiting threads and threads</span></span><br><span class="line"><span class="string">        attempting to 'wait()' will have BrokenBarrierError raised.</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="keyword">with</span> self._cond:</span><br><span class="line">            self._break()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_break</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="comment"># An internal error was detected. The barrier is set to</span></span><br><span class="line">        <span class="comment"># a broken state all parties awakened.</span></span><br><span class="line">        self._state = <span class="number">-2</span></span><br><span class="line">        self._cond.notify_all()</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">parties</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""Return the number of threads required to trip the barrier."""</span></span><br><span class="line">        <span class="keyword">return</span> self._parties</span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">n_waiting</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""Return the number of threads currently waiting at the barrier."""</span></span><br><span class="line">        <span class="comment"># We don't need synchronization here since this is an ephemeral result</span></span><br><span class="line">        <span class="comment"># anyway. It returns the correct value in the steady state.</span></span><br><span class="line">        <span class="keyword">if</span> self._state == <span class="number">0</span>:</span><br><span class="line">            <span class="keyword">return</span> self._count</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line"></span><br><span class="line"><span class="meta">    @property</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">broken</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="string">"""Return True if the barrier is in a broken state."""</span></span><br><span class="line">        <span class="keyword">return</span> self._state == <span class="number">-2</span></span><br></pre></td></tr></table></figure></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>Python 源码的注释太丰富了，以至于我都不想翻译成中文。所以结合注释看代码即可~</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2019/11/22/python-stdlib-threading/" title="Python 标准库源码之 threading 模块">http://ifaceless.space/2019/11/22/python-stdlib-threading/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Python/" rel="tag"><i class="fa fa-tag"></i> Python</a>
+          
+            <a href="/tags/多线程/" rel="tag"><i class="fa fa-tag"></i> 多线程</a>
+          
+            <a href="/tags/源码学习/" rel="tag"><i class="fa fa-tag"></i> 源码学习</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/11/20/rate-limit-policies/" rel="next" title="限流算法学习：漏桶 & 令牌桶算法">
+                <i class="fa fa-chevron-left"></i> 限流算法学习：漏桶 & 令牌桶算法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/11/22/portal/" rel="prev" title="Go 语言中如何以优雅的姿势实现对象序列化？">
+                Go 语言中如何以优雅的姿势实现对象序列化？ <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me@ifaceless.me" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#源码学习"><span class="nav-number">2.</span> <span class="nav-text">源码学习</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#同步原语"><span class="nav-number">2.1.</span> <span class="nav-text">同步原语</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Lock"><span class="nav-number">2.1.1.</span> <span class="nav-text">Lock</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RLock"><span class="nav-number">2.1.2.</span> <span class="nav-text">RLock</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Condition"><span class="nav-number">2.1.3.</span> <span class="nav-text">Condition</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Semaphore"><span class="nav-number">2.1.4.</span> <span class="nav-text">Semaphore</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Event"><span class="nav-number">2.1.5.</span> <span class="nav-text">Event</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Barrier"><span class="nav-number">2.1.6.</span> <span class="nav-text">Barrier</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

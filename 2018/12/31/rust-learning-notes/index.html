@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Rust,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言谢天谢地，总算赶在 2018 年结束前完成了 Rust 之旅（当然还是入门级别）。之所以想要入坑这门语言，也是想要在研究 TiKV 时候不要被语言卡主。另外，学习新的语言也是为了开阔视野，学习新的思路~">
+<meta name="keywords" content="Rust">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Rust 入坑记">
+<meta property="og:url" content="http://ifaceless.space/2018/12/31/rust-learning-notes/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言谢天谢地，总算赶在 2018 年结束前完成了 Rust 之旅（当然还是入门级别）。之所以想要入坑这门语言，也是想要在研究 TiKV 时候不要被语言卡主。另外，学习新的语言也是为了开阔视野，学习新的思路~">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2019-06-24T00:49:40.532Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Rust 入坑记">
+<meta name="twitter:description" content="引言谢天谢地，总算赶在 2018 年结束前完成了 Rust 之旅（当然还是入门级别）。之所以想要入坑这门语言，也是想要在研究 TiKV 时候不要被语言卡主。另外，学习新的语言也是为了开阔视野，学习新的思路~">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2018/12/31/rust-learning-notes/">
+
+
+
+
+
+  <title>Rust 入坑记 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2018/12/31/rust-learning-notes/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Rust 入坑记</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-31T18:00:00+08:00">
+                2018-12-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/学习笔记/" itemprop="url" rel="index">
+                    <span itemprop="name">学习笔记</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  11.7k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  42
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>谢天谢地，总算赶在 2018 年结束前完成了 Rust 之旅（当然还是入门级别）。之所以想要入坑这门语言，也是想要在研究 TiKV 时候不要被语言卡主。另外，学习新的语言也是为了开阔视野，学习新的思路~<br><a id="more"></a><br>正如很多前辈所言，Rust 的门槛其实挺高的，所以<strong>绝对不适合新手作为入门语言</strong>！幸运的是，早些年就接触并学习了 C, Java, C#, Python, Go 等语言，所以对于其中某些类似的概念理解起来就比较轻松（如 <code>trait</code>, <code>struct</code> 和一些面向对象的模式等）。但是，这门语言还是有很多比较新的概念非常与众不同：</p>
+<ul>
+<li><strong>所有权和生命周期、生命周期注解</strong></li>
+<li><strong>Trait</strong> 和 <strong>Trait Objects</strong></li>
+<li><strong>声明宏</strong>和<strong>过程宏</strong></li>
+<li><strong>智能指针</strong>（我没了解过 C++ 的智能指针，不好对比）</li>
+<li>非常强大的<strong>模式匹配</strong>（花样非常多）</li>
+<li>非常<strong>可爱的错误处理方式</strong>（对比下 Go 呆板处理方式就知道了）</li>
+</ul>
+<p>关于语法方面，倒是觉得可以「忍受」，毕竟习惯了也就可以了。但是由于概念很多，包括使用的符号太多（<strong>键盘上你能看到的符号基本都用上了</strong>），还是需要强大的理解力和记忆力才可以把持住吧，至少像我这样的老人家表示看完一遍根本不行，不管怎么样，先入坑~</p>
+<p>入坑时学习的是官方推荐的 <a href="https://doc.rust-lang.org/book" target="_blank" rel="noopener">Rust Book</a>，对应的中文翻译版本可以参考 <a href="https://kaisery.github.io/trpl-zh-cn" target="_blank" rel="noopener">Rust 程序设计语言</a>。但是需要注意的是，中文译本有些翻译不太通顺的地方，所以可以对照着去看英文版~</p>
+<p>前段时间 <code>Rust 1.31.0</code> 发布了，所以也跟着升级了下。由于书中的例子应该是以 <code>Rust 2015</code> 版本为主的，所以有极少部分示例不能在 <code>Rust 2018</code> 中使用，可以参照提示，使用 <code>cargo fix</code> 一下即可完成迁移~</p>
+<p>学习过程中敲了些代码，参见 <a href="https://github.com/iFaceless/learning-rust" target="_blank" rel="noopener">Learning Rust</a> 仓库，有兴趣也可以去看，代码中添加很多注释，应该可以帮助理解~</p>
+<p>下面把学习期间做的笔记做个汇总，方便老人家回顾~</p>
+<h1 id="变量"><a href="#变量" class="headerlink" title="变量"></a>变量</h1><ol>
+<li><p>Rust 中变量分为两种：</p>
+<ol>
+<li>不可变的变量（只读）</li>
+<li>可变的变量（mut 声明）</li>
+</ol>
+</li>
+<li><p>声明的同名变量具有 <code>shadowing</code> 效果</p>
+</li>
+<li>可以定义常量，使用关键词 <code>const</code> 定义</li>
+<li>变量与常量的区别：<ol>
+<li>变量的赋值可以来自某个函数（运行时确定）</li>
+<li>常量的赋值则需要则只能来自简单的表达式</li>
+<li>作用域不同，常量的作用域全局</li>
+<li>声明方式不同，常量在定义时需要指定类型，无法使用类型推断</li>
+</ol>
+</li>
+</ol>
+<h1 id="所有权"><a href="#所有权" class="headerlink" title="所有权"></a>所有权</h1><p>Rust 的所有权机制相对其它语言还是比较独特的。可以看到它是如何借助所有权来管理所有在堆上申请的内存空间的。与其它拥有 GC 或者需要手动管理内存的语言来说，通过所有权管理内存还是挺特别的。</p>
+<p>Rust 编译器能够在编译时提供很多安全检查，比如存在数据写入竞争的程序都无法通过编译，这样就大大减少了运行时排查错误的可能。</p>
+<h2 id="规则"><a href="#规则" class="headerlink" title="规则"></a>规则</h2><ol>
+<li>Rust 中每一个值都有一个被称为其<strong>所有者 Owner </strong>的变量</li>
+<li>值有且只能有一个所有者</li>
+<li>当所有者（变量）离开作用域，值会被抛弃（内存回收）</li>
+</ol>
+<h2 id="注意点"><a href="#注意点" class="headerlink" title="注意点"></a>注意点</h2><ol>
+<li>Rust 中变量的赋值，和传统语言不通，它做的是所有权转移的工作，也就是之前的变量就会被失效了</li>
+<li>如果一个类型有 <code>Copy</code> trait，一个旧的变量在将其赋值给其它变量后仍然可用（如在栈上分配的整数）</li>
+<li>Rust 永远不会自动创建数据的「深拷贝」，所以任何自动的复制，可以认为对运行时的性能影响较小</li>
+</ol>
+<h2 id="引用和借用"><a href="#引用和借用" class="headerlink" title="引用和借用"></a>引用和借用</h2><ol>
+<li>在任意给定的时间，要么只能有一个可变引用，要么只能有多个不可变引用</li>
+<li>引用必须总是有效</li>
+</ol>
+<h2 id="Slice-切片"><a href="#Slice-切片" class="headerlink" title="Slice 切片"></a>Slice 切片</h2><ol>
+<li>没有所有权的数据类型，允许引用集合中一段连续的元素序列，而不用引用整个集合</li>
+<li><p>切片语法（感觉和 Python 或者 Go 类似）：</p>
+<ul>
+<li><code>start..end</code> 对应的是 <code>[start, end)</code> 这样的区间</li>
+<li>而 <code>start..=end</code> 则表示 <code>[start, end]</code> 区间</li>
+<li><code>start..</code> 表示从 start 开始到结尾</li>
+<li><code>..</code> 则表示从头到尾</li>
+</ul>
+</li>
+<li><p>字符串字面值就是 Slice <code>&amp;str</code></p>
+</li>
+</ol>
+<h1 id="结构体"><a href="#结构体" class="headerlink" title="结构体"></a>结构体</h1><ol>
+<li><code>struct</code> 可以用来自定义数据类型，类似面向对象语言中的<strong>数据属性</strong></li>
+<li>结构体初始化，每个字段都需要显式赋值，字段初始化顺序可以不用关心</li>
+<li><code>mut</code> 和 <code>imut</code> 是针对整个结构体而言的，不允许结构体部分字段设置为 <code>mut</code></li>
+<li>变量与字段同名时，可以简化结构体初始化写法</li>
+<li>元组结构体，相当于给元组类型命名了，这样可以有别于其他类型元组，只需要指定类型，不需要命名字段</li>
+<li><strong>类单元结构体（unit-like structs）</strong>：<ul>
+<li>没有任何字段的结构体</li>
+<li>类似 <code>()</code></li>
+<li>适用于在某个类型上实现 <code>trait</code>，但不需要存储数据</li>
+</ul>
+</li>
+<li>生命周期会保证结构体引用的数据有效性和结构体保持一致</li>
+<li>很多基本类型都实现了 <code>Display</code> trait，所以在使用 <code>println!(&quot;{}&quot;)</code> 时可以正常打印；但 rust 默认不会打印出结构体的展示信息，使用 <code>{:?}</code> 会使用 <code>Debug</code> trait，从而打印出结构体的调试信息。使用 <code>derive</code> 注解，可以使用 trait。</li>
+<li>Rust 有<strong>自动引用和解引用</strong>的功能，会自动为 <code>object</code> 添加 <code>&amp;</code>, <code>&amp;mut</code> 或 <code>*</code>，从而和方法的签名匹配</li>
+<li><p>Rust 中的关联函数（associated functions）是放在 <code>impl</code> 块中，</p>
+<ul>
+<li>和结构体本身有较大的相关性，但不是方法</li>
+<li>第一个参数也不是 <code>self</code></li>
+<li>依然是函数</li>
+<li>类似其它语言中的类的静态方法</li>
+</ul>
+</li>
+<li><p>每个结构体都允许拥有多个 <code>impl</code> 块</p>
+</li>
+<li>结构体并非创建自定义类型的唯一方法！</li>
+</ol>
+<h1 id="枚举与模式匹配"><a href="#枚举与模式匹配" class="headerlink" title="枚举与模式匹配"></a>枚举与模式匹配</h1><ol>
+<li>Rust 中的枚举类似于 F#, OCaml 和 Haskell 这种函数式编程语言中的**代数数据类型（algebraic data types）</li>
+<li>枚举还可以存储数据（自定义的那种，类似的概念可以用结构体来表达，但是比较麻烦）</li>
+<li>枚举的每个成员可以处理不同类型和数量的数据（可以将任意类型数据放入枚举成员中）</li>
+<li>Rust 枚举实在太强大了，甚至可以实现方法，远不是 Python/Go 中那种简单的枚举可比的</li>
+<li>一个常用的标准库枚举类型 <code>Option</code>，应对的场景：一个值要么有值要么没值（WTF?）</li>
+<li>Rust 中没有空值（Null）的功能：空值和非空值</li>
+<li>只要一个值不是 <code>Option&lt;T&gt;</code> 类型，就<strong>可以</strong>安全的认为它的值不为空</li>
+<li><code>match</code> 是非常强大的控制流运算符，可以将一个值和一系列的模式相比较，并根据相匹配的模式执行相应的代码</li>
+<li>Rust 不允许 <code>match</code> 没有匹配处理各种情况，Rust 中的匹配是<strong>穷尽的</strong></li>
+<li><code>（）</code> 是一个 <code>unit</code> 值</li>
+<li><code>if let</code> 适合匹配一种情况的时候替代 <code>match</code>，减少样板代码编写，<code>match</code> 的语法糖</li>
+</ol>
+<h1 id="模块与代码复用"><a href="#模块与代码复用" class="headerlink" title="模块与代码复用"></a>模块与代码复用</h1><ol>
+<li><p><strong>模块（module）</strong>是一个包含函数或类型定义的命名空间</p>
+<ol>
+<li><code>mod</code> 声明新模块，模块中的代码要么直接位于声明后的大括号中，要么位于另一个文件</li>
+<li>函数、类型、常量和模块默认都是私有的，<code>pub</code> 可以控制其在模块外可见</li>
+<li><code>use</code> 关键字将模块或者模块中的定义引入到作用域中以便于引用它们</li>
+</ol>
+</li>
+<li><p>Rust 中多个模块可以位于一个文件中，且模块可以嵌套，以构成更符合逻辑的结构</p>
+</li>
+<li>Rust 默认只知道 <code>lib.rs</code> 内容，所以模块的声明或者定义都需要放在该文件</li>
+<li><p>模块文件系统的规则：</p>
+<ol>
+<li>如果 <code>foo</code> 模块没有子模块，应该将 <code>foo</code> 的声明放在 <code>foo.rs</code> 的文件中</li>
+<li>如果 <code>foo</code> 模块有子模块，应该将 <code>foo</code> 的声明放在 <code>foo/mod.rs</code> 的文件中</li>
+</ol>
+</li>
+<li><p>Rust 中模块和函数默认均为私有的，必须要同时设置为公有，才能在外部访问模块中的函数</p>
+</li>
+<li><p>私有性规则：</p>
+<ol>
+<li>如果一个项是公有的，它能被任何父模块访问</li>
+<li>如果一个项是私有的，它能被直接父级模块及其任何子模块访问</li>
+</ol>
+</li>
+<li><p><code>use</code> 只将指定的模块引入作用域，但不会将其子模块也引入</p>
+</li>
+</ol>
+<h1 id="通用集合类型"><a href="#通用集合类型" class="headerlink" title="通用集合类型"></a>通用集合类型</h1><ol>
+<li><strong>集合</strong> 是一些列有用的数据结构体，不同于内建数组和元组，这些集合指向的数据是存储在堆上的</li>
+<li><p>三种广泛使用的集合：</p>
+<ol>
+<li><code>vector</code>：变长，连续存储一系列值（类似 Python 的 <code>list</code>）</li>
+<li>字符串：字符集合</li>
+<li>哈希：就是 map</li>
+</ol>
+</li>
+<li><p><code>vector</code> 只能存储相同类型的值，其存储的值在内存中彼此相邻排列</p>
+</li>
+<li><code>vector</code> 的结尾在新增元素时，如果没有足够空间将所有元素依次相邻存放的情况下，可能会要求分配内存，并将老的元素拷贝到新的空间。所以 Rust 是不允许在引用的某个元素时，不可以进行修改</li>
+<li>可以借助 <code>enum</code> 实现在 vector 中存储多种类型元素目标</li>
+<li>Rust 的核心语言中只有一种字符串类型：<code>str</code>，即字符串 slice，以借用的形式出现 <code>&amp;str</code>，UTF-8 编码</li>
+<li><code>String</code> 类型是由标准库提供的，可变长、有所有权、UTF-8 编码的字符串类型</li>
+<li>Rust 标准库还提供了其他字符串类型：<code>OsString</code>, <code>OsStr</code>, <code>CString</code>, <code>CStr</code>，它们和 <code>String</code> 或者 <code>str</code> 拥有不同的编码或内存表现形式，各自拥有一些使用场景</li>
+<li><code>String</code> 支持 <code>+</code> 运算符、<code>format!</code> 拼接字符串</li>
+<li><code>format!</code> 和 <code>print!</code> 宏类似，<strong>并且不会获取参数的所有权</strong></li>
+<li><p>Rust 中，<code>String</code> 或者 <code>str</code> 类型是不支持索引获取的：</p>
+<ol>
+<li><code>String</code> 在底层使用 <code>Vec&lt;u8&gt;</code> 存储字符字节，由于不同的语言使用 UTF-8 编码时，需要的字节是不一样的，为了避免返回无效的（无意义）字节值，Rust 选择不编译这种索引访问的情况</li>
+<li>由于索引操作预期是常数时间 O(1)，但 <code>String</code> 中实现索引不能保证这样的性能</li>
+</ol>
+</li>
+<li><p>使用字符串 Slice 时需要谨慎，防止 <code>&amp;s[n..m]</code> 操作取出来的是非法的字符（编译时会让通过），当然 Rust 会在运行时直接 panic</p>
+</li>
+<li>可以对 <code>&amp;String.chars()</code> 遍历获得每个字符，对 <code>&amp;String.bytes()</code> 遍历获得每个字节</li>
+<li><code>HashMap&lt;k, v&gt;</code> 类似其它语言中的字典（map）。其并不在 preclude 中，所以在使用时，需要 <code>use</code> 导入到作用域</li>
+</ol>
+<h1 id="错误处理"><a href="#错误处理" class="headerlink" title="错误处理"></a>错误处理</h1><ol>
+<li>Rust 中将错误分为两大类：<strong>可恢复错误（recoverable）</strong> 和 <strong>不可恢复错误（unrecoverable）</strong>。可恢复的错误通常代表向用户报告错误和重试操作是否合理的情况，如文件不存在。而不可恢复的错误则通常是很严重的 bug</li>
+<li>可恢复的错误是 <code>Result&lt;T, E&gt;</code>，而 <code>panic!</code> 会在遇到不可恢复的错误时终止执行。注意这个和其它语言中的异常机制还是不太一样的</li>
+<li>panic 时，默认会开始展开（unwinding），从而回溯栈并清理遇到的每个函数的数据，但这个回溯并清理的过程有很多工作。你可以选择直接终止（abort），让操作系统来清理内存。</li>
+<li><p>如果希望二进制文件越小越好，可以在 <code>Cargo.toml</code> 中添加下面的配置，这样在 panic 时直接终止执行：</p>
+ <figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[profile.release]</span></span><br><span class="line"><span class="attr">panic</span> = <span class="string">'abort'</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>我们使用 <code>Result</code> 类型来作为返回，用于应付一些常规错误（如文件不存在），定义如下：</p>
+ <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">enum</span> <span class="title">Result</span></span>&lt;T, E&gt; &#123;</span><br><span class="line">    <span class="literal">Ok</span>(T),</span><br><span class="line">    <span class="literal">Err</span>(E),</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>可以使用闭包（closure）来减少因错误处理而嵌套多层 <code>match</code> 的问题</p>
+</li>
+<li>当然，还可以使用 <code>unwrap</code> 和 <code>expect</code> 处理错误</li>
+<li>错误传递在 Rust 中很常见，所以有个 <code>?</code> 操作符语法糖可以替代繁琐的 <code>match</code> 写法。此外，<code>?</code> 还将错误值传递给 <code>from</code> 函数（定义于 <code>From</code> trait` 中），用于将一种错误类型转换为另一种类型</li>
+<li><code>?</code> 操作符<strong>只能被用于返回 <code>Result</code> 类型的函数中</strong></li>
+<li>关于数据校验，可以定义一个新的类型，把校验逻辑收敛到 <code>new</code> 方法，这样所有函数均使用该类型，从而让各个依赖该参数的函数不用编写繁琐的校验逻辑</li>
+</ol>
+<h2 id="要不要-panic"><a href="#要不要-panic" class="headerlink" title="要不要 panic!"></a>要不要 <code>panic!</code></h2><p>这里给出一些指导性原则，来帮助你在不同场景下，如何更好的处理错误，决定是否需要 <code>panic!</code> 还是传递错误到上层。</p>
+<ol>
+<li>在编写示例、原型代码或者测试时，建议用 <code>unwrap</code> 或者 <code>expect</code>，简单处理错误的情况（直接 panic! 掉），把焦点放在核心功能实现上，然后再处理具体的错误</li>
+<li>遇到非常规可预期的错误状态时，建议 <code>panic!</code> 掉</li>
+</ol>
+<h1 id="泛型、Trait-和生命周期"><a href="#泛型、Trait-和生命周期" class="headerlink" title="泛型、Trait 和生命周期"></a>泛型、Trait 和生命周期</h1><ol>
+<li>很多语言都有处理重复概念的工具，Rust 中的工具之一就是<strong>泛型（generics）</strong></li>
+<li>泛型可以认为是具体类型的高层抽象，我们可以基于泛型去实现一些通用的关联方法，而不需要知道 concrete type。想想 Go 没有泛型，就知道多惨了</li>
+<li><code>trait</code> 可以与泛型结合，将泛型限制为拥有特定行为的类型，而不是任意类型</li>
+<li>任何字符都可以作为类型参数名，之所以用 <code>T</code> 是 Rust 的习惯用法，<code>T</code> 作为 <code>type</code> 的缩写也很合适</li>
+<li>使用 <code>&lt;&gt;</code> 来定义泛型</li>
+<li>Rust 中使用泛型实现的代码和使用具体类型实现的代码，在性能上不会有任何损失。Rust 通过在编译时进行泛型代码<strong>单态化（monomorphization）</strong>来保证效率。单态化是指通过填充编译时使用的具体类型，将通用代码转为特定代码的过程</li>
+<li><code>trait</code> 以一种抽象的方式定义共享行为，可以使用 <code>trait bounds</code> 指定泛型是任何拥有特定行为的类型</li>
+<li><code>trait</code> 定义是一种将方法签名组合起来的方法，目的是定义一个实现某些目的所必须的行为集合</li>
+<li>注意：只有当 <code>trait</code> 或者要实现 <code>trait</code> 的类型位于 crate 的本地作用域时，才能为该类型实现 <code>trait</code></li>
+<li><code>trait</code> 中定义的方法是可以有默认实现的，具体类型在实现 <code>trait</code> 时可以选择重载方法，但不支持调用默认方法（Oops）</li>
+<li><code>trait</code> 可以作为参赛（类似 Go 里面的函数接收一个 interface）</li>
+<li><p>注意下面两种是不同的：</p>
+ <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 这里允许 item1 和 item2 是不同的类型，只要都实现了 `SomeTrait`</span></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">notify</span></span>(item1: <span class="keyword">impl</span> SomeTrait, item2: <span class="keyword">impl</span> SomeTrait);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 这里就会要求 item1 和 item2 是不同的类型，也就是只有 trait bound 这种写法</span></span><br><span class="line"><span class="comment">// 才可以做到这样的限制</span></span><br><span class="line"><span class="keyword">pub</span> <span class="function"><span class="keyword">fn</span> <span class="title">notify</span></span>&lt;T: SomeTrait&gt;(item1: T, item2: T);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>与 Go 的函数可以返回 <code>interface</code> 类似，Rust 支持返回 <code>trait</code>，但是不同的是，只能返回一种实现了该 <code>trait</code> 的类型。不过依然会有更高级的方法做到，请继续往后学习！</p>
+</li>
+<li>任何满足特定 trait bound 的类型实现 trait 被称为 blanket implementations，广泛应用于 Rust 标准中。如标准库为任何实现了 <code>Display</code> trait 的类型实现了 <code>ToString</code> 方法</li>
+</ol>
+<h1 id="生命周期和引用有效性"><a href="#生命周期和引用有效性" class="headerlink" title="生命周期和引用有效性"></a>生命周期和引用有效性</h1><ol>
+<li>生命周期的主要目标是避免悬垂引用</li>
+<li>Rust 编译器中的<strong>借用检查器（borrow checker）</strong>是用来比较作用域，从而确保所有的借用都是有效的</li>
+<li><p>生命周期注释：</p>
+ <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="keyword">let</span> r;                <span class="comment">// ---------+-- 'a</span></span><br><span class="line">                          <span class="comment">//          |</span></span><br><span class="line">    &#123;                     <span class="comment">//          |</span></span><br><span class="line">        <span class="keyword">let</span> x = <span class="number">5</span>;        <span class="comment">// -+-- 'b  |</span></span><br><span class="line">        r = &amp;x;           <span class="comment">//  |       |</span></span><br><span class="line">    &#125;                     <span class="comment">// -+       |</span></span><br><span class="line">                          <span class="comment">//          |</span></span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">"r: &#123;&#125;"</span>, r); <span class="comment">//          |</span></span><br><span class="line">&#125;                         <span class="comment">// ---------+</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>生命周期的注解并不会改变任何引用的生命周期长短。当函数指定了泛型生命周期后，可以接受任何生命周期的引用。<strong>生命周期注解描述了多个引用生命周期的相互关系，而不影响其生命周期</strong>。生命周期注解在<strong>借用检查器</strong>的帮助下，会指出不遵守协议的入参。</p>
+</li>
+<li><p>泛型生命周期 <code>&#39;a</code> 的具体生命周期等同于多个函数参数中生命周期较小的那个</p>
+</li>
+<li><strong>生命周期语法是用于将函数的多个参数与其返回值的生命周期进行关联的，一旦它们形成了某种关联，Rust 就有足够的信息来允许内存安全的操作并阻止产生悬垂指针或违反内存安全的行为</strong></li>
+<li>Rust 存在<strong>生命周期省略规则（lifetime elision rules）</strong>，这些规则是一系列特定场景，如果符合规则，无需手动指定生命周期</li>
+<li><p><strong>生命周期省略规则</strong>：</p>
+<ol>
+<li>函数或方法的参数生命周期叫做<strong>输入生命周期</strong></li>
+<li>返回值的生命周期叫做<strong>输出生命周期</strong></li>
+<li>规则适用于 <code>fn</code> 和 <code>impl</code> 块</li>
+<li>规则一：每一个是引用的生命周期都有其自己的生命周期参数（各个生命周期参数是不同的）</li>
+<li>规则二：如果只有一个输入生命周期参数，则它会被赋予所有输出生命周期参数</li>
+<li>规则三：如果方法有多个生命周期参数（<code>&amp;self</code> 和 <code>&amp;mut self</code>），则 <code>&amp;self</code> 的生命周期被赋予给所有输出生命周期参数</li>
+</ol>
+</li>
+<li><p>静态生命周期：</p>
+<ol>
+<li><code>&#39;static</code>，生命周期存活于整个程序运行期间</li>
+<li>所有字符串字面值都有 <code>&#39;static</code> 生命周期</li>
+<li>如果编译器提示加 <code>&#39;static</code> 生命周期建议时，应该看看是不是自己的实现方式有问题，而不是盲目添加 <code>&#39;static</code> 生命周期</li>
+</ol>
+</li>
+</ol>
+<h1 id="单元测试与集成测试"><a href="#单元测试与集成测试" class="headerlink" title="单元测试与集成测试"></a>单元测试与集成测试</h1><ol>
+<li>Edsger W. Dijkstra: Program testing can be a very effective way to show the presence of bugs, but it is hopelessly inadequate for showing their absence.</li>
+<li><p>Rust 中的测试函数是用于验证非测试代码是否按照预期方式运行的。测试函数体通常要执行的操作如下：</p>
+<ol>
+<li>设置任何所需的数据或状态</li>
+<li>运行需要测试的代码</li>
+<li>断言其结果是否为期望的</li>
+</ol>
+</li>
+<li><p>Rust 中的测试是一个带有 <code>test</code> 属性注解的函数。<strong>属性是 Rust 代码片段的元数据</strong>，为了将一个函数变成测试函数，需要在 <code>fn</code> 之前加上 <code>#[test]</code>。<code>cargo test</code> 命令执行时，Rust 会构建一个测试执行程序调用标记了 <code>test</code> 属性的函数，并报告测试通过与否</p>
+</li>
+<li>Rust 会编译在 API 文档中的代码示例，所以也可以进行文档测试 <code>Doc-tests</code>，这样可以保证稳定和代码同步</li>
+<li>每个测试都在一个新线程中运行，当主线程发现测试异常，就将对应测试标记为失败</li>
+<li>测试相关的宏，如果测试失败，会打印出详细的断言失败原因，便于排查：<ul>
+<li><code>assert!</code>: 是否为 True</li>
+<li><code>assert_ne!</code>: 是否不等于</li>
+<li><code>assert_eq!</code>: 是否等于</li>
+</ul>
+</li>
+<li>需要注意的是，<code>assert_ne!</code> 和 <code>assert_eq!</code> 在底层使用了 <code>==</code> 和 <code>!=</code>，意味着被比较的值必须实现 <code>PartialEq</code> 和 <code>Debug</code> trait。所有的基本类型和大部分的标准类型都实现了这些 <code>trait</code>，对于自定义的结构体和枚举类型，通常可以在结构体上加 <code>#[derive(PartialEq, Debug)]</code> 注解解决</li>
+<li>对于上述三个断言用的宏，任何其它参数都会被传入 <code>format</code> 宏，所以可以借助这个特性自定义错误提示</li>
+<li><p>使用 <code>#[should_panic]</code> 属性来测试某些预期会 <code>panic</code> 的场景；对于希望检查 panic 的文本中是否含有指定文本的情况，可以加个 <code>expected</code> 参数：</p>
+ <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">mod</span> tests &#123;</span><br><span class="line">    <span class="keyword">use</span> super::*;</span><br><span class="line"></span><br><span class="line">    <span class="meta">#[test]</span></span><br><span class="line">    <span class="meta">#[should_panic(expected = <span class="meta-string">"message to be contained"</span>)]</span></span><br><span class="line">    <span class="function"><span class="keyword">fn</span> <span class="title">should_panic_with_msg</span></span>() &#123;</span><br><span class="line">        foo_will_panic();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>测试函数可以返回 <code>Result&lt;T, E&gt;</code>，和断言失败直接 panic 不同，这里是通过 <code>Result&lt;T, E&gt;</code> 结果来判断测试结果。此外也不能在这样的测试函数上加 <code>#[should_panic]</code> 属性，否则提示：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">error: functions using `#[should_panic]` must return `()`</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>cargo test</code> 默认行为是采用并行运行测试的方式，并且会截获测试运行中的输出，阻止显示，从而方便阅读测试结果</p>
+</li>
+<li><p>测试常用的控制参数：</p>
+<ol>
+<li>指定并行执行测试的线程数：<code>cargo test -- --test-threads=1</code></li>
+<li>测试时显示函数打印的信息：<code>cargo test -- --nocapture</code>，由于测试时并行的，为了方便查看输出，所以你可能需要指定使用单线程运行测试</li>
+<li>运行指定一个或多个测试（直接指定测试函数全名或部分字符串用于匹配）：<code>cargo test name</code></li>
+<li>使用 <code>#[ignore]</code> 属性过滤不希望运行的测试</li>
+<li>只运行被忽略的测试：<code>cargo test -- --ignored</code></li>
+</ol>
+</li>
+<li><p>关于 <code>cargo test</code> 参数需要注意的点：</p>
+<ol>
+<li>完整使用方式 <code>cargo test [OPTIONS] [TESTNAME] [-- &lt;args&gt;...]</code></li>
+<li><code>--</code> 前的参数传递给 <code>cargo</code></li>
+<li><code>--</code> 后的参数传递给二进制测试程序（<code>test binaries</code>），进而传递给 <code>libtest</code>（这个是 Rust 内建的单元测试和 micro-benchmark 框架），可以使用 <code>cargo -- --help</code> 了解详细参数</li>
+</ol>
+</li>
+<li><p><strong>单元测试（unit tests）</strong> 侧重于小而集中，在隔离环境中一次测试一个模块，或者私有接口：</p>
+<ol>
+<li>单元测试与要测试的代码同在 <code>src</code> 目录下相同的文件中</li>
+<li>规范是在每个文件中创建包含测试函数的 <code>tests</code> 模块，并使用 <code>cfg(test)</code> 注解</li>
+</ol>
+</li>
+<li><p><strong>集成测试（integrated tests）</strong> 则是在外部测试你的库，只测试公有接口，且每个测试可能会测试多个模块：</p>
+<ol>
+<li>使用单独的 <code>tests</code> 目录和 <code>src</code> 同级别</li>
+<li><code>cargo</code> 会将每个文件当做单独的 <code>crate</code> 编译</li>
+<li><code>tests</code> 目录很特殊，里面的测试不需要 <code>#[cfg(test)]</code> 注解，并且只会在 <code>cargo test</code> 时编译并执行 <code>tests</code> 目录中的文件</li>
+<li><code>cargo test --test &lt;filename&gt;</code> 运行某个特定的集成测试文件中的所有测试</li>
+<li><code>cargo test --test &lt;filename&gt; &lt;TESTNAME&gt;</code> 运行某个集成测试文件中某个 case</li>
+<li><code>tests</code> 目录中的子目录不会被当作单独的 crate 编译或作为一个测试结果部分出现在测试输出中，所以可以将一些公用的帮助函数放到子目录中实现（新增一个模块）</li>
+</ol>
+</li>
+</ol>
+<h1 id="命令行小工具：rgrep"><a href="#命令行小工具：rgrep" class="headerlink" title="命令行小工具：rgrep"></a>命令行小工具：rgrep</h1><ol>
+<li><code>std::env::args</code> 在其任何参数包括无效 Unicode 时会报错。如果需要处理这种情况，可以使用 <code>std::env::args_os</code>，该函数返回一个 <code>OsString</code>，而非 <code>String</code>，但细节处理起来还是比较麻烦</li>
+<li><p>二进制程序关注点分离基本步骤：</p>
+<ol>
+<li>将程序拆分成 <code>main.rs</code> 和 <code>lib.rs</code>，并将程序的逻辑放入 <code>lib.rs</code> 中</li>
+<li>当命令行解析逻辑比较小时，可以保留在 <code>main.rs</code> 中</li>
+<li>当命令行解析开始变得复杂时，也同样将其从 <code>main.rs</code> 提取到 <code>lib.rs</code> 中</li>
+<li>经过这些后，保留在 <code>main</code> 函数的责任应该被限制为：<ol>
+<li>使用参数值调用命令行解析逻辑</li>
+<li>设置任何其它的配置</li>
+<li>调用 <code>lib.rs</code> 中 <code>run</code> 函数</li>
+<li>如果 <code>run</code> 返回错误，则处理这个错误</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>错误输出到 <code>stderr</code>，使用 <code>eprint!</code> 和 <code>eprintln!</code></p>
+</li>
+</ol>
+<h1 id="迭代器和闭包"><a href="#迭代器和闭包" class="headerlink" title="迭代器和闭包"></a>迭代器和闭包</h1><ol>
+<li>Rust 的 <strong>闭包（closures）</strong> 是可以保存进变量或作为参数传递给其它函数的匿名函数。可以在一个地方创建闭包，然后在不同的上下文中执行闭包运算，<strong>闭包运行捕获调用者作用域的值</strong></li>
+<li>闭包不要求像 <code>fn</code> 函数那样在参数和返回值上注明类型，因为它不会被暴露给库的用户调用</li>
+<li>闭包通常很短，并且只用于有限的上下文中，且编译器能可靠地推断参数和返回值类型</li>
+<li>每个闭包实例拥有自己独有的匿名类型，即便签名相同，它们的类型依然可以被认为是不同的</li>
+<li>所有的闭包和函数都实现了 trait <code>Fn</code>, <code>FnMut</code> 或 <code>FnOnce</code> 中的一个</li>
+<li>当闭包从环境中捕获一个值，闭包会在闭包体中存储这个值以供使用</li>
+<li>闭包获取环境的三种方式（对应参数获取的方式：所有权、可变借用和不可变借用）：<ul>
+<li><code>FnOnce</code>：<strong>闭包周围的作用域叫做环境</strong>，<code>Once</code> 表示闭包不能多次获取相同变量的所有权，也只能被调用一次。由于所有闭包都至少被调用一次，所有都实现了 <code>FnOnce</code></li>
+<li><code>FnMut</code>：获取可变借用值，可以改变环境。对于没有移动被捕获变量的所有权到闭包内的闭包也实现了 <code>FnMut</code></li>
+<li><code>Fn</code>：获取不可变借用。不需要对被捕获的变量进行可变访问的闭包实现了 <code>Fn</code></li>
+</ul>
+</li>
+</ol>
+<p>1.迭代器模式允许你对一个项的序列进行某些处理，<strong>迭代器（iterator）</strong> 负责遍历序列中的每一项和决定序何时结束</p>
+<ol>
+<li>迭代器是惰性的，联想下 Python 的生成器、迭代器就好了</li>
+<li>迭代器 trait 中 <code>type Item</code> 和 <code>Self::Item</code> 定义了 trait 的关联类型</li>
+<li><code>iter</code> 方法生成一个不可变应用的迭代器；<code>into_iter</code> 则返回拥有所有权的迭代器；如果需要迭代可变引用，则使用 <code>iter_mut</code></li>
+<li><strong>迭代器</strong> 是 Rust 零开销抽象之一，它意味着抽象并不会引入运行时开销</li>
+<li>展开是一种移除循环控制代码的开销，并替换为每个迭代中的重复代码的优化</li>
+<li>开起来 Rust 是比较推荐使用迭代器和闭包的，而且对函数编程风格更是偏爱~</li>
+</ol>
+<h1 id="Cargo-和-crates-io"><a href="#Cargo-和-crates-io" class="headerlink" title="Cargo 和 crates.io"></a>Cargo 和 crates.io</h1><ol>
+<li>文档注释使用的是 <code>///</code>，并且支持 Markdown 注解</li>
+<li>使用 <code>cargo doc</code> 可以生成 HTML 文档到 <code>target/doc</code> 中，使用 <code>cargo doc --open</code> 可以构建后打开文档</li>
+<li>文档中还可以包含 <code>Panics</code>, <code>Errors</code> 和 <code>Safety</code></li>
+<li><code>//!</code> 在 <code>crate</code> 根文件（`src/lib.rs）或模块根文件提供一个概要性的介绍</li>
+<li>使用 <code>pub use</code> 可以重导出，使共有结构不同于私有结构，方便用户使用（其实在 Python 中也有很多库是这么干的）</li>
+<li>工作空间是一系列共享同样的 Cargo.lock 和输出目录的包</li>
+<li>使用 <code>cargo install &lt;name&gt;</code> 可以安装来自 <a href="https://crates.io" target="_blank" rel="noopener">creates.io</a> 的二进制文件</li>
+</ol>
+<h1 id="智能指针"><a href="#智能指针" class="headerlink" title="智能指针"></a>智能指针</h1><ol>
+<li><strong>指针</strong> 是一个包含内存地址的变量的通用概念。Rust 中最常见的指针是 <strong>引用</strong>，使用 <code>&amp;</code> 表示，除引用数据没有任何其它特殊功能，没有任何额外开销</li>
+<li><strong>智能指针</strong> 是一类数据结构，表现类似指针，但是拥有额外的元数据和功能</li>
+<li>Rust 中，普通引用和智能指针的一个额外区别是 <strong>引用是一类只借用数据的指针；大部分情况，智能指针拥有它们指向的数据</strong></li>
+<li><p>智能指针通常使用结构体实现，区别于常规结构体，它实现了 <code>Deref</code> 和 <code>Drop</code> trait：</p>
+<ol>
+<li><code>Deref</code> 运行智能指针结构体实例表现得像引用</li>
+<li><code>Drop</code> 则允许自定义当智能指针离开作用域时运行的逻辑</li>
+</ol>
+</li>
+<li><p>标准库中常用的智能指针（你也可以实现自定义的智能指针）：</p>
+<ul>
+<li><code>Box&lt;T&gt;</code> 用于在堆上分配值</li>
+<li><code>Rc&lt;T&gt;</code> 引用计数类型，数据可以拥有多个所有者</li>
+<li><code>Ref&lt;T&gt;</code> 和 <code>RefMut&lt;T&gt;</code>，通过 <code>RefCell&lt;T&gt;</code> 访问，在运行时而非编译时执行借用规则的类型</li>
+</ul>
+</li>
+</ol>
+<h2 id="Box"><a href="#Box" class="headerlink" title="Box"></a>Box<t></t></h2><ol>
+<li><p>使用场景：</p>
+<ol>
+<li>当有一个在编译时未知大小的类型，而又想要在需要确切大小的上下文中使用该类型时</li>
+<li>当有大量数据且希望在确保数据不被拷贝的情况下转移所有权时</li>
+<li>当希望拥有一个值，且只关心它的类型是否实现了特定 trait 而不是其具体类型时</li>
+</ol>
+</li>
+<li><p><strong>递归类型</strong> 是在编译器无法知道大小的类型，也是 <code>Box&lt;T&gt;</code> 适用的场景</p>
+</li>
+</ol>
+<h2 id="Deref"><a href="#Deref" class="headerlink" title="Deref"></a>Deref</h2><ol>
+<li>实现 <code>Deref</code> trait 允许重载「解引用运算符（dereference operator）<code>*</code>」，这样智能指针就可以被当作常规引用对待</li>
+<li>实现了 <code>deref</code> 方法后，就是向编译器提供了获取任何实现了 <code>Deref</code> trait 类型的值，提供了解引用的能力</li>
+<li>以 <code>let z = Box::new(10)</code> 为例，<code>*z</code> 在底层其实是 <code>*(z.deref())</code> 操作</li>
+<li>一般所有权依然要保留在智能指针结构体中，不用把所有权转移出去</li>
+<li><p><strong>解引用强制多态（deref coercions）</strong> 是 Rust 表现在函数或方法传参上的一种便利。当所涉及的类型定义了 <code>Deref</code> trait，Rust 会分析这些类型并使用任意多次 <code>Deref::deref</code> 调用获得匹配参数的类型（都发生在编译时），而且也让代码可读性更好：</p>
+ <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> m = MyBox::new(<span class="built_in">String</span>::from(<span class="string">"world"</span>));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 正式因为「解引用强制多态」机制存在，这种传参是支持的，会自动做类型转换</span></span><br><span class="line">    <span class="comment">// 第一次 deref 拿到 &amp;String （针对 Box 类型）</span></span><br><span class="line">    <span class="comment">// 第二次 deref 拿到 &amp;str（针对 &amp;String 类型）</span></span><br><span class="line">    print_box(&amp;m);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 否则，你可能要这样写</span></span><br><span class="line">    print_box(&amp;(*m));</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 甚至这样</span></span><br><span class="line">    print_box(&amp;(*m)[..])</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">print_box</span></span>(s: &amp;<span class="built_in">str</span>) &#123;</span><br><span class="line">    <span class="built_in">println!</span>(<span class="string">"hello, &#123;&#125;"</span>, s);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>解引用强制多态生效情况：</p>
+<ul>
+<li>当 <code>T: Deref&lt;Target=U&gt;</code> 时，<code>&amp;T</code> -&gt; <code>&amp;U</code></li>
+<li>当 <code>T: DerefMut&lt;Target=U&gt;</code> 时，<code>&amp;mut T</code> -&gt; <code>&amp;mut U</code></li>
+<li>当 <code>T: Deref&lt;Target=U&gt;</code> 时，<code>&amp;mut T</code> -&gt; <code>&amp;U</code></li>
+</ul>
+</li>
+<li><p>Rust 可以将可变引用强制变成不可变引用（反过来不行，考虑下为什么？）</p>
+</li>
+</ol>
+<h2 id="Drop"><a href="#Drop" class="headerlink" title="Drop"></a>Drop</h2><ol>
+<li>当值要离开作用域时，可以为该类型实现 <code>Drop</code> trait，这样可以在离开时做一些自定义的清理工作：网络资源、文件或者内存空间释放等</li>
+<li>我们不能直截了当地禁用自动 <code>drop</code> 功能，通常也不需要。<code>Drop</code> trait 存在的意义就是它会被自动处理</li>
+<li>如果需要提前执行 <code>drop</code>，可以使用 <code>std::mem::drop</code> 函数，但不能直接调用值的 <code>drop</code> 方法，因为离开作用域后 Rust 会自动调用值的 <code>drop</code> 方法，从而导致 <em>double free</em> 错误</li>
+</ol>
+<h2 id="Rc"><a href="#Rc" class="headerlink" title="Rc"></a>Rc<t></t></h2><ol>
+<li>多数情况下，所有权是很清晰的。但有时候某个值却可以有多个所有者，比如图数据结构中，多条边可能指向相同的节点</li>
+<li><code>Rc&lt;T&gt;</code> 会追踪值的引用计数，保证没有引用时，才可以被清空</li>
+<li><code>Rc&lt;T&gt;</code> 用于当我们希望在堆上分配内存供多个部分读取，但又不能在编译时确定哪个部分会在最后结束使用它。</li>
+<li><code>Rc&lt;T&gt;</code> 只能用于单线程场景</li>
+<li><code>Rc::new</code> 和 <code>Rc::clone</code> 方法比较常用，<code>Rc::clone</code> 做的是浅拷贝，并且每次调用只会给引用计数加 1</li>
+<li><code>Rc::strong_count</code> 可以查看引用计数（注意还有个 <code>Rc::weak_count</code>，避免循环引用使用）</li>
+</ol>
+<h2 id="RefCell-和内部可变模式"><a href="#RefCell-和内部可变模式" class="headerlink" title="RefCell 和内部可变模式"></a>RefCell<t> 和内部可变模式</t></h2><ol>
+<li><strong>内部可变性（Interior mutability）</strong> 是 Rust 中的一个设计模式，允许你在有不可变引用时也能改变数据。使用 <code>unsafe</code> 来模糊 Rust 的常规的可变性和借用规则</li>
+<li><code>RefCell&lt;T&gt;</code> 代表其管理的数据的唯一所有权</li>
+<li><p>借用规则：</p>
+<ol>
+<li>在任意给定时间，只能拥有一个可变引用或任意数量的不可变引用之一</li>
+<li>引用必须总是有效的</li>
+</ol>
+</li>
+<li><p>对于 <code>RefCell&lt;T&gt;</code>，不可变性作用于 <strong>运行时</strong>；如果在运行时违反借用规则，程序会 panic</p>
+</li>
+<li><code>RefCell&lt;T&gt;</code> 用于你确信代码遵守借用规则，但编译器这个大笨蛋不能理解和确定的时候</li>
+<li>只能用于单线程场景</li>
+<li>在不可变值内部改变值就是 <strong>内部可变性</strong> 模式，一个典型的应用场景是 mock 对象</li>
+<li><strong>测试替身（test double）</strong> 是一个通用编程概念，它代表一个在测试中替代某个类型的类型</li>
+<li><code>borrow</code> 方法返回 <code>Ref</code>；<code>borrow_mut</code> 返回 <code>RefMut</code></li>
+<li><code>Rc&lt;T&gt;</code> 和 <code>RefCell&lt;T&gt;</code> 结合，可以做到值有多个所有者并且可以被修改</li>
+</ol>
+<h2 id="循环引用"><a href="#循环引用" class="headerlink" title="循环引用"></a>循环引用</h2><ol>
+<li>Rust 的内存安全机制使得内存泄漏更加少见，除非你刻意创建类似循环引用这种数据结构</li>
+<li><code>Rc::clone</code> 增加实例的 <code>strong_count</code></li>
+<li><code>Rc::downgrade</code> 创建值的 <strong>弱引用（weak ref）</strong> ，会得到 <code>Weak&lt;T&gt;</code> 类型的智能指针，并会将 <code>weak_count</code> 增加。<code>weak_count</code> 无需计数器为 0 就能使 <code>Rc</code> 实例被清理</li>
+<li>强引用代表如何共享 <code>Rc&lt;T&gt;</code> 实例所有权，弱引用不代表所有权关系</li>
+<li><code>Weak&lt;T&gt;</code> 实例的 <code>upgrade</code> 方法返回 <code>Option&lt;Rc&lt;T&gt;&gt;</code>，需要检查指向的值是否被清理了</li>
+</ol>
+<h1 id="并发"><a href="#并发" class="headerlink" title="并发"></a>并发</h1><h2 id="线程"><a href="#线程" class="headerlink" title="线程"></a>线程</h2><ol>
+<li><strong>并发编程</strong> 代表程序的不同部分相互独立执行；<strong>并行编程</strong> 代表程序不同部分同时执行</li>
+<li>多线程环境下编程其实还是要小心点，但是不要害怕，需要的时候就大胆用</li>
+<li>Rust 标准库使用 1:1 线程模型实现，足够底层</li>
+<li><code>thread::spawn</code> 可以启动新的线程</li>
+<li>如果要在别的线程中使用主线程中的值，需要使用 <code>move</code> 关键字</li>
+</ol>
+<h2 id="消息传递"><a href="#消息传递" class="headerlink" title="消息传递"></a>消息传递</h2><ol>
+<li>使用 <strong>消息传递</strong> 的方式在多线程中通信</li>
+<li><em>Do not communicate by sharing memory; instead, share memory by communicating</em></li>
+<li><p>Rust 中实现消息传递的主要工具是 <strong>通道（channel）</strong>：</p>
+<ol>
+<li>发送方：transmitter/producer</li>
+<li>接收方：receiver/consumer</li>
+<li>当发送方或接收方任意一个被 drop，都可以认为通道被关闭了（不像 Go 中的显式 <code>close(chan)</code>）</li>
+</ol>
+</li>
+<li><p><code>mpsc::channel</code>，这里 <code>mpsc</code> 全称是 <strong>多生产者，单消费者（multiple producer, single consumer）</strong></p>
+</li>
+<li><code>recv</code> 是阻塞接收，<code>try_recv</code> 则会立即返回</li>
+<li>可以对 <code>receiver</code> 进行迭代，消费 channel 中的消息（注意，这里的 channel 是带缓冲的）</li>
+<li><code>mpsc::Sender::clone</code> 可以用来克隆生成多个生产者</li>
+</ol>
+<h2 id="状态共享：Mutex-与-Arc"><a href="#状态共享：Mutex-与-Arc" class="headerlink" title="状态共享：Mutex 与 Arc"></a>状态共享：Mutex 与 Arc<t></t></h2><ol>
+<li>基于 channel 的机制类似于单所有权，一旦值被发送出去，发送方将失去所有权</li>
+<li>共享内存模式则类似多所有权，多个线程可以<strong>同时访问</strong>相同的内存地址</li>
+<li><strong>互斥信号量（mutex, mutual exclusion）</strong>，只允许一个线程访问某些数据</li>
+<li><code>Arc&lt;T&gt;</code> 类似于 <code>Rc&lt;T&gt;</code>，<code>A</code> 表示 <code>Atomic</code>，即原子的。引用计数在多线程环境下是安全的，但因为需要并发原语加持，所以相对 <code>Rc&lt;T&gt;</code> 会存在性能损耗</li>
+<li><code>Mutex&lt;T&gt;</code> 提供了内部可变性</li>
+<li><code>RefCell&lt;T&gt;</code> 和 <code>Mutex&lt;T&gt;</code> 具有相似的作用</li>
+<li><code>Rc&lt;T&gt;</code> 和 <code>Arc&lt;T&gt;</code> 也是类似</li>
+</ol>
+<h2 id="Sync-和-Send"><a href="#Sync-和-Send" class="headerlink" title="Sync 和 Send"></a>Sync 和 Send</h2><ol>
+<li>Rust 语言本身对并发知之甚少，前面提到的只是标准库实现方案，但并发方案不受标准库或语言所限</li>
+<li><p><code>std::marker</code> 中 <code>Send</code> 与 <code>Sync</code> trait：</p>
+<ol>
+<li><code>Send</code> 允许在多线程之间转移所有权</li>
+<li>几乎所有的 Rust 类型都是可 <code>Send</code> 的，任何由 <code>Send</code> 类型组成的复合类型也是 <code>Send</code> 的</li>
+<li><code>Sync</code> 允许多线程访问：<strong>实现了 <code>Sync</code> 的类型可以安全地在多个线程中拥有其值的引用</strong></li>
+<li>对于任意类型 <code>T</code>，如果 <code>&amp;T</code> 是 <code>Send</code> 的，那么 <code>T</code> 就是 <code>Sync</code> 的</li>
+<li>完全由 <code>Sync</code> 的类型组成的类型也是 <code>Sync</code> 的</li>
+</ol>
+</li>
+<li><p>手动实现 <code>Send</code> 和 <code>Sync</code> 是不安全的，它们是标记 trait，甚至都不需要实现任何方法，用于加强并发相关性的不可变性</p>
+</li>
+</ol>
+<h1 id="Rust-面向对象特征"><a href="#Rust-面向对象特征" class="headerlink" title="Rust 面向对象特征"></a>Rust 面向对象特征</h1><h2 id="面向对象语言特点"><a href="#面向对象语言特点" class="headerlink" title="面向对象语言特点"></a>面向对象语言特点</h2><ol>
+<li><p><em>Design Patterns: Elements of Resuable Object-Oriented Software</em> 中对于面向对象的定义：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Object-oriented programs are made up of objects. An object packages both data and the procedures that</span><br><span class="line">people on that data. The procedures are typically called methods or operations.</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>面向对象编程语言的共享特性：<strong>对象</strong>、<strong>封装</strong> 和多态</p>
+</li>
+<li>Rust 的结构体和 Enum 是符合对象包含数据和行为定义的；另外，通过 <code>pub</code> 关键字可以控制是否对外提供访问权限，对于细节可以私有化，不用对外暴露</li>
+<li>继承：复用代码；子类型可以替代父类型被使用的地方（即多态）。继承存在的一个问题是常常会共享多于需要的代码（有这种风险）</li>
+<li>Rust 使用 trait 对象替代继承，实现多态（一种可用于多种类型代码的广泛概念）</li>
+</ol>
+<h2 id="Trait-Object"><a href="#Trait-Object" class="headerlink" title="Trait Object"></a>Trait Object</h2><ol>
+<li>trait 对象指向一个实现了指定 trait 的类型实例，通过指定某些指针（<code>&amp;</code> 或 <code>Box&lt;T&gt;</code> 等），接着指定相关 trait</li>
+<li>不能向 trait 对象中增加数据，没有那么通用：具体作用是允许对通用行为进行抽象</li>
+<li>与定义了使用 <code>trait bound</code> 的泛型类型参数不同的结构体不同，trait 对象允许运行时替代多种具体类型，而泛型参数则一次只能替代一个具体类型</li>
+<li>类似动态语言中的 <strong>鸭子类型</strong> 概念，我们不需要知道组件的具体类型，只需要确定是否实现了指定的 trait 即可执行期望的操作</li>
+<li>使用 trait 对象和 Rust 类型系统进行类似鸭子类型操作的优势是无需在 <strong>运行时</strong> 检查一个值是否实现了特定的方法或担心调用时因为值没有实现方法而产生错误</li>
+<li>trait 对象执行动态分发（编译器会生成在运行时确定调用什么方法的代码），动态优化会导致编译器禁用一些优化</li>
+<li>只有对象安全（object safe）的 trait 才可以组成 trait 对象。如果一个 trait 中的方法有如下属性时，则该 trait 是对象安全的：<ol>
+<li>返回值类型不是 <code>Self</code></li>
+<li>方法没有任何泛型类型参数</li>
+</ol>
+</li>
+</ol>
+<h2 id="状态模式实现"><a href="#状态模式实现" class="headerlink" title="状态模式实现"></a>状态模式实现</h2><ol>
+<li><strong>状态模式</strong> 是一个面向对象设计模式：一个值拥有某些内部状态（体现为一系列 <strong>状态对象</strong>），同时值的行为会随着内部状态而改变。每一个状态对象代表负责自身的行为和当需要改变为另一个状态时的规则状态。持有任何一个这种状态的值不同于状态的行为及何时状态转移毫不知情</li>
+<li>优点：易于扩展和维护</li>
+<li>缺点：<ol>
+<li>因为需要实现状态之间的转换，产生相互联系</li>
+<li>存在重复逻辑</li>
+</ol>
+</li>
+</ol>
+<h1 id="模式匹配"><a href="#模式匹配" class="headerlink" title="模式匹配"></a>模式匹配</h1><ol>
+<li><p>模式可由下面的内容组合而成：</p>
+<ol>
+<li>字面值</li>
+<li>解构的数组、枚举、结构体或元组</li>
+<li>变量</li>
+<li>通配符</li>
+<li>占位符</li>
+</ol>
+</li>
+<li><p><code>match</code> 表达时必须是穷尽的（exhaustive）</p>
+</li>
+<li><code>if let</code>, <code>else if</code>, <code>else if let</code> 可以混合使用的条件表达式</li>
+<li><code>while let</code> 条件循环</li>
+<li><code>for (x, y) in</code> 循环</li>
+<li><code>let</code> 语句</li>
+<li>如果希望忽略元组中的一个或多个值，可以使用 <code>_</code> 或 <code>..</code></li>
+<li>函数参数也可以是模式</li>
+<li><p><strong>Refutable（可反驳的）</strong>：能够匹配任何传递的可能值的模式</p>
+<ol>
+<li><code>if let</code> 表达式</li>
+<li><code>while let</code> 表达式</li>
+</ol>
+</li>
+<li><p><strong>Irrefutable（不可反驳的）</strong>：对某些可能的值进行匹配会失败的模式</p>
+<ol>
+<li><code>let</code> 语句</li>
+<li>函数参数</li>
+<li><code>for</code> 循环</li>
+</ol>
+</li>
+<li><p><code>char</code> 和 <code>numeric</code> 值是 Rust 可以知道范围是否为空的类型</p>
+</li>
+<li><strong>匹配守卫（match guard）</strong> 是一个在 <code>match</code> 分支后指定的额外的 <code>if</code> 条件，当匹配到该分支时，额外的 <code>if</code> 条件也必须满足才可以。匹配守卫对于表达非常复杂的匹配条件时很有帮助</li>
+</ol>
+<h1 id="Rust-高级特性（难）"><a href="#Rust-高级特性（难）" class="headerlink" title="Rust 高级特性（难）"></a>Rust 高级特性（难）</h1><h2 id="Unsafe-Rust"><a href="#Unsafe-Rust" class="headerlink" title="Unsafe Rust"></a>Unsafe Rust</h2><ol>
+<li><p>可以提供 Super Power:</p>
+<ol>
+<li>解引用裸指针</li>
+<li>调用不安全的函数或方法</li>
+<li>访问或修改可变静态变量</li>
+<li>实现不安全的 trait：当至少有一个方法中包含编译器无法验证的变量时 trait 是不安全的</li>
+</ol>
+</li>
+<li><p>之所以需要 Unsafe Rust，是因为：</p>
+<ol>
+<li>静态分析（编译器）本质上是保守的，有时候程序可能是有效的，但被拒绝编译</li>
+<li>底层计算机硬件固有的不安全性</li>
+</ol>
+</li>
+<li><p><code>unsafe</code> 并不会关闭 borrow-checker 或者禁用其它 Rust 安全检查</p>
+</li>
+<li><code>unsafe</code> 不代表代码块真的很危险或者必然导致内存安全问题，真正意图是程序员会确保 <code>unsafe block</code> 中的代码是以有效的方式访问内存</li>
+<li>可以为不安全的代码提供安全的抽象接口</li>
+<li><p><strong>裸指针（raw pointers）</strong> 类型：<code>*const T</code> 和 <code>*mut T</code>，区别于引用和智能指针的地方：</p>
+<ol>
+<li>允许忽略借用规则，可同时拥有不可变和可变的指针，或多个指向相同位置的可变指针</li>
+<li>不保证指向有效的内存</li>
+<li>允许为空</li>
+<li>不能实现任何自动清理功能</li>
+</ol>
+</li>
+<li><p>可以在安全的代码中创建裸指针，但不能直接 <strong>解引用</strong> 裸指针（必须要在 <code>unsafe</code> 环境下）</p>
+</li>
+<li>裸指针的一个常见的应用场景就是调用 C 接口</li>
+<li><code>extern</code> 关键字可以创建和使用 <strong>外部函数接口（Foreign Function Interface, FFI）</strong></li>
+<li>常量与静态变量：<ol>
+<li>静态变量的内存地址总是固定的，且生命周期为 <code>&#39;static</code>，使用静态变量值总会访问相同的地址</li>
+<li>常量允许在任何被用到的时候复制其数据</li>
+<li>静态变量是可变的，访问和修改可变静态变量都是 <strong>不安全</strong> 的</li>
+</ol>
+</li>
+</ol>
+<h2 id="高级生命周期"><a href="#高级生命周期" class="headerlink" title="高级生命周期"></a>高级生命周期</h2><ol>
+<li><p>涉及的主题：</p>
+<ol>
+<li><strong>生命周期子类型（lifetime subtyping）</strong>：确保某个生命周期长于另一个生命周期的方式</li>
+<li><strong>生命周期绑定（lifetime bounds）</strong>：用于指定泛型引用的生命周期</li>
+<li><strong>trait 对象生命周期（trait object lifetimes）</strong>：如何推断，何时需要绑定</li>
+<li><strong>匿名生命周期</strong>：省略写法</li>
+</ol>
+</li>
+<li><p>trait bound 可以帮助 Rust 验证泛型的引用不会存在的比其引用的数据更久：如 <code>T: &#39;a&#39;</code></p>
+</li>
+<li><code>&#39;_</code> 匿名生命周期，简化写法</li>
+</ol>
+<h2 id="高级-trait"><a href="#高级-trait" class="headerlink" title="高级 trait"></a>高级 trait</h2><ol>
+<li><strong>关联类型（associated types）</strong> 是一个将类型占位符与 trait 相关联的方式，这样 trait 的方法签名中就可以使用这些占位符</li>
+<li><p>为何要使用关联类型而非泛型呢：</p>
+<ol>
+<li>泛型的话，每次实现 trait 都需要注明类型；支持多次实现 trait</li>
+<li>关联类型，则只能针对一种类型实现一次，且无需注明类型</li>
+</ol>
+</li>
+<li><p>当使用泛型参数时，可以为泛型指定默认的具体类型。为泛型指定默认类型的语法是在声明泛型类型时使用：<code>&lt;PlaceholderType=ConcreteType&gt;</code></p>
+</li>
+<li><code>std::ops</code> 中列出的运算符和 trait 可以重载</li>
+<li><code>RHS</code> 全称是 right hand side</li>
+<li><code>RHS=Self</code>：默认类型参数（default parameters）</li>
+<li>Rust 不会阻止你为一个类型实现某个方法，再去实现一个或多个具有同名的 trait 方法。但是在调用时，默认会调用直接实现在类型上的方法。要想调用指定 trait 的某个方法，可以使用类似 <code>TraitName::method(&amp;obj)</code> 这种写法</li>
+<li><p>完全限定语法消除同名关联函数歧义示例：<code>&lt;Dog as Animal&gt;::baby_name()</code>，完整语法：</p>
+ <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&lt;Type <span class="keyword">as</span> Trait&gt;::function(receiver_if_method, next_arg, ...);</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>可以选择在任何函数或方法调用处使用完全限定语法</p>
+</li>
+</ol>
+<h2 id="高级类型"><a href="#高级类型" class="headerlink" title="高级类型"></a>高级类型</h2><ol>
+<li>必须将动态大小类型的值置于某种指针之后</li>
+<li>动态大小类型 (DST，dynamically sized types)，只有在运行时才可以知道大小的类型</li>
+<li><code>Sized</code> trait，决定一个类型的大小是否在编译时可知，自动为编译器在编译时就知道大小的类型实现</li>
+<li><p>Rust 隐式地位每个泛型函数增加了 <code>Sized</code> bound</p>
+ <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 默认添加了 `Sized` 绑定</span></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">generic</span></span>&lt;T: <span class="built_in">Sized</span>&gt; (t: T) &#123;&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><code>?Sized</code> 可以放宽限制，但是需要使用 <code>&amp;T</code>，保证参数是类型是 <code>Sized</code>，但 T 可以不用是 Sized 的：</p>
+ <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">generic</span></span>&lt;T: ?<span class="built_in">Sized</span>&gt; (t: &amp;T) &#123;&#125;</span><br></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="高级函数和闭包"><a href="#高级函数和闭包" class="headerlink" title="高级函数和闭包"></a>高级函数和闭包</h2><ol>
+<li>除了可以向函数传递闭包外，还可以传递常规函数。通过函数指针允许使用函数作为另一个函数的参数</li>
+<li><code>fn</code> 叫做 <strong>函数指针（function pointer）</strong></li>
+<li>函数指针实现了三个闭包 <code>trait</code>（<code>Fn</code>, <code>FnMut</code> 和 <code>FnOnce</code>），总是可以在调用期望闭包的函数时传递函数指针作为参数</li>
+</ol>
+<h2 id="宏"><a href="#宏" class="headerlink" title="宏"></a>宏</h2><ol>
+<li><p><strong>宏（Macro）</strong> 是 Rust 中一些列的功能：</p>
+<ol>
+<li><strong>声明（Declarative）宏</strong>：使用 <code>macro_rules!</code></li>
+<li><strong>过程（Procedural) 宏</strong>：<ol>
+<li>自定义 <code>#[derive]</code> 宏</li>
+<li>类属性（Attribute）宏</li>
+<li>类函数宏</li>
+</ol>
+</li>
+</ol>
+</li>
+<li><p>宏是一种为其它代码而写代码的方式，即所谓的 **元编程（meta programming）</p>
+</li>
+<li>元编程对于减少大量编写和维护的代码非常有用</li>
+<li>宏只接受一个可变参数</li>
+<li>宏可以在编译器翻译代码前展开</li>
+<li>宏比普通函数更加难以阅读、理解和维护</li>
+<li>在调用宏 <strong>之前</strong> 必须定义并引入到作用域，而函数则可以在任何地方定义和调用</li>
+<li>宏模式所匹配的是 Rust 代码结构而非值，所以和 <code>match</code> 模式匹配不同</li>
+<li>过程宏更像函数（一种过程类型），接收 Rust 代码作为输入，在这些代码上进行操作，再产生另一些代码作为输出，而非像声明式宏那样匹配模式，再用另外一部分代码替换当前代码</li>
+<li><code>#[derive(xx)]</code> 属性可以生成代码</li>
+<li>类属性宏则允许创建新的属性 <code>#[some_attribute]</code></li>
+<li><code>derive</code> 只能用于结构体和枚举；属性则可以用于其它的项，如函数</li>
+<li>类函数宏定义看起来像函数调用的宏，如 <code>let sql = sql!(SELECT * FROM users)</code></li>
+</ol>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li><a href="https://doc.rust-lang.org/book" target="_blank" rel="noopener">The Rust Book</a></li>
+<li><a href="https://kaisery.github.io/trpl-zh-cn" target="_blank" rel="noopener">Rust 程序设计语言</a></li>
+<li><a href="https://stackoverflow.com/questions/32304595/whats-the-difference-between-self-and-self" target="_blank" rel="noopener">self, Self in Rust</a></li>
+<li><a href="https://medium.com/@deckarep/paradigms-of-rust-for-the-go-developer-210f67cd6a29" target="_blank" rel="noopener">Paradigms of Rust for the Go developer</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2018/12/31/rust-learning-notes/" title="Rust 入坑记">http://ifaceless.space/2018/12/31/rust-learning-notes/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Rust/" rel="tag"><i class="fa fa-tag"></i> Rust</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/12/22/clean-arch-notes-intro/" rel="next" title="《架构整洁之道》学习笔记之介绍">
+                <i class="fa fa-chevron-left"></i> 《架构整洁之道》学习笔记之介绍
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/01/03/clean-arch-notes-paradigms/" rel="prev" title="《架构整洁之道》学习笔记之编程范式">
+                《架构整洁之道》学习笔记之编程范式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me@ifaceless.me" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#变量"><span class="nav-number">2.</span> <span class="nav-text">变量</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#所有权"><span class="nav-number">3.</span> <span class="nav-text">所有权</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#规则"><span class="nav-number">3.1.</span> <span class="nav-text">规则</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#注意点"><span class="nav-number">3.2.</span> <span class="nav-text">注意点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#引用和借用"><span class="nav-number">3.3.</span> <span class="nav-text">引用和借用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Slice-切片"><span class="nav-number">3.4.</span> <span class="nav-text">Slice 切片</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#结构体"><span class="nav-number">4.</span> <span class="nav-text">结构体</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#枚举与模式匹配"><span class="nav-number">5.</span> <span class="nav-text">枚举与模式匹配</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#模块与代码复用"><span class="nav-number">6.</span> <span class="nav-text">模块与代码复用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#通用集合类型"><span class="nav-number">7.</span> <span class="nav-text">通用集合类型</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#错误处理"><span class="nav-number">8.</span> <span class="nav-text">错误处理</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#要不要-panic"><span class="nav-number">8.1.</span> <span class="nav-text">要不要 panic!</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#泛型、Trait-和生命周期"><span class="nav-number">9.</span> <span class="nav-text">泛型、Trait 和生命周期</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#生命周期和引用有效性"><span class="nav-number">10.</span> <span class="nav-text">生命周期和引用有效性</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#单元测试与集成测试"><span class="nav-number">11.</span> <span class="nav-text">单元测试与集成测试</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#命令行小工具：rgrep"><span class="nav-number">12.</span> <span class="nav-text">命令行小工具：rgrep</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#迭代器和闭包"><span class="nav-number">13.</span> <span class="nav-text">迭代器和闭包</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cargo-和-crates-io"><span class="nav-number">14.</span> <span class="nav-text">Cargo 和 crates.io</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#智能指针"><span class="nav-number">15.</span> <span class="nav-text">智能指针</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Box"><span class="nav-number">15.1.</span> <span class="nav-text">Box</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Deref"><span class="nav-number">15.2.</span> <span class="nav-text">Deref</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Drop"><span class="nav-number">15.3.</span> <span class="nav-text">Drop</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Rc"><span class="nav-number">15.4.</span> <span class="nav-text">Rc</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#RefCell-和内部可变模式"><span class="nav-number">15.5.</span> <span class="nav-text">RefCell 和内部可变模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#循环引用"><span class="nav-number">15.6.</span> <span class="nav-text">循环引用</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#并发"><span class="nav-number">16.</span> <span class="nav-text">并发</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#线程"><span class="nav-number">16.1.</span> <span class="nav-text">线程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消息传递"><span class="nav-number">16.2.</span> <span class="nav-text">消息传递</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#状态共享：Mutex-与-Arc"><span class="nav-number">16.3.</span> <span class="nav-text">状态共享：Mutex 与 Arc</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Sync-和-Send"><span class="nav-number">16.4.</span> <span class="nav-text">Sync 和 Send</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Rust-面向对象特征"><span class="nav-number">17.</span> <span class="nav-text">Rust 面向对象特征</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#面向对象语言特点"><span class="nav-number">17.1.</span> <span class="nav-text">面向对象语言特点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Trait-Object"><span class="nav-number">17.2.</span> <span class="nav-text">Trait Object</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#状态模式实现"><span class="nav-number">17.3.</span> <span class="nav-text">状态模式实现</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#模式匹配"><span class="nav-number">18.</span> <span class="nav-text">模式匹配</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Rust-高级特性（难）"><span class="nav-number">19.</span> <span class="nav-text">Rust 高级特性（难）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Unsafe-Rust"><span class="nav-number">19.1.</span> <span class="nav-text">Unsafe Rust</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高级生命周期"><span class="nav-number">19.2.</span> <span class="nav-text">高级生命周期</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高级-trait"><span class="nav-number">19.3.</span> <span class="nav-text">高级 trait</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高级类型"><span class="nav-number">19.4.</span> <span class="nav-text">高级类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#高级函数和闭包"><span class="nav-number">19.5.</span> <span class="nav-text">高级函数和闭包</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#宏"><span class="nav-number">19.6.</span> <span class="nav-text">宏</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">20.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>
