@@ -106,7 +106,7 @@
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-5f2b9c321b7100a11e2dae9e48bce81f_r.png">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-e7ae1f0fcc4b3a1d0af4e65a1ca04101_r.png">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-ff24fef84f1c136922f8bf1f5679ea99_hd.png">
-<meta property="og:updated_time" content="2019-11-24T09:58:50.406Z">
+<meta property="og:updated_time" content="2019-11-24T10:07:26.745Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux Kernel Development 学习与总结">
 <meta name="twitter:description" content="引言最近抽时间把 Operating Systems: Three Easy Pieces 终于看完了（其实 2017 年就知道它了，没想到拖到了 2019 年末 😅），全书分三个部分（虚拟化、并发、持久化）对操作系统的一些通用设计思想进行了介绍，学完后，对于进程、内存虚拟化、并发、文件系统有了更加深刻的认识。但是，真实的世界是什么样子的呢？这就是希望在阅读《Linux 设计与实现》（Linux">
@@ -415,7 +415,7 @@
       
 
       
-        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>最近抽时间把 <em>Operating Systems: Three Easy Pieces</em> 终于看完了（其实 2017 年就知道它了，没想到拖到了 2019 年末 😅），全书分三个部分（虚拟化、并发、持久化）对操作系统的一些通用设计思想进行了介绍，学完后，对于进程、内存虚拟化、并发、文件系统有了更加深刻的认识。但是，真实的世界是什么样子的呢？这就是希望在阅读《Linux 设计与实现》（<em>Linux Kernel Development</em>）后找到想要的答案。当然，在学习中也针对很多部分搜集了不少学习资料，整理在文后，方便加深理解。</p>
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>最近抽时间把 <a href="http://pages.cs.wisc.edu/~remzi/OSTEP/" target="_blank" rel="noopener"><em>Operating Systems: Three Easy Pieces</em></a> 终于看完了（其实 2017 年就知道它了，没想到拖到了 2019 年末 😅），全书分三个部分（虚拟化、并发、持久化）对操作系统的一些通用设计思想进行了介绍，学完后，对于进程、内存虚拟化、并发、文件系统有了更加深刻的认识。但是，真实的世界是什么样子的呢？这就是希望在阅读《Linux 设计与实现》（<em>Linux Kernel Development</em>）后找到想要的答案。当然，在学习中也针对很多部分搜集了不少学习资料，整理在文后，方便加深理解。</p>
 <p>在学习之前，思考了一些问题，可以在学习中探索这些问题的答案：</p>
 <ol>
 <li>Linux 中进程、线程是如何实现的？各种调度策略是什么样的？又是怎么实现的呢？</li>
@@ -424,7 +424,7 @@
 <li>文件系统有很多，操作系统是怎么进行抽象，并对用户提供一致优雅的系统调用接口的呢？</li>
 <li>Linux 内核中有哪些非常经典的算法和数据结构的应用？它们使用场景是什么？怎么实现的呢？</li>
 </ol>
-<h1 id="Linux-内核简介"><a href="#Linux-内核简介" class="headerlink" title="Linux 内核简介"></a>Linux 内核简介</h1><p><a href="https://makelinux.github.io/kernel_map/" target="_blank" rel="noopener"><img src="https://pic4.zhimg.com/80/v2-e0c1aced72034fd29160b2a0dbc73fa5_r.png" alt=""></a></p>
+<h1 id="Linux-内核简介"><a href="#Linux-内核简介" class="headerlink" title="Linux 内核简介"></a>Linux 内核简介</h1><p><img src="https://pic4.zhimg.com/80/v2-e0c1aced72034fd29160b2a0dbc73fa5_r.png" alt=""></p>
 <p>说到 Linux，就不得不提到它的祖先 Unix 系统。Unix 在 1970 年左右被 Ken Thompson 首先在一台 PDP-7 机型上实现，而后移植到 PDP-11 机器上，1973 年它被使用 C 语言重写，提供了更加强大的可移植性。</p>
 <p>经过多年发展，Unix 系统成为了一个强大、健壮且稳定的操作系统。其强大的根本原因如下：</p>
 <ol>
@@ -713,7 +713,7 @@
 </li>
 <li><strong>返回值如何带给用户空间？</strong>当然也是通过寄存器来传递的，在 x86 中，可以使用 eax 寄存器。</li>
 </ol>
-<h1 id="内核数据结构"><a href="#内核数据结构" class="headerlink" title="内核数据结构"></a>内核数据结构</h1><p><a href="https://naotu.baidu.com/file/c79c254f63d70f61aa57a980da878ca8" target="_blank" rel="noopener"><img src="https://pic1.zhimg.com/80/v2-2bbaf34ff51ed6c19c0390d1fd118b40_hd.png" alt="内核数据结构"></a></p>
+<h1 id="内核数据结构"><a href="#内核数据结构" class="headerlink" title="内核数据结构"></a>内核数据结构</h1><p><img src="https://pic1.zhimg.com/80/v2-2bbaf34ff51ed6c19c0390d1fd118b40_hd.png" alt="内核数据结构"></p>
 <p>Linux 内核链表实现独树一帜。它是将链表塞入到数据结构，而非常规的那种在数据结构中塞入链表。</p>
 <p>可以看下对比就知道为何特别了：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 常规定义方法</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">node</span> &#123;</span></span><br><span class="line">    <span class="keyword">void</span> *data;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">node</span> *<span class="title">prev</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">node</span> *<span class="title">next</span>;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Linux 内核链表定义</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> *<span class="title">prev</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> *<span class="title">next</span>;</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">node</span> &#123;</span></span><br><span class="line">    <span class="keyword">void</span> *data;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">list</span>;</span> <span class="comment">// 所有的 node 形成链表</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -727,7 +727,33 @@
 </ol>
 <p>Linux 中对于中断的响应和处理分成<strong>上半部</strong>和<strong>下半部</strong>。其中上半部会在接收到中断信号后快速完成必要工作的（有严格的时限），而更加繁重的任务则会在下半部执行。在上半部需要快速执行，且无法睡眠；但下半部则没有这样的限制。</p>
 <h2 id="无须重入"><a href="#无须重入" class="headerlink" title="无须重入"></a>无须重入</h2><p>Linux 中的中断处理不用考虑重入，因为当给定中断处理程序在执行时，对应中断线在所有处理器上被屏蔽，避免同一中断线接收另外的中断。这样做简化了中断处理程序的编写。</p>
-<h2 id="中断上下文"><a href="#中断上下文" class="headerlink" title="中断上下文"></a>中断上下文</h2><p>所谓的中断上下文（interrupt context），就是在执行中断处理程序时，内核所处的上下文。中断上下文和进程上下文没有半毛钱关系，我们可以把它和进程上下文进行一番对比：<br>| 中断上下文  | 进程上下文  |<br>| ———— | ———— |<br>|执行中断处理程序时，内核所处的上下文   |  内核代表进程执行（系统调用、运行内核线程）时，所处的操作模式  |<br>|与进程无瓜，与 current 宏无瓜   |可通过 current 宏关联当前进程   |<br>|没有后备进程，无法睡眠，也不能调用会导致睡眠的函数   |可睡眠，可调用调度程序   |<br>|有严格的执行时限|没有非常严格的要求|</p>
+<h2 id="中断上下文"><a href="#中断上下文" class="headerlink" title="中断上下文"></a>中断上下文</h2><p>所谓的中断上下文（interrupt context），就是在执行中断处理程序时，内核所处的上下文。中断上下文和进程上下文没有半毛钱关系，我们可以把它和进程上下文进行一番对比：</p>
+<table>
+<thead>
+<tr>
+<th>中断上下文</th>
+<th>进程上下文</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>执行中断处理程序时，内核所处的上下文</td>
+<td>内核代表进程执行（系统调用、运行内核线程）时，所处的操作模式</td>
+</tr>
+<tr>
+<td>与进程无瓜，与 current 宏无瓜</td>
+<td>可通过 current 宏关联当前进程</td>
+</tr>
+<tr>
+<td>没有后备进程，无法睡眠，也不能调用会导致睡眠的函数</td>
+<td>可睡眠，可调用调度程序</td>
+</tr>
+<tr>
+<td>有严格的执行时限</td>
+<td>没有非常严格的要求</td>
+</tr>
+</tbody>
+</table>
 <h2 id="下半部及推后执行的工作"><a href="#下半部及推后执行的工作" class="headerlink" title="下半部及推后执行的工作"></a>下半部及推后执行的工作</h2><p>下半部就是执行和中断处理相关，但是中断处理程序中不会执行的工作。引入下半部的目的就是让中断处理程序尽可能地简短、快速，避免屏蔽中断太久，导致系统的响应能力和性能受到影响；而比较繁重的工作可以在下半部执行。</p>
 <p>下半部主要实现方式：</p>
 <ol>
@@ -752,7 +778,7 @@
 <li><strong>睡眠及与用户空间同步</strong>：在内核中执行的进程可能会睡眠，从而导致调度程序被唤醒，并运行新的用户进程</li>
 <li><strong>SMP</strong>：多个处理器会并行执行</li>
 </ol>
-<p><a href="https://naotu.baidu.com/file/c79c254f63d70f61aa57a980da878ca8" target="_blank" rel="noopener"><img src="https://pic3.zhimg.com/80/v2-de0df74c2c0f79723ab558d3b2727e71.png" alt=""></a></p>
+<p><img src="https://pic3.zhimg.com/80/v2-de0df74c2c0f79723ab558d3b2727e71.png" alt=""></p>
 <h1 id="定时器和时间管理"><a href="#定时器和时间管理" class="headerlink" title="定时器和时间管理"></a>定时器和时间管理</h1><p>内核需要在硬件（RTC 和 Timer）的帮助下才能计算和管理时间，内核通过<strong>已知的</strong>（这个时钟周期是可编程的，可确定的）时钟中断间隔来计算 wall time 和 jiffies（系统启动以来的节拍总数）。那么，在时钟中断发生时究竟会做哪些工作呢？以下给出一些会周期执行的工作：</p>
 <ol>
 <li>更新系统运行时间和实际时间</li>
@@ -854,7 +880,7 @@
 </ol>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mm_struct -&gt; vm_area_struct</span><br></pre></td></tr></table></figure>
 <h2 id="64-位系统进程地址空间布局"><a href="#64-位系统进程地址空间布局" class="headerlink" title="64 位系统进程地址空间布局"></a>64 位系统进程地址空间布局</h2><p><img src="https://pic4.zhimg.com/80/v2-5f2b9c321b7100a11e2dae9e48bce81f_r.png" alt=""><br>每一个进程都有 64bit 的地址空间，其中用户空间可以使用一半的地址空间（128 TiB），而另一半则是内核空间使用。内核通常驻留在内存中，并且会被映射到每个进程的虚拟内存当中。而在内核中，所有的内核线程都共享一个地址空间。详细的内存布局可以参考后面的学习资料~</p>
-<h2 id="页表"><a href="#页表" class="headerlink" title="页表"></a>页表</h2><p>Linux 中使用三级页表完成地址转换，使用多级页表可以节约地址转换需要占用的空间。但由于完成虚拟页地址到物理页地址转换都需要在三级页表中查找到映射，开销比较高。所以很多体系结构提供了 TLB 作为地址映射的硬件缓存。<br><img src="https://pic4.zhimg.com/80/v2-e7ae1f0fcc4b3a1d0af4e65a1ca04101_r.png" alt=""><br><a href="https://hackernoon.com/entering-god-mode-the-kernel-space-mirroring-attack-8a86b749545f" target="_blank" rel="noopener"><img src="https://pic4.zhimg.com/80/v2-ff24fef84f1c136922f8bf1f5679ea99_hd.png" alt=""></a></p>
+<h2 id="页表"><a href="#页表" class="headerlink" title="页表"></a>页表</h2><p>Linux 中使用三级页表完成地址转换，使用多级页表可以节约地址转换需要占用的空间。但由于完成虚拟页地址到物理页地址转换都需要在三级页表中查找到映射，开销比较高。所以很多体系结构提供了 TLB 作为地址映射的硬件缓存。<br><img src="https://pic4.zhimg.com/80/v2-e7ae1f0fcc4b3a1d0af4e65a1ca04101_r.png" alt=""><br><img src="https://pic4.zhimg.com/80/v2-ff24fef84f1c136922f8bf1f5679ea99_hd.png" alt=""></p>
 <h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>总体上来说，这本书还是比较适合对操作系统基本概念有一定了解，且对于 Linux 内核也有一点了解的前提下阅读，否则在看到一些概念的时候会比较吃力。比如对于进程、线程的抽象定义，虚拟内存中讲到的分页、分段概念以及多级页表的概念。另外，对于常用数据结构需要有清晰的认识；并发相关的同步问题也有了解。<br>虽然整本书是基于 Linux 2.6.3x 内核为基础的，如今的 Linux 内核已经发展到 5.x 时代了，这期间变化肯定有很多。但这本书的价值还是存在的，其中讲得很多思想、方法依然实用，可以变通地去看待和理解。</p>
 <h1 id="名词解释"><a href="#名词解释" class="headerlink" title="名词解释"></a>名词解释</h1><ol>
 <li>POSIX: Portable Operating System Interface</li>
@@ -881,6 +907,8 @@
 <li><a href="https://stackoverflow.com/questions/55443733/linux-kernel-memory-layout" target="_blank" rel="noopener">Linux kernel memory layout</a></li>
 <li><a href="https://www.kernel.org/doc/gorman/html/understand/understand006.html" target="_blank" rel="noopener">Chapter 3 Page Table Management</a></li>
 <li><a href="https://ifaceless.space/2019/11/18/linux-kernel-scheduler-papers/">Linux 调度器资料整理</a></li>
+<li><a href="https://makelinux.github.io/kernel_map/" target="_blank" rel="noopener">Linux Kernel Map</a></li>
+<li><a href="https://hackernoon.com/entering-god-mode-the-kernel-space-mirroring-attack-8a86b749545f" target="_blank" rel="noopener">Entering God Mode — The Kernel Space Mirroring Attack</a></li>
 </ul>
 
       
