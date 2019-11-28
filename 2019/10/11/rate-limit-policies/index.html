@@ -89,20 +89,20 @@
 
 
 
-<meta name="description" content="引言本节主要学习下两种常用的单机限流思想，分别是漏桶算法和令牌桶算法。此外，还将给出使用 Python 及 Go 语言实现，便于加深理解。当然，现实中肯定不能直接用下面的代码。实际应用时，我们不大可能在单机执行限流，下面的实现也并非线程或 goroutine 安全的。 实际限流可以考虑在 Nginx 层对请求限流，或者如果真的要自己在业务方实现一套限流策略的话，可以考虑基于 Redis 实现分布式">
+<meta name="description" content="引言本节主要学习下两种常用的单机限流思想，分别是漏桶算法和令牌桶算法。此外，还将给出使用 Python 及 Go 语言实现，便于加深理解。当然，现实中肯定不能直接用下面的代码。实际应用时，我们不大可能在单机执行限流，下面的实现也并非线程或 goroutine 安全的。">
 <meta name="keywords" content="Web 开发,限流">
 <meta property="og:type" content="article">
 <meta property="og:title" content="限流算法学习：漏桶 &amp; 令牌桶算法">
-<meta property="og:url" content="http://ifaceless.space/2019/11/20/rate-limit-policies/index.html">
+<meta property="og:url" content="http://ifaceless.space/2019/10/11/rate-limit-policies/index.html">
 <meta property="og:site_name" content="黑白之院">
-<meta property="og:description" content="引言本节主要学习下两种常用的单机限流思想，分别是漏桶算法和令牌桶算法。此外，还将给出使用 Python 及 Go 语言实现，便于加深理解。当然，现实中肯定不能直接用下面的代码。实际应用时，我们不大可能在单机执行限流，下面的实现也并非线程或 goroutine 安全的。 实际限流可以考虑在 Nginx 层对请求限流，或者如果真的要自己在业务方实现一套限流策略的话，可以考虑基于 Redis 实现分布式">
+<meta property="og:description" content="引言本节主要学习下两种常用的单机限流思想，分别是漏桶算法和令牌桶算法。此外，还将给出使用 Python 及 Go 语言实现，便于加深理解。当然，现实中肯定不能直接用下面的代码。实际应用时，我们不大可能在单机执行限流，下面的实现也并非线程或 goroutine 安全的。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://pic2.zhimg.com/80/v2-bdf9f813d2f9d8622174e9e58be308b6_hd.png">
 <meta property="og:image" content="https://pic3.zhimg.com/80/v2-f2b510a893be6ff316bbde684b70c2e2_hd.png">
-<meta property="og:updated_time" content="2019-11-24T09:45:59.963Z">
+<meta property="og:updated_time" content="2019-11-28T09:41:31.559Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="限流算法学习：漏桶 &amp; 令牌桶算法">
-<meta name="twitter:description" content="引言本节主要学习下两种常用的单机限流思想，分别是漏桶算法和令牌桶算法。此外，还将给出使用 Python 及 Go 语言实现，便于加深理解。当然，现实中肯定不能直接用下面的代码。实际应用时，我们不大可能在单机执行限流，下面的实现也并非线程或 goroutine 安全的。 实际限流可以考虑在 Nginx 层对请求限流，或者如果真的要自己在业务方实现一套限流策略的话，可以考虑基于 Redis 实现分布式">
+<meta name="twitter:description" content="引言本节主要学习下两种常用的单机限流思想，分别是漏桶算法和令牌桶算法。此外，还将给出使用 Python 及 Go 语言实现，便于加深理解。当然，现实中肯定不能直接用下面的代码。实际应用时，我们不大可能在单机执行限流，下面的实现也并非线程或 goroutine 安全的。">
 <meta name="twitter:image" content="https://pic2.zhimg.com/80/v2-bdf9f813d2f9d8622174e9e58be308b6_hd.png">
 
 
@@ -133,7 +133,7 @@
 
 
 
-  <link rel="canonical" href="http://ifaceless.space/2019/11/20/rate-limit-policies/">
+  <link rel="canonical" href="http://ifaceless.space/2019/10/11/rate-limit-policies/">
 
 
 
@@ -286,7 +286,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/11/20/rate-limit-policies/">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/10/11/rate-limit-policies/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -315,8 +315,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-20T21:20:11+08:00">
-                2019-11-20
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-11T21:20:11+08:00">
+                2019-10-11
               </time>
             
 
@@ -408,8 +408,7 @@
       
 
       
-        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>本节主要学习下两种常用的单机限流思想，分别是<strong>漏桶算法</strong>和<strong>令牌桶算法</strong>。此外，还将给出使用 Python 及 Go 语言实现，便于加深理解。当然，现实中肯定不能直接用下面的代码。实际应用时，我们不大可能在单机执行限流，下面的实现也并非线程或 goroutine 安全的。</p>
-<p>实际限流可以考虑在 Nginx 层对请求限流，或者如果真的要自己在业务方实现一套限流策略的话，可以考虑基于 Redis 实现分布式限流策略。并且在实际应用中，可能还会基于不同的维度进行限流，如用户 id，请求 IP 等，实际应用需要考虑的东西更多。</p>
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>本节主要学习下两种常用的单机限流思想，分别是<strong>漏桶算法</strong>和<strong>令牌桶算法</strong>。此外，还将给出使用 Python 及 Go 语言实现，便于加深理解。当然，现实中肯定不能直接用下面的代码。实际应用时，我们不大可能在单机执行限流，下面的实现也并非线程或 goroutine 安全的。<br><a id="more"></a><br>实际限流可以考虑在 Nginx 层对请求限流，或者如果真的要自己在业务方实现一套限流策略的话，可以考虑基于 Redis 实现分布式限流策略。并且在实际应用中，可能还会基于不同的维度进行限流，如用户 id，请求 IP 等，实际应用需要考虑的东西更多。</p>
 <h1 id="漏桶算法"><a href="#漏桶算法" class="headerlink" title="漏桶算法"></a>漏桶算法</h1><p>可以把请求当作水流，水流全部进入有限大小的水缸，同时水缸会按照固定的速率漏水。当水流湍急，水缸漏水太慢的话，会得知水缸积水，直到溢出（此时拒绝服务）。</p>
 <p><img src="https://pic2.zhimg.com/80/v2-bdf9f813d2f9d8622174e9e58be308b6_hd.png" alt=""></p>
 <h2 id="特点"><a href="#特点" class="headerlink" title="特点"></a>特点</h2><ol>
@@ -450,7 +449,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://ifaceless.space/2019/11/20/rate-limit-policies/" title="限流算法学习：漏桶 & 令牌桶算法">http://ifaceless.space/2019/11/20/rate-limit-policies/</a>
+    <a href="http://ifaceless.space/2019/10/11/rate-limit-policies/" title="限流算法学习：漏桶 & 令牌桶算法">http://ifaceless.space/2019/10/11/rate-limit-policies/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -480,8 +479,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/11/18/linux-kernel-scheduler-papers/" rel="next" title="Linux 调度器学习资料整理">
-                <i class="fa fa-chevron-left"></i> Linux 调度器学习资料整理
+              <a href="/2019/09/22/implement-lru-cache-in-go/" rel="next" title="使用 Go 语言实现一个简单的 LRU Cache">
+                <i class="fa fa-chevron-left"></i> 使用 Go 语言实现一个简单的 LRU Cache
               </a>
             
           </div>
@@ -490,8 +489,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/11/22/python-stdlib-threading/" rel="prev" title="Python 标准库源码之 threading 模块">
-                Python 标准库源码之 threading 模块 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/10/30/linux-kernel-dev-notes/" rel="prev" title="Linux Kernel Development 学习与总结">
+                Linux Kernel Development 学习与总结 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -573,7 +572,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-count">29</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

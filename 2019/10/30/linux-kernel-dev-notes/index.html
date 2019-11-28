@@ -76,7 +76,7 @@
 
 
 
-  <meta name="keywords" content="Linux,操作系统,调度器,内存管理,文件系统,">
+  <meta name="keywords" content="Linux,调度器,操作系统,内存管理,文件系统,">
 
 
 
@@ -89,13 +89,13 @@
 
 
 
-<meta name="description" content="引言最近抽时间把 Operating Systems: Three Easy Pieces 终于看完了（其实 2017 年就知道它了，没想到拖到了 2019 年末 😅），全书分三个部分（虚拟化、并发、持久化）对操作系统的一些通用设计思想进行了介绍，学完后，对于进程、内存虚拟化、并发、文件系统有了更加深刻的认识。但是，真实的世界是什么样子的呢？这就是希望在阅读《Linux 设计与实现》（Linux">
-<meta name="keywords" content="Linux,操作系统,调度器,内存管理,文件系统">
+<meta name="description" content="引言最近抽时间把 Operating Systems: Three Easy Pieces 终于看完了（其实 2017 年就知道它了，没想到拖到了 2019 年 😅），全书分三个部分（虚拟化、并发、持久化）对操作系统的一些通用设计思想进行了介绍，学完后，对于进程、内存虚拟化、并发、文件系统有了更加深刻的认识。但是，真实的世界是什么样子的呢？这就是希望在阅读《Linux 设计与实现》（Linux">
+<meta name="keywords" content="Linux,调度器,操作系统,内存管理,文件系统">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Linux Kernel Development 学习与总结">
-<meta property="og:url" content="http://ifaceless.space/2019/10/31/linux-kernel-dev-notes/index.html">
+<meta property="og:url" content="http://ifaceless.space/2019/10/30/linux-kernel-dev-notes/index.html">
 <meta property="og:site_name" content="黑白之院">
-<meta property="og:description" content="引言最近抽时间把 Operating Systems: Three Easy Pieces 终于看完了（其实 2017 年就知道它了，没想到拖到了 2019 年末 😅），全书分三个部分（虚拟化、并发、持久化）对操作系统的一些通用设计思想进行了介绍，学完后，对于进程、内存虚拟化、并发、文件系统有了更加深刻的认识。但是，真实的世界是什么样子的呢？这就是希望在阅读《Linux 设计与实现》（Linux">
+<meta property="og:description" content="引言最近抽时间把 Operating Systems: Three Easy Pieces 终于看完了（其实 2017 年就知道它了，没想到拖到了 2019 年 😅），全书分三个部分（虚拟化、并发、持久化）对操作系统的一些通用设计思想进行了介绍，学完后，对于进程、内存虚拟化、并发、文件系统有了更加深刻的认识。但是，真实的世界是什么样子的呢？这就是希望在阅读《Linux 设计与实现》（Linux">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-e0c1aced72034fd29160b2a0dbc73fa5_r.png">
 <meta property="og:image" content="https://pic2.zhimg.com/80/v2-ad2075f3f165ab1ab983605446be9b28_r.png">
@@ -106,10 +106,10 @@
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-5f2b9c321b7100a11e2dae9e48bce81f_r.png">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-e7ae1f0fcc4b3a1d0af4e65a1ca04101_r.png">
 <meta property="og:image" content="https://pic4.zhimg.com/80/v2-ff24fef84f1c136922f8bf1f5679ea99_hd.png">
-<meta property="og:updated_time" content="2019-11-24T10:07:26.745Z">
+<meta property="og:updated_time" content="2019-11-28T09:41:31.556Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Linux Kernel Development 学习与总结">
-<meta name="twitter:description" content="引言最近抽时间把 Operating Systems: Three Easy Pieces 终于看完了（其实 2017 年就知道它了，没想到拖到了 2019 年末 😅），全书分三个部分（虚拟化、并发、持久化）对操作系统的一些通用设计思想进行了介绍，学完后，对于进程、内存虚拟化、并发、文件系统有了更加深刻的认识。但是，真实的世界是什么样子的呢？这就是希望在阅读《Linux 设计与实现》（Linux">
+<meta name="twitter:description" content="引言最近抽时间把 Operating Systems: Three Easy Pieces 终于看完了（其实 2017 年就知道它了，没想到拖到了 2019 年 😅），全书分三个部分（虚拟化、并发、持久化）对操作系统的一些通用设计思想进行了介绍，学完后，对于进程、内存虚拟化、并发、文件系统有了更加深刻的认识。但是，真实的世界是什么样子的呢？这就是希望在阅读《Linux 设计与实现》（Linux">
 <meta name="twitter:image" content="https://pic4.zhimg.com/80/v2-e0c1aced72034fd29160b2a0dbc73fa5_r.png">
 
 
@@ -140,7 +140,7 @@
 
 
 
-  <link rel="canonical" href="http://ifaceless.space/2019/10/31/linux-kernel-dev-notes/">
+  <link rel="canonical" href="http://ifaceless.space/2019/10/30/linux-kernel-dev-notes/">
 
 
 
@@ -293,7 +293,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/10/31/linux-kernel-dev-notes/">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/10/30/linux-kernel-dev-notes/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -322,8 +322,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-31T17:47:22+08:00">
-                2019-10-31
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-30T17:47:22+08:00">
+                2019-10-30
               </time>
             
 
@@ -415,8 +415,7 @@
       
 
       
-        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>最近抽时间把 <a href="http://pages.cs.wisc.edu/~remzi/OSTEP/" target="_blank" rel="noopener"><em>Operating Systems: Three Easy Pieces</em></a> 终于看完了（其实 2017 年就知道它了，没想到拖到了 2019 年末 😅），全书分三个部分（虚拟化、并发、持久化）对操作系统的一些通用设计思想进行了介绍，学完后，对于进程、内存虚拟化、并发、文件系统有了更加深刻的认识。但是，真实的世界是什么样子的呢？这就是希望在阅读《Linux 设计与实现》（<em>Linux Kernel Development</em>）后找到想要的答案。当然，在学习中也针对很多部分搜集了不少学习资料，整理在文后，方便加深理解。</p>
-<p>在学习之前，思考了一些问题，可以在学习中探索这些问题的答案：</p>
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>最近抽时间把 <a href="http://pages.cs.wisc.edu/~remzi/OSTEP/" target="_blank" rel="noopener"><em>Operating Systems: Three Easy Pieces</em></a> 终于看完了（其实 2017 年就知道它了，没想到拖到了 2019 年 😅），全书分三个部分（虚拟化、并发、持久化）对操作系统的一些通用设计思想进行了介绍，学完后，对于进程、内存虚拟化、并发、文件系统有了更加深刻的认识。但是，真实的世界是什么样子的呢？这就是希望在阅读《Linux 设计与实现》（<em>Linux Kernel Development</em>）后找到想要的答案。当然，在学习中也针对很多部分搜集了不少学习资料，整理在文后，方便加深理解。<br><a id="more"></a><br>在学习之前，思考了一些问题，可以在学习中探索这些问题的答案：</p>
 <ol>
 <li>Linux 中进程、线程是如何实现的？各种调度策略是什么样的？又是怎么实现的呢？</li>
 <li>并发问题肯定需要注意，Linux 中如何应对竞态条件 &amp; 数据竞争呢？各种常见的同步原语又是如何实现的？</li>
@@ -930,7 +929,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://ifaceless.space/2019/10/31/linux-kernel-dev-notes/" title="Linux Kernel Development 学习与总结">http://ifaceless.space/2019/10/31/linux-kernel-dev-notes/</a>
+    <a href="http://ifaceless.space/2019/10/30/linux-kernel-dev-notes/" title="Linux Kernel Development 学习与总结">http://ifaceless.space/2019/10/30/linux-kernel-dev-notes/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -947,9 +946,9 @@
           
             <a href="/tags/Linux/" rel="tag"><i class="fa fa-tag"></i> Linux</a>
           
-            <a href="/tags/操作系统/" rel="tag"><i class="fa fa-tag"></i> 操作系统</a>
-          
             <a href="/tags/调度器/" rel="tag"><i class="fa fa-tag"></i> 调度器</a>
+          
+            <a href="/tags/操作系统/" rel="tag"><i class="fa fa-tag"></i> 操作系统</a>
           
             <a href="/tags/内存管理/" rel="tag"><i class="fa fa-tag"></i> 内存管理</a>
           
@@ -966,8 +965,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/10/29/golang-traps/" rel="next" title="Go 编写姿势">
-                <i class="fa fa-chevron-left"></i> Go 编写姿势
+              <a href="/2019/10/11/rate-limit-policies/" rel="next" title="限流算法学习：漏桶 & 令牌桶算法">
+                <i class="fa fa-chevron-left"></i> 限流算法学习：漏桶 & 令牌桶算法
               </a>
             
           </div>
@@ -976,8 +975,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/11/15/implement-lru-cache-in-go/" rel="prev" title="使用 Go 语言实现一个简单的 LRU Cache">
-                使用 Go 语言实现一个简单的 LRU Cache <i class="fa fa-chevron-right"></i>
+              <a href="/2019/11/05/linux-kernel-scheduler-papers/" rel="prev" title="Linux 调度器学习资料整理">
+                Linux 调度器学习资料整理 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -1059,7 +1058,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-count">29</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

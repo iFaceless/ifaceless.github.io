@@ -93,14 +93,14 @@
 <meta name="keywords" content="Python,多线程,源码学习">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Python 标准库源码之 threading 模块">
-<meta property="og:url" content="http://ifaceless.space/2019/11/22/python-stdlib-threading/index.html">
+<meta property="og:url" content="http://ifaceless.space/2019/09/14/python-stdlib-threading/index.html">
 <meta property="og:site_name" content="黑白之院">
 <meta property="og:description" content="引言虽然说 Python 受限于 CPython 的实现，存在的 GIL 会导致我们在使用多线程的时候，没法利用多核跑多线程。但是有的时候还是会用到线程的，尤其是针对一些 I/O 密集型的任务，也可以使用它们。 在使用多线程编程时，我们随时需要注意竞态条件（race condition）和数据竞争（data race）的问题，前者会导致我们在不同的时间点运行程序得到的输出可能不同；而后者则更为可怕">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://pic2.zhimg.com/80/v2-ee4c29657d4deb6d0953bc8531241697_hd.png">
 <meta property="og:image" content="https://pic2.zhimg.com/80/v2-b4516542d0e21eab291382ac3f8ed364_hd.png">
 <meta property="og:image" content="https://pic3.zhimg.com/80/v2-976ddfaeddc70d04ee29843cfd125713_hd.png">
-<meta property="og:updated_time" content="2019-11-24T09:45:59.962Z">
+<meta property="og:updated_time" content="2019-11-28T09:41:31.558Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Python 标准库源码之 threading 模块">
 <meta name="twitter:description" content="引言虽然说 Python 受限于 CPython 的实现，存在的 GIL 会导致我们在使用多线程的时候，没法利用多核跑多线程。但是有的时候还是会用到线程的，尤其是针对一些 I/O 密集型的任务，也可以使用它们。 在使用多线程编程时，我们随时需要注意竞态条件（race condition）和数据竞争（data race）的问题，前者会导致我们在不同的时间点运行程序得到的输出可能不同；而后者则更为可怕">
@@ -134,7 +134,7 @@
 
 
 
-  <link rel="canonical" href="http://ifaceless.space/2019/11/22/python-stdlib-threading/">
+  <link rel="canonical" href="http://ifaceless.space/2019/09/14/python-stdlib-threading/">
 
 
 
@@ -287,7 +287,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/11/22/python-stdlib-threading/">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/09/14/python-stdlib-threading/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -316,8 +316,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-22T21:03:33+08:00">
-                2019-11-22
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-14T21:03:33+08:00">
+                2019-09-14
               </time>
             
 
@@ -410,8 +410,7 @@
 
       
         <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>虽然说 Python 受限于 CPython 的实现，存在的 GIL 会导致我们在使用多线程的时候，没法利用多核跑多线程。但是有的时候还是会用到线程的，尤其是针对一些 I/O 密集型的任务，也可以使用它们。</p>
-<p>在使用多线程编程时，我们随时需要注意<strong>竞态条件（race condition）</strong>和<strong>数据竞争（data race）</strong>的问题，前者会导致我们在不同的时间点运行程序得到的输出可能不同；而后者则更为可怕，容易导致共享的数据结构被错误修改，甚至导致程序崩溃或者出现莫名其妙的 Bug。这个时候自然就要用到 Python threading 模块为我们提供的若干同步原语了。</p>
-<p>那么，我们常用的 Lock、RLock、条件变量（Condition Variables）、信号量（Semaphore）等是如何实现的呢？接下来的源码学习是基于 <a href="https://github.com/python/cpython/blob/master/Lib/threading.py" target="_blank" rel="noopener">CPython master 分支的线程模块</a>。希望在学习完它们的实现后，能够加深理解，合理运用。</p>
+<p>在使用多线程编程时，我们随时需要注意<strong>竞态条件（race condition）</strong>和<strong>数据竞争（data race）</strong>的问题，前者会导致我们在不同的时间点运行程序得到的输出可能不同；而后者则更为可怕，容易导致共享的数据结构被错误修改，甚至导致程序崩溃或者出现莫名其妙的 Bug。这个时候自然就要用到 Python threading 模块为我们提供的若干同步原语了。<br><a id="more"></a><br>那么，我们常用的 Lock、RLock、条件变量（Condition Variables）、信号量（Semaphore）等是如何实现的呢？接下来的源码学习是基于 <a href="https://github.com/python/cpython/blob/master/Lib/threading.py" target="_blank" rel="noopener">CPython master 分支的线程模块</a>。希望在学习完它们的实现后，能够加深理解，合理运用。</p>
 <h1 id="源码学习"><a href="#源码学习" class="headerlink" title="源码学习"></a>源码学习</h1><p>CPython 的 threading 模块实际上是基于 Java 的线程模型实现的，所以熟悉 Java 的话，自然也不会对该模块的实现感到陌生。该模块是基于更底层的 <code>_thread</code> 模块，抽象出更加方便使用的线程模型，核心包括 <code>threading.Thread</code> 线程类封装，便于用户继承或组合；此外还有一些同步原语的实现。<code>Python/thread_nt.h</code> 文件中是 C 语言实现的底层和线程有关的函数（如锁的创建和维护、线程的创建和管理）。</p>
 <h2 id="同步原语"><a href="#同步原语" class="headerlink" title="同步原语"></a>同步原语</h2><h3 id="Lock"><a href="#Lock" class="headerlink" title="Lock"></a>Lock</h3><p>该模块中，<code>Lock</code> 其实是使用了底层 <code>_thread.allocate_lock</code> 函数来创建锁的。代码也很简单：</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Lock = _allocate_lock</span><br></pre></td></tr></table></figure>
@@ -464,7 +463,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://ifaceless.space/2019/11/22/python-stdlib-threading/" title="Python 标准库源码之 threading 模块">http://ifaceless.space/2019/11/22/python-stdlib-threading/</a>
+    <a href="http://ifaceless.space/2019/09/14/python-stdlib-threading/" title="Python 标准库源码之 threading 模块">http://ifaceless.space/2019/09/14/python-stdlib-threading/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -496,8 +495,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/11/20/rate-limit-policies/" rel="next" title="限流算法学习：漏桶 & 令牌桶算法">
-                <i class="fa fa-chevron-left"></i> 限流算法学习：漏桶 & 令牌桶算法
+              <a href="/2019/09/03/golang-traps/" rel="next" title="Go 编写姿势">
+                <i class="fa fa-chevron-left"></i> Go 编写姿势
               </a>
             
           </div>
@@ -506,8 +505,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/11/22/portal/" rel="prev" title="Go 语言中如何以优雅的姿势实现对象序列化？">
-                Go 语言中如何以优雅的姿势实现对象序列化？ <i class="fa fa-chevron-right"></i>
+              <a href="/2019/09/22/implement-lru-cache-in-go/" rel="prev" title="使用 Go 语言实现一个简单的 LRU Cache">
+                使用 Go 语言实现一个简单的 LRU Cache <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -589,7 +588,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-count">29</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

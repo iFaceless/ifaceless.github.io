@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Linux,调度器,CFS,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言Linux Kernel Development 一书中，关于 Linux 的进程调度器并没有讲解的很深入，只是提到了 CFS 调度器的基本思想和一些实现细节；并没有 Linux 早期的调度器介绍，以及最近这些年新增的在内核源码树外维护的调度器思想。所以在经过一番搜寻后，看到了这篇论文 A complete guide to Linux process scheduling，对 Linux 的">
+<meta name="keywords" content="Linux,调度器,CFS">
+<meta property="og:type" content="article">
+<meta property="og:title" content="论文学习之 Linux 调度器">
+<meta property="og:url" content="http://ifaceless.space/2019/11/17/guide-to-linux-scheduler/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言Linux Kernel Development 一书中，关于 Linux 的进程调度器并没有讲解的很深入，只是提到了 CFS 调度器的基本思想和一些实现细节；并没有 Linux 早期的调度器介绍，以及最近这些年新增的在内核源码树外维护的调度器思想。所以在经过一番搜寻后，看到了这篇论文 A complete guide to Linux process scheduling，对 Linux 的">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pic1.zhimg.com/v2-665ed41d133e9e332c4fdc6034240cb5.jpg">
+<meta property="og:image" content="https://pic4.zhimg.com/v2-d5299a6846bcb492ec3340f1a725b323.jpg">
+<meta property="og:image" content="https://pic2.zhimg.com/v2-4d4d4645d2dc1a52bbea516e8d82171b.jpg">
+<meta property="og:image" content="https://pic4.zhimg.com/v2-a4e9ffb8e01f5adbb240bd0f3e19991f.jpg">
+<meta property="og:image" content="https://pic1.zhimg.com/v2-5dbbda39ff60d26fd2605ef6970dc468.jpg">
+<meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Red-black_tree_example.svg/2560px-Red-black_tree_example.svg.png">
+<meta property="og:image" content="https://pic3.zhimg.com/v2-bcc1970ab1806342e946bf4e9b6ff1d7.jpg">
+<meta property="og:image" content="https://mmbiz.qpic.cn/mmbiz_png/Ass1lsY6bytXicPsWIWNWxe47NbURjISJ8rdLqdPkHHW9vngCa5CojQPoI8s7f3f2V6I1OMBJXB1rbOhlmb6wrg/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1">
+<meta property="og:updated_time" content="2019-11-28T09:43:04.277Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="论文学习之 Linux 调度器">
+<meta name="twitter:description" content="引言Linux Kernel Development 一书中，关于 Linux 的进程调度器并没有讲解的很深入，只是提到了 CFS 调度器的基本思想和一些实现细节；并没有 Linux 早期的调度器介绍，以及最近这些年新增的在内核源码树外维护的调度器思想。所以在经过一番搜寻后，看到了这篇论文 A complete guide to Linux process scheduling，对 Linux 的">
+<meta name="twitter:image" content="https://pic1.zhimg.com/v2-665ed41d133e9e332c4fdc6034240cb5.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2019/11/17/guide-to-linux-scheduler/">
+
+
+
+
+
+  <title>论文学习之 Linux 调度器 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/11/17/guide-to-linux-scheduler/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">论文学习之 Linux 调度器</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-17T23:20:14+08:00">
+                2019-11-17
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  11k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  41
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p><em>Linux Kernel Development</em> 一书中，关于 Linux 的进程调度器并没有讲解的很深入，只是提到了 CFS 调度器的基本思想和一些实现细节；并没有 Linux 早期的调度器介绍，以及最近这些年新增的在内核源码树外维护的调度器思想。所以在经过一番搜寻后，看到了这篇论文 <a href="https://trepo.tuni.fi/bitstream/handle/10024/96864/GRADU-1428493916.pdf" target="_blank" rel="noopener">A complete guide to Linux process scheduling</a>，对 Linux 的调度器历史进行了回顾，并且相对细致地讲解了 CFS 调度器。整体来说，虽然比较啰嗦，但是对于想要知道更多细节的我来说非常适合，所以就有了翻译它的冲动。当然，在学习过程也参考了其它论文。下面开启学习之旅吧~</p>
+<a id="more"></a>
+<p><em>需要注意的是，在 Linux 中，线程和进程都是由同一个结构体（task_struct，即任务描述符）表示的，所以文中会交叉使用进程、线程和任务等术语，可以将它们视作同义词。当然，也可以将线程（任务）称为最小执行单元。但 Linux 的调度算法（如 CFS）可以应用更加通用的调度单元（如线程、cgroup、用户等）。总之，不要过度纠结这里的术语，重要的是了解每种调度算法的思想！</em></p>
+<h1 id="为什么需要调度"><a href="#为什么需要调度" class="headerlink" title="为什么需要调度"></a>为什么需要调度</h1><p>Linux 是一个多任务的操作系统，这就意味着它可以「同时」执行多个任务。在单核处理器上，任意时刻只能有一个进程可以执行（并发）；而在多核处理器中，则允许任务并行执行。然而，不管是何种硬件类型的机器上，可能同时还有很多在内存中无法得到执行的进程，它们正在等待运行，或者正在睡眠。负责将 CPU 时间分配给进程的内核组件就是「进程调度器」。</p>
+<p>调度器负责维护进程调度顺序，选择下一个待执行的任务。如同多数其它的现代操作系统，Linux 实现了<strong>抢占式</strong>多任务机制。也就是说，调度器可以随时决定任意进程停止运行，而让其它进程获得 CPU 资源。这种违背正在运行的进程意愿，停止其运行的行为就是所谓的「抢占」。抢占通常可以在定时器中断时发生，当中断发生时，调度器会检查是否需要切换任务，如果是，则会完成进程上下文切换。每个进程所获得的运行时间叫做<strong>进程的时间片（timeslice）</strong>。</p>
+<p>任务通常可以区分为<strong>交互式（I/O 密集型）</strong>和<strong>非交互式（CPU 密集型）</strong>任务。交互式任务通常会重度依赖 I/O 操作（如 GUI 应用），并且通常用不完分配给它的时间片。而非交互式任务（如数学运算）则需要使用更多的 CPU 资源。它们通常会用完自己的时间片之后被抢占，并不会被 I/O 请求频繁阻塞。</p>
+<p>当然，现实中的应用程序可能同时包含上述两种分类任务。例如，文本编辑器，多数情况下，它会等待用户输入，但是在执行拼写检查时也会需要占用大量 CPU 资源。<br><strong>操作系统的调度策略就需要均衡这两种类型的任务，并且保证每个任务都能得到足够的执行资源，而不会对其它任务产生明显的性能影响。</strong> Linux 为了保证 CPU 利用率最大化，同时又能保证更快的响应时间，倾向于为非交互式任务分配更大的时间片，但是以较低的频率运行它们；而针对 I/O 密集型任务，则会在较短周期内频繁地执行。</p>
+<h1 id="调度有关的进程描述符"><a href="#调度有关的进程描述符" class="headerlink" title="调度有关的进程描述符"></a>调度有关的进程描述符</h1><p>进程描述符（task_struct）中的很多字段会被调度机制直接使用。以下仅列出一些核心的部分，并在后文详细讨论。<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> &#123;</span></span><br><span class="line">    <span class="keyword">int</span> prio, static_prio, normal_prio;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> rt_priority;</span><br><span class="line">    <span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">sched_class</span> *<span class="title">sched_class</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sched_entity</span> <span class="title">se</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sched_rt_entity</span> <span class="title">rt</span>;</span></span><br><span class="line">    …</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> policy;</span><br><span class="line">    <span class="keyword">cpumask_t</span> cpus_allowed;</span><br><span class="line">    …</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>关于这些字段的说明如下：</p>
+<ul>
+<li><code>prio</code> 表示进程的优先级。进程运行时间，抢占频率都依赖于这些值。<code>rt_priority</code> 则用于实时（real-time）任务；</li>
+<li><code>sched_class</code> 表示进程位于哪个调度类；</li>
+<li><code>sched_entity</code> 的意义比较特殊。通常把一个线程（Linux 中的进程、任务同义词）叫作最小调度单元。但是 Linux 调度器不仅仅只能够调度单个任务，<strong>而且还可以将一组进程，甚至属于某个用户的所有进程作为整体进行调度</strong>。这就允许我们实现组调度，从而将 CPU 时间先分配到进程组，再在组内分配到单个线程。当引入这项功能后，可以大幅度提升桌面系统的交互性。比如，可以将编译任务聚集成一个组，然后进行调度，从而不会对交互性产生明显的影响。这里再次强调下，**Linux 调度器不仅仅能直接调度进程，也能对调度单元（schedulable entities）进行调度。这样的调度单元正是用 <code>struct sched_entity</code> 来表示的。需要说明的是，它并非一个指针，而是直接嵌套在进程描述符中的。当然，后面的谈论将聚焦在单进程调度这种简单场景。由于调度器是面向调度单元设计的，所以它会将单个进程也视为调度单元，因此会使用 <code>sched_entity</code> 结构体操作它们。<code>sched_rt_entity</code> 则是实时调度时使用的。</li>
+<li><code>policy</code> 表明任务的调度策略：通常意味着针对某些特定的进程组（如需要更长时间片，更高优先级等）应用特殊的调度决策。Linux 内核目前支持的调度策略如下：<ul>
+<li><code>SCHED_NORMAL</code>：普通任务使用的调度策略；</li>
+<li><code>SCHED_BATCH</code>：不像普通任务那样被频繁抢占，可允许任务运行尽可能长的时间，从而更好地利用缓存，但是代价自然是损失交互性能。这种非常适合批量任务调度（批量的 CPU 密集型任务）;</li>
+<li><code>SCHED_IDLE</code>：它要比 nice 19 的任务优先级还要低，但它并非真的空闲任务;</li>
+<li><code>SCHED_FIFO</code> 和 <code>SCHED_RR</code> 是软实时进程调度策略。它们是由 POSIX 标准定义的，由 <code>&lt;kernel/sched/rt.c&gt;</code> 里面定义的实时调度器负责调度。RR 实现的是带有固定时间片的轮转调度方式；SCHED_FIFO 则使用的是先进先出的队列机制。</li>
+</ul>
+</li>
+<li><code>cpus_allowed</code>：用来表示任务的 CPU 亲和性。用户空间可以通过 <code>sched_setaffinity</code> 系统调用来设置。</li>
+</ul>
+<h1 id="优先级-Priority"><a href="#优先级-Priority" class="headerlink" title="优先级 Priority"></a>优先级 Priority</h1><h2 id="进程优先级"><a href="#进程优先级" class="headerlink" title="进程优先级"></a>进程优先级</h2><h3 id="普通任务优先级"><a href="#普通任务优先级" class="headerlink" title="普通任务优先级"></a>普通任务优先级</h3><p>所有的类 Unix 操作系统都实现了优先级调度机制。它的核心思想就是给任务设定一个值，然后通过该值决定任务的重要程度。如果任务的优先级一致，则一次重复运行它们。在 Linux 中，每一个普通任务都被赋予了一个 nice 值，它的范围是 -20 到 +19，任务默认 nice 值是 0。<br><img src="https://pic1.zhimg.com/v2-665ed41d133e9e332c4fdc6034240cb5.jpg" alt=""></p>
+<p>nice 值越高，任务优先级越低（it’s nice to others）。Linux 中可以使用 <code>nice(int increment)</code> 系统调用来修改当前进程的优先级。该系统调用的实现位于 <code>&lt;kernel/shced/core.c&gt;</code> 中。默认情况下，用户只能为该用户启动的进程增加 nice 值（即降低优先级）。如果需要增加优先级（减少 nice 值），或者修改其它用户进程优先级，则必须以 root 身份操作。</p>
+<h3 id="实时任务优先级"><a href="#实时任务优先级" class="headerlink" title="实时任务优先级"></a>实时任务优先级</h3><p>在 Linux 中，除了普通任务外，还有一类任务属于实时任务。实时任务是确保它们能够在一定时间范围内执行的任务，有两类实时任务，列举如下：</p>
+<ul>
+<li><strong>硬实时任务</strong>：会有严格的时间限制，任务必须在时限内完成。比如直升机的飞控系统，就需要及时响应驾驶员的操控，并做出预期的动作。然而，Linux 本身并不支持硬实时任务，但是有一些基于它修改的版本，如 RTLinux（它们通常被称为 RTOS）则是支持硬实时调度的。</li>
+<li><strong>软实时任务</strong>：软实时任务其实也会有时间限制，但不是那么严格。也就是说，任务晚一点运行任务，并不会造成不可挽回的灾难性事故。实践中，软实时任务会提供一定的时间限制保障，但是不要过度依赖这种特性。例如，VOIP 软件会使用软实时保障的协议传来送音视频信号，但是即便因为操作系统负载过高，而产生一点延迟，也不会造成很大影响。<strong>无论如何，软实时任务总会比普通任务的优先级更高</strong>。</li>
+</ul>
+<p>Linux 中实时任务的优先级范围是 0~99，但是有趣的是，它和 nice 值的作用刚好相反，这里的优先级值越大，就意味着优先级越高。<br><img src="https://pic4.zhimg.com/v2-d5299a6846bcb492ec3340f1a725b323.jpg" alt=""></p>
+<p>类似其它的 Unix 系统，Linux 也是基于 POSIX 1b 标准定义的 「Real-time Extensions」实现实时优先级。可以通过如下的命令查看系统中的实时任务：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ ps -eo pid, rtprio, cmd</span><br></pre></td></tr></table></figure>
+<p>也可通过 <code>chrt -p pid</code> 查看单个进程的详情。Linux 中可以通过 <code>chrt -p prio pid</code> 更改实时任务优先级。这里需要注意的是，如果操作的是一个系统进程（通常并不会将普通用户的进程设置为实时的），则必须有 root 权限才可以修改实时优先级。</p>
+<h2 id="内核视角下的进程优先级"><a href="#内核视角下的进程优先级" class="headerlink" title="内核视角下的进程优先级"></a>内核视角下的进程优先级</h2><p>实时上，内核看到的任务优先级和用户看到的并不相同，在计算和管理优先级时也需要考虑很多方面。Linux 内核中使用 0~139 表示任务的优先级，并且，<strong>值越小，优先级越高</strong>（注意和用户空间的区别）。其中 0~99 保留给实时进程，100~139（映射成 nice 值就是 -20~19）保留给普通进程。<br><img src="https://pic2.zhimg.com/v2-4d4d4645d2dc1a52bbea516e8d82171b.jpg" alt=""></p>
+<p>我们可以在 <code>&lt;include/linux/sched/prio.h&gt;</code> 头文件中看到内核表示进程优先级的单位（scale）和宏定义（macros），它们用来将用户空间优先级映射到到内核空间。<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MAX_NICE 19</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MIN_NICE -20</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> NICE_WIDTH (MAX_NICE - MIN_NICE + 1)</span></span><br><span class="line">…</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MAX_USER_RT_PRIO 100</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MAX_RT_PRIO MAX_USER_RT_PRIO</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MAX_PRIO (MAX_RT_PRIO + NICE_WIDTH)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> DEFAULT_PRIO (MAX_RT_PRIO + NICE_WIDTH / 2)</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">* Convert user-nice values [ -20 ... 0 ... 19 ]</span></span><br><span class="line"><span class="comment">* to static priority [ MAX_RT_PRIO..MAX_PRIO-1 ],</span></span><br><span class="line"><span class="comment">* and back.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> NICE_TO_PRIO(nice) ((nice) + DEFAULT_PRIO)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> PRIO_TO_NICE(prio) ((prio) - DEFAULT_PRIO)</span></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">* 'User priority' is the nice value converted to something we</span></span><br><span class="line"><span class="comment">* can work with better when scaling various scheduler parameters,</span></span><br><span class="line"><span class="comment">* it's a [ 0 ... 39 ] range.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> USER_PRIO(p) ((p)-MAX_RT_PRIO)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> TASK_USER_PRIO(p) USER_PRIO((p)-&gt;static_prio)</span></span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> MAX_USER_PRIO (USER_PRIO(MAX_PRIO))</span></span><br></pre></td></tr></table></figure></p>
+<h2 id="优先级计算"><a href="#优先级计算" class="headerlink" title="优先级计算"></a>优先级计算</h2><p>在 <code>task_struct</code> 中有几个字段用来表示进程优先级：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> prio, static_prio, normal_prio;</span><br><span class="line"><span class="keyword">unsigned</span> <span class="keyword">int</span> rt_priority;</span><br></pre></td></tr></table></figure></p>
+<p><code>static_prio</code> 是由用户或系统设定的「静态」优先级映射成内核表示的优先级：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">p-&gt;static_prio = NICE_TO_PRIO(nice_value);</span><br></pre></td></tr></table></figure></p>
+<p><code>normal_prio</code> 存放的是基于 <code>static_prio</code> 和进程调度策略（实时或普通）决定的优先级，相同的静态优先级，在不同的调度策略下，得到的正常优先级是不同的。子进程在 fork 时，会继承父进程的 <code>normal_prio</code>。</p>
+<p><code>prio</code> 则是「动态优先级」，在某些场景下优先级会发生变动。一种场景就是，系统可以通过给某个任务优先级提升一段时间，从而抢占其它高优先级任务，一旦 <code>static_prio</code> 确定，<code>prio</code> 字段就可以通过下面的方式计算：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">p-&gt;prio = effective_prio(p);</span><br><span class="line"><span class="comment">// kernel/sched/core.c 中定义了计算方法</span></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">effective_prio</span><span class="params">(struct task_struct *p)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    p-&gt;normal_prio = normal_prio(p);</span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    * If we are RT tasks or we were boosted to RT priority,</span></span><br><span class="line"><span class="comment">    * keep the priority unchanged. Otherwise, update priority</span></span><br><span class="line"><span class="comment">    * to the normal priority:</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="keyword">if</span> (!rt_prio(p-&gt;prio))</span><br><span class="line">        <span class="keyword">return</span> p-&gt;normal_prio;</span><br><span class="line">    <span class="keyword">return</span> p-&gt;prio;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keyword">int</span> <span class="title">normal_prio</span><span class="params">(struct task_struct *p)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> prio;</span><br><span class="line">    <span class="keyword">if</span> (task_has_dl_policy(p))</span><br><span class="line">        prio = MAX_DL_PRIO<span class="number">-1</span>;</span><br><span class="line">    <span class="keyword">else</span> <span class="keyword">if</span> (task_has_rt_policy(p))</span><br><span class="line">        prio = MAX_RT_PRIO<span class="number">-1</span> - p-&gt;rt_priority;</span><br><span class="line">    <span class="keyword">else</span> </span><br><span class="line">        prio = __normal_prio(p);</span><br><span class="line">    <span class="keyword">return</span> prio;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">static</span> <span class="keyword">inline</span> <span class="keyword">int</span> __normal_prio(struct task_struct *p)</span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">return</span> p-&gt;static_prio;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="负载权重（Load-Weights）"><a href="#负载权重（Load-Weights）" class="headerlink" title="负载权重（Load Weights）"></a>负载权重（Load Weights）</h2><p>优先级会让一些任务比别的任务更重要，因此也会获得更多的 CPU 使用时间。nice 值和时间片的比例关系是通过负载权重（Load Weights）进行维护的，我们可以在 <code>task_struct-&gt;se.load</code> 中看到进程的权重，定义如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sched_entity</span> &#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">load_weight</span> <span class="title">load</span>;</span> <span class="comment">/* for load-balancing */</span></span><br><span class="line">    …</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">load_weight</span> &#123;</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> weight;</span><br><span class="line">    u32 inv_weight;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>为了让 nice 值的变化反映到 CPU 时间变化片上更加合理，Linux 内核中定义了一个数组，用于映射 nice 值到权重：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">static</span> <span class="keyword">const</span> <span class="keyword">int</span> prio_to_weight[<span class="number">40</span>] = &#123;</span><br><span class="line">    <span class="comment">/* -20 */</span> <span class="number">88761</span>, <span class="number">71755</span>, <span class="number">56483</span>, <span class="number">46273</span>, <span class="number">36291</span>,</span><br><span class="line">    <span class="comment">/* -15 */</span> <span class="number">29154</span>, <span class="number">23254</span>, <span class="number">18705</span>, <span class="number">14949</span>, <span class="number">11916</span>,</span><br><span class="line">    <span class="comment">/* -10 */</span> <span class="number">9548</span>, <span class="number">7620</span>, <span class="number">6100</span>, <span class="number">4904</span>, <span class="number">3906</span>,</span><br><span class="line">    <span class="comment">/* -5 */</span> <span class="number">3121</span>, <span class="number">2501</span>, <span class="number">1991</span>, <span class="number">1586</span>, <span class="number">1277</span>,</span><br><span class="line">    <span class="comment">/* 0 */</span> <span class="number">1024</span>, <span class="number">820</span>, <span class="number">655</span>, <span class="number">526</span>, <span class="number">423</span>,</span><br><span class="line">    <span class="comment">/* 5 */</span> <span class="number">335</span>, <span class="number">272</span>, <span class="number">215</span>, <span class="number">172</span>, <span class="number">137</span>,</span><br><span class="line">    <span class="comment">/* 10 */</span> <span class="number">110</span>, <span class="number">87</span>, <span class="number">70</span>, <span class="number">56</span>, <span class="number">45</span>,</span><br><span class="line">    <span class="comment">/* 15 */</span> <span class="number">36</span>, <span class="number">29</span>, <span class="number">23</span>, <span class="number">18</span>, <span class="number">15</span>,</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>来看看如何使用上面的映射表，假设有两个优先级都是 0 的任务，每个都能获得 50% 的 CPU 时间（1024 / (1024 + 1024) = 0.5）。如果突然给其中的一个任务优先级提升了 1 （nice 值 -1）。此时，一个任务应该会获得额外 10% 左右的 CPU 时间，而另一个则会减少 10% CPU 时间。来看看计算结果：1277 / (1024 + 1277) ≈ 0.55，1024 / (1024 + 1277) ≈ 0.45，二者差距刚好在 10% 左右，符合预期。完整的计算函数定义在 <code>&lt;kernel/sched/core.c&gt;</code> 中：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">set_load_weight</span><span class="params">(struct task_struct *p)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> prio = p-&gt;static_prio - MAX_RT_PRIO;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">load_weight</span> *<span class="title">load</span> = &amp;<span class="title">p</span>-&gt;<span class="title">se</span>.<span class="title">load</span>;</span></span><br><span class="line">    <span class="comment">/*</span></span><br><span class="line"><span class="comment">    * SCHED_IDLE tasks get minimal weight:</span></span><br><span class="line"><span class="comment">    */</span></span><br><span class="line">    <span class="keyword">if</span> (p-&gt;policy == SCHED_IDLE) &#123;</span><br><span class="line">        load-&gt;weight = scale_load(WEIGHT_IDLEPRIO);</span><br><span class="line">        load-&gt;inv_weight = WMULT_IDLEPRIO;</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    load-&gt;weight = scale_load(prio_to_weight[prio]);</span><br><span class="line">    load-&gt;inv_weight = prio_to_wmult[prio];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="调度类-Scheduling-Classes"><a href="#调度类-Scheduling-Classes" class="headerlink" title="调度类 Scheduling Classes"></a>调度类 Scheduling Classes</h1><p>虽说 Linux 内核使用的 C 语言并非所谓的 OOP 语言（没有类似 C++/Java 中的 class 概念），但是我们可以在内核代码中看到一些使用 C 语言结构体 + 函数指针（Hooks）的方式来模拟面向对象的方式，抽象行为和数据。调度类也是这样实现的（此外，还有 <code>inode_operations</code>, <code>super_block_operations</code> 等），它的定义如下（位于 <code>&lt;kernel/shced/sched.h&gt;</code>）：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 为了简单起见，隐藏了部分代码（如 SMP 相关的）</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sched_class</span> &#123;</span></span><br><span class="line">    <span class="comment">// 多个 sched_class 是链接在一起的</span></span><br><span class="line">    <span class="keyword">const</span> <span class="class"><span class="keyword">struct</span> <span class="title">sched_class</span> *<span class="title">next</span>;</span></span><br><span class="line">    <span class="comment">// 该 hook 会在任务进入可运行状态时调用。它会将调度单元（如一个任务）放到</span></span><br><span class="line">    <span class="comment">// 队列中，同时递增 `nr_running` 变量（该变量表示运行队列中可运行的任务数）</span></span><br><span class="line">    <span class="keyword">void</span> (*enqueue_task) (struct rq *rq, struct task_struct *p, <span class="keyword">int</span> flags);</span><br><span class="line">    <span class="comment">// 该 hook 会在任务不可运行时调用。它会将任务移出队列，同时递减 `nr_running`</span></span><br><span class="line">    <span class="keyword">void</span> (*dequeue_task) (struct rq *rq, struct task_struct *p, <span class="keyword">int</span> flags);</span><br><span class="line">    <span class="comment">// 该 hook 可以在任务需要主动放弃 CPU 时调用，但是需要注意的是，它不会改变</span></span><br><span class="line">    <span class="comment">// 任务的可运行状态，也就是说依然会在队列中等待下次调度。类似于先 dequeue_task，</span></span><br><span class="line">    <span class="comment">// 再 enqueue_task</span></span><br><span class="line">    <span class="keyword">void</span> (*yield_task) (struct rq *rq);</span><br><span class="line">    <span class="comment">// 该 hook 会在任务进入可运行状态时调用并检查是否需要抢占当前任务</span></span><br><span class="line">    <span class="keyword">void</span> (*check_preempt_curr) (struct rq *rq, struct task_struct *p, <span class="keyword">int</span> flags);</span><br><span class="line">    <span class="comment">// 该 hook 用来选择最适合运行的下一个任务</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> * (*<span class="title">pick_next_task</span>) (<span class="title">struct</span> <span class="title">rq</span> *<span class="title">rq</span>, <span class="title">struct</span> <span class="title">task_struct</span> *<span class="title">prev</span>);</span></span><br><span class="line">    <span class="comment">// 该 hook 会在任务修改自身的调度类或者任务组时调用</span></span><br><span class="line">    <span class="keyword">void</span> (*set_curr_task) (struct rq *rq);</span><br><span class="line">    <span class="comment">// 通常是在时钟中断时调用，可能会导致任务切换</span></span><br><span class="line">    <span class="keyword">void</span> (*task_tick) (struct rq *rq, struct task_struct *p, <span class="keyword">int</span> queued);</span><br><span class="line">    <span class="comment">// 当任务被 fork 时通知调度器</span></span><br><span class="line">    <span class="keyword">void</span> (*task_fork) (struct task_struct *p);</span><br><span class="line">    <span class="comment">// 当任务挂掉时通知调度器</span></span><br><span class="line">    <span class="keyword">void</span> (*task_dead) (struct task_struct *p);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>关于调度策略的具体细节的实现有如下几个模块：</p>
+<ul>
+<li><code>core.c</code> 包含调度器的核心部分；</li>
+<li><code>fair.c</code> 实现了 CFS（Comple Faire Scheduler，完全公平任务调度器） 调度器，应用于普通任务；</li>
+<li><code>rt.c</code> 实现了实时调度，应用于实时任务；</li>
+<li><code>idle_task.c</code> 当没有其它可运行的任务时，会运行空闲任务。<br>内核是基于任务的调度策略（SCHED_*）来决定使用何种调度类实现，并会调用相应的方法。<code>SCHED_NORMAL</code>, <code>SCHED_BATCH</code> 和 <code>SCHED_IDLE</code> 进程会映射到 <code>fair_sched_class</code> （由 CFS 实现）；<code>SCHED_RR</code> 和 <code>SCHED_FIFO</code> 则映射的 <code>rt_sched_class</code> （实时调度器）。</li>
+</ul>
+<h1 id="运行队列-Run-Queue"><a href="#运行队列-Run-Queue" class="headerlink" title="运行队列 Run Queue"></a>运行队列 Run Queue</h1><p>所有可运行的任务是放在运行队列中的，并且等待 CPU 运行。每个 CPU 核心都有自己的运行队列，每个任务任意时刻只能处于其中一个队列中。在多处理器机器中，会有负载均衡策略，任务就会转移到其它 CPU 上运行的可能。</p>
+<p>运行队列数据结构定义如下（位于 <code>&lt;kernel/sched/sched.h&gt;</code>）:<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 为了简单起见，隐藏了部分代码（SMP 相关）</span></span><br><span class="line"><span class="comment">// 这个是每个 CPU 都会有的一个任务运行队列</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">rq</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="comment">// 表示当前队列中总共有多少个可运行的任务（包含所有的 sched class）</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> nr_running;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">define</span> CPU_LOAD_IDX_MAX 5</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> cpu_load[CPU_LOAD_IDX_MAX];</span><br><span class="line">    <span class="comment">// 运行队列负载记录</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">load_weight</span> <span class="title">load</span>;</span></span><br><span class="line">    <span class="comment">// 嵌套的 CFS 调度器运行队列</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">cfs_rq</span> <span class="title">cfs</span>;</span></span><br><span class="line">    <span class="comment">// 嵌套的实时任务调度器运行队列</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">rt_rq</span> <span class="title">rt</span>;</span></span><br><span class="line">    <span class="comment">// curr 指向当前正在运行的进程描述符</span></span><br><span class="line">    <span class="comment">// idle 则指向空闲进程描述符（当没有其它可运行任务时，该任务才会启动）</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> *<span class="title">curr</span>, *<span class="title">idle</span>;</span></span><br><span class="line">    u64 clock;</span><br><span class="line">    <span class="keyword">int</span> cpu;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="何时运行调度器？"><a href="#何时运行调度器？" class="headerlink" title="何时运行调度器？"></a>何时运行调度器？</h1><p>实时上，调度函数 <code>schedule()</code> 会在很多场景下被调用。有的是直接调用，有的则是隐式调用（通过设置 <code>TIF_NEED_RESCHED</code> 来提示操作系统尽快运行调度函数）。以下三个调度时机值得关注下：</p>
+<ul>
+<li><p><strong>时钟中断发生时，会调用 <code>scheduler_tick()</code> 函数</strong>，该函数会更新一些和调度有关的数据统计，并触发调度类的周期调度方法，从而间接地进行调度。以 2.6.39 源码为例，可能的调用链路如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">scheduler_tick</span><br><span class="line">└── task_tick</span><br><span class="line">    └── entity_tick</span><br><span class="line">        └── check_preempt_tick</span><br><span class="line">            └── resched_task</span><br><span class="line">                └── set_tsk_need_resched</span><br></pre></td></tr></table></figure>
+</li>
+<li><p><strong>当前正在运行的任务进入睡眠状态</strong>。在这种情况下，任务会主动释放 CPU。通常情况下，该任务会因为等待指定的事件而睡眠，它可以将自己添加到等待队列，并启动循环检查期望的条件是否满足。在进入睡眠前，任务可以将自己的状态设置为 <code>TASK_INTERRUPTABLE</code>（除了任务要等待的事件可唤醒外，也可以被信号唤醒）或者 <code>TASK_UNINTERRUPTABLE</code>（自然是不会理会信号咯），然后调用 <code>schedule()</code> 选择下一个任务运行。</p>
+</li>
+<li><p><strong>睡眠的任务被唤醒</strong>。任务等待的事件可以在关联的等待队列上调用 <code>wake_up()</code> 函数唤醒任务：相关任务会将自己设置为可运行状态，并加入运行队列。如果当前唤醒的任务优先级比运行队列中的任何任务都高，则会设置 <code>TIF_NEED_RESCHED</code> 标志，从而让操作系统尽快调用 <code>schedule()</code> 函数。</p>
+</li>
+</ul>
+<h1 id="Linux-调度器"><a href="#Linux-调度器" class="headerlink" title="Linux 调度器"></a>Linux 调度器</h1><h2 id="早期版本"><a href="#早期版本" class="headerlink" title="早期版本"></a>早期版本</h2><p>Linux 0.0.1 版本就已经有了一个简单的调度器，当然并非适合拥有特别多处理器的系统。该调度器只维护了一个全局的进程队列，每次都需要遍历该队列来寻找新的进程执行，而且对任务数量还有严格限制（<code>NR_TASKS</code> 在最初的版本中只有 32）。下面来看看这个调度器是如何实现的吧：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 'schedule()' is the scheduler function. </span></span><br><span class="line"><span class="comment">// This is GOOD CODE! There probably won't be any reason to change </span></span><br><span class="line"><span class="comment">// this, as it should work well in all circumstances (ie gives </span></span><br><span class="line"><span class="comment">// IO-bound processes good response etc)...</span></span><br><span class="line"><span class="function"><span class="keyword">void</span> <span class="title">schedule</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">int</span> i, next, c;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> **<span class="title">p</span>;</span></span><br><span class="line">    <span class="comment">// 遍历所有任务，如果有信号，则需要唤醒 `TASK_INTERRUPTABLE` 的任务</span></span><br><span class="line">    <span class="keyword">for</span> (p = &amp;LAST_TASK; p &gt; &amp;FIRST_TASK; --p)</span><br><span class="line">        <span class="keyword">if</span> (*p) &#123;</span><br><span class="line">            <span class="keyword">if</span> ((*p)-&gt;alarm &amp;&amp; (*p)-&gt;alarm &lt; jiffies) &#123;</span><br><span class="line">                (*p)-&gt;signal |= (<span class="number">1</span> &lt;&lt; (SIGALRM - <span class="number">1</span>));</span><br><span class="line">                (*p)-&gt;alarm = <span class="number">0</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">if</span> ((*p)-&gt;signal &amp;&amp; (*p)-&gt;state == TASK_INTERRUPTIBLE)</span><br><span class="line">                (*p)-&gt;state = TASK_RUNNING;</span><br><span class="line">        &#125;</span><br><span class="line">    <span class="keyword">while</span> (<span class="number">1</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        c = <span class="number">-1</span>;</span><br><span class="line">        next = <span class="number">0</span>;</span><br><span class="line">        i = NR_TASKS;</span><br><span class="line">        p = &amp;task[NR_TASKS];</span><br><span class="line">        <span class="comment">// 遍历所有任务，找到时间片最长的那个</span></span><br><span class="line">        <span class="keyword">while</span> (--i) &#123;</span><br><span class="line">            <span class="keyword">if</span> (!*--p)</span><br><span class="line">                <span class="keyword">continue</span>;</span><br><span class="line">            <span class="keyword">if</span> ((*p)-&gt;state == TASK_RUNNING &amp;&amp; (*p)-&gt;counter &gt; c)</span><br><span class="line">                c = (*p)-&gt;counter, next = i;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (c)</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">        <span class="comment">// 遍历任务，重新设值时间片</span></span><br><span class="line">        <span class="keyword">for</span> (p = &amp;LAST_TASK; p &gt; &amp;FIRST_TASK; --p)</span><br><span class="line">            <span class="keyword">if</span> (*p)</span><br><span class="line">                (*p)-&gt;counter = ((*p)-&gt;counter &gt;&gt; <span class="number">1</span>) + (*p)-&gt;priority;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 切换到下一个需要执行的任务</span></span><br><span class="line">    switch_to(next);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="O-n"><a href="#O-n" class="headerlink" title="O(n)"></a>O(n)</h2><p>2.4 版本的 Linux 内核使用的调度算法非常简单和直接，由于每次在寻找下一个任务时需要遍历系统中所有的任务（链表），因此被称为 O(n) 调度器（时间复杂度）。</p>
+<p>当然，该调度器要比 0.01 版本内核中的调度算法稍微复杂点，它引入了 epoch 概念。也就是将时间分成纪元（epochs），也就是每个进程的生命周期。理论上来说，每个纪元结束，每个进程都应该运行过一次了，而且通常用光了它当前的时间片。但实际上，有些任务并没有完全用完时间片，那么它剩余时间片的一半将会和新的时间片相加，从而在下一个纪元运行更长的时间。</p>
+<p>我们来看下 <code>schedule()</code> 算法的核心源码：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// schedule() 算法会遍历所有的任务（O(N)），并且计算出每个任务的</span></span><br><span class="line"><span class="comment">// goodness 值，且挑选出「最好」的任务来运行。</span></span><br><span class="line"><span class="comment">// 以下是部分核心源码，主要是了解下它的思路。</span></span><br><span class="line"><span class="function">asmlinkage <span class="keyword">void</span> <span class="title">schedule</span><span class="params">(<span class="keyword">void</span>)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 任务（进程）描述符：</span></span><br><span class="line">    <span class="comment">// 1. prev: 当前正在运行的任务</span></span><br><span class="line">    <span class="comment">// 2. next: 下一个将运行的任务</span></span><br><span class="line">    <span class="comment">// 3. p: 当前正在遍历的任务</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">task_struct</span> *<span class="title">prev</span>, *<span class="title">next</span>, *<span class="title">p</span>;</span></span><br><span class="line">    <span class="keyword">int</span> this_cpu, c; <span class="comment">// c 表示权重值</span></span><br><span class="line">repeat_schedule:</span><br><span class="line">    <span class="comment">// 默认选中的任务</span></span><br><span class="line">    next = idle_task(this_cpu);</span><br><span class="line">    c = <span class="number">-1000</span>;</span><br><span class="line">    list_for_each(tmp, &amp;runqueue_head) &#123;</span><br><span class="line">        p = list_entry(tmp, struct task_struct, run_list);</span><br><span class="line">        <span class="keyword">if</span> (can_schedule(p, this_cpu)) &#123;</span><br><span class="line">            <span class="keyword">int</span> weight = goodness(p, this_cpu, prev-&gt;active_mm);</span><br><span class="line">            <span class="keyword">if</span> (weight &gt; c)</span><br><span class="line">                c = weight, next = p;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>源码中的 <code>goodness()</code> 函数会计算出一个权重值，它的算法基本思想就是基于进程所剩余的时钟节拍数（时间片），再加上基于进程优先级的权重值。返回值如下：</p>
+<ul>
+<li>-1000 表示不要选择该进程运行</li>
+<li>0 表示时间片用完了，需要重新计算 counters（可能会被选中运行）</li>
+<li>正整数：表示 goodness 值（越大越好）</li>
+<li>+1000 表示实时进程，接下来就要选择它运行</li>
+</ul>
+<p>最后，针对 O(n) 调度器做下总结：</p>
+<ol>
+<li>算法实现非常简单，但是不高效（任务越多，遍历耗费时间越久）</li>
+<li>没有很好的扩展性，多核处理器怎么办？</li>
+<li>对于实时任务调度支持较弱（无论如何作为优先级高的实时任务都需要在遍历完列表后才可以知道）</li>
+</ol>
+<h2 id="O-1"><a href="#O-1" class="headerlink" title="O(1)"></a>O(1)</h2><p><a href="https://en.wikipedia.org/wiki/Ingo_Moln%C3%A1r" target="_blank" rel="noopener">Ingo Molnár</a> 大佬在 2.6 版本的内核中加入了全新的调度算法，它能够在常数时间内调度任务，因此被称为 O(1) 调度器。我们来看看它引入的一些新特性：</p>
+<ul>
+<li>全局优先级单位，范围是 0~139，数值越低，优先级越高</li>
+<li><strong>将任务拆分成实时（0~99）和正常（100~139）两部分</strong>。更高优先级任务获得更多时间片</li>
+<li><strong>即刻抢占（early preemption）</strong>。当任务状态变成 <code>TASK_RUNNING</code> 时，内核会检查其优先级是否比当前运行的任务优先级更高，如果是的话，则抢占当前正在运行的任务，切换到该任务</li>
+<li><strong>实时任务使用静态优先级</strong></li>
+<li><strong>普通任务使用使用动态优先级</strong>。任务优先级会在其使用完自己的时间片后重新计算，内核会考虑它过去的行为，决定它的交互性等级。交互型任务更容易得到调度</li>
+</ul>
+<p>O(n) 的调度器会在每个纪元结束后（所有任务的时间片都使用过），才会重新计算任务优先级。而 O(1) 则是在每个任务时间片配额用完后就重新计算优先级。O(1) 调度器为<strong>每个 CPU 维护了两个队列，即 active 和 expired</strong>。active 队列存放的是时间片尚未用完的任务，而 expired 则是时间片已经耗尽的任务。当一个任务的时间片用完后，就会被转到 expired 队列，而且会重新计算它的优先级。<strong>当 active 队列任务全部转移到 expired 队列后，会交换二者（让 active 指向 expired 队列，expired 指向 active 队列）</strong>。可以看到，优先级的计算，队列切换都和任务数量多寡无关，能够在 O(1) 时间复杂度下完成。</p>
+<p>在先前介绍的调度算法中，如果想要取一个优先级最高的任务，还需要遍历整个任务链表才可以。而 O(1) 调度器则很特别，它为每种优先级提供了一个任务链表。所有的可运行任务会被分散在不同优先级队应的链表中。</p>
+<p>接下来看看全新的 <code>runqueue</code> 是怎么定义的吧：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">runqueue</span> &#123;</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> nr_running; <span class="comment">/* 可运行的任务总数（某个 CPU） */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">prio_array</span> *<span class="title">active</span>;</span> <span class="comment">/* 指向 active 的队列的指针 */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">prio_array</span> *<span class="title">expired</span>;</span> <span class="comment">/* 指向 expired 的队列的指针 */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">prio_array</span> <span class="title">arrays</span>[2];</span> <span class="comment">/* 实际存放不同优先级对应的任务链表 */</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>通过下面的图可以直观感受下任务队列：<br><img src="https://pic4.zhimg.com/v2-a4e9ffb8e01f5adbb240bd0f3e19991f.jpg" alt=""></p>
+<p>接下来看看 <code>prio_array</code> 是怎么定义的：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">prio_array</span> &#123;</span></span><br><span class="line">    <span class="keyword">int</span> nr_active; <span class="comment">/* 列表中的任务总数 */</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> bitmap[BITMAP_SIZE]; <span class="comment">/* 位图表示对应优先级链表是否有任务存在 */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">queue</span>[<span class="title">MAX_PRIO</span>];</span> <span class="comment">/* 任务队列（每种优先级对应一个双向链表） */</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>可以看到，在 <code>prio_array</code> 中存在一个位图，它是用来标记每个 priority 对应的任务链表是否存在任务的。接下来看看为何 O(1) 调度器可以在常数时间找到需要运行的任务：</p>
+<ol>
+<li><strong>常数时间确定优先级</strong>：首先会在位图中查找到第一个设置为 1 的位（总共有 140 bits，从第一个 bit 开始搜索，这样可以保证高优先级的任务先得到机会运行），如果找到了就可以确定哪个优先级有任务，假设找到后的值为 <code>priority</code>；</li>
+<li><strong>常数时间获得下一个任务</strong>：在 <code>queue[priority]</code> 对应的任务链表中提取第一个任务来执行（多个任务会轮转执行）。<br><img src="https://pic1.zhimg.com/v2-5dbbda39ff60d26fd2605ef6970dc468.jpg" alt=""></li>
+</ol>
+<p>好了，是时候总结下 O(1) 调度器的优缺点了：</p>
+<ol>
+<li>设计上要比 O(n) 调度器更加复杂精妙；</li>
+<li>相对来说扩展性更好，性能更优，在任务切换上的开销更小；</li>
+<li>用来标记任务是否为交互类型的算法还是过于复杂，且容易出错。</li>
+</ol>
+<h2 id="Staircase"><a href="#Staircase" class="headerlink" title="Staircase"></a>Staircase</h2><p><em>Staircase Scheduler</em> 是 Con Kolivas 为了改善桌面系统交互应用的响应时间而实现的调度器，但它并非内核官方支持的调度器。它的整体设计思想类似于 <em>Operating Systems: The Three Easy Pieces</em> 中提到的 MLFQ（Multilevel Feedback Queue，多级反馈队列）。</p>
+<p>我们来看下它的设计思想：</p>
+<ol>
+<li>首先，它也是将任务按照优先级放在不同的任务链表中（类似上面的 active 队列）</li>
+<li>调度器每次会从最高优先级的任务链表中获取一个要切换执行的任务，当任务时间片使用完毕后，会将其优先级调低一个等级，直到其优先级降到最低。</li>
+<li>当处于最低优先级的任务用光了时间片后，它会被重新放到更高优先级的任务链表中（这个新的优先级是它之前最高优先级减 1 后的值），同时会获得两倍于之前的时间片</li>
+<li>对于长时间睡眠的任务，会被放到最高优先级任务链表。所以交互式任务可以保持在最高优先级位置，从而保持良好的响应性能；而批处理任务则处于低优先级，但是会获得更多的执行时间。</li>
+</ol>
+<h2 id="CFS"><a href="#CFS" class="headerlink" title="CFS"></a>CFS</h2><h3 id="单核调度"><a href="#单核调度" class="headerlink" title="单核调度"></a>单核调度</h3><p>CFS 的全称是 Complete Fair Scheduler，也就是完全公平调度器。它实现了一个基于权重的公平队列算法，从而将 CPU 时间分配给多个任务（每个任务的权重和它的 nice 值有关，nice 值越低，权重值越高）。每个任务都有一个关联的虚拟运行时间 vruntime，它表示一个任务所使用的 CPU 时间除以其优先级得到的值。相同优先级和相同 vruntime 的两个任务实际运行的时间也是相同的，这就意味着 CPU 资源是由它们均分了。为了保证所有任务能够公平推进，每当需要抢占当前任务时，CFS 总会挑选出 <code>vruntime</code> 最小的那个任务运行。</p>
+<p>内核版本在 2.6.38 之前，每个线程（任务）会被当成独立的调度单元，并且和系统中其它线程共享资源，这就意味着一个多线程的应用会比单线程的应用获得更多的资源。之后，CFS 不断改进，目前已经支持将一个应用中的线程打包到 cgroup 结构中，cgroup 的 vruntime 是其中所有线程的 vuntime 之和。然后 CFS 就可以将它的算法应用于cgroup 之间，从而保证公平性。当某个 cgroup 被选中后，其中拥有最小 vruntime 的线程会被执行，从而保证 cgroup 中的线程之间的公平性。cgroup 还可以嵌套，例如 systemd 会自动配置 cgroup 来保证不同用户之间的公平性，然后在用户运行的多个应用之间维持公平性。</p>
+<p>CFS 通过在一定时间内运行调度所有的线程来避免饥饿问题。当运行的 线程数在 8 个及以下时，默认的时间周期是 48ms；而当多于 8 个线程时，时间周期就会随着线程数量而增加（6ms * 线程数，之所以选择 6ms，是为了避免频繁抢占，导致上下文切换频繁切换的开销）。由于 CFS 总是会挑选 vruntime 最小的线程执行，它就需要避免某个线程的 vruntime 太小，以至于其它线程需要等待很久才能得到调度（会有饥饿问题）。所以在实践中，CFS 会保证所有线程之间的 vruntime 之差低于抢占时间（6ms），它是通过如下两点来保证的：</p>
+<ol>
+<li>当线程创建时，它的 vruntime 值等于运行队列中等待执行线程的最大 vruntime；</li>
+<li>当线程从睡眠中唤醒时，它的 vruntime 值会被更新为大于或等于所有待调度线程中最小的 vruntime。使用最小 vruntime 还可以保证频繁睡眠的线程优先被调度，这对于桌面系统非常适合，它会减少交互应用的响应延迟。</li>
+</ol>
+<p>CFS 还引入了启发式调度思想来改善高速缓存利用率。例如，当线程被唤醒时，它会检查该线程的 vruntime 和正在运行的线程 vruntime 之差是否非常显著（临界值是 1ms），如果不是的话，则不会抢占当前正在运行的任务。但是这种做法还是以牺牲调度延迟为代价的，算是一种权衡吧。</p>
+<h3 id="多核负载均衡"><a href="#多核负载均衡" class="headerlink" title="多核负载均衡"></a>多核负载均衡</h3><p>在多核环境中，Linux CFS 会将<em>工作（work）</em>分摊到多个处理器核心中执行。但是这不等同于将线程均分到多个处理器。比如，一个 CPU 密集型的线程和 10 个频繁睡眠的线程可能分别在两个核上执行，其中一个专门执行 CPU 密集型线程；而另一个则处理那 10 个频繁睡眠的线程。</p>
+<p>为了多个处理器上的工作量均衡，CFS 使用了 <code>load</code> 指标来衡量线程和处理器的负载情况。线程的负载和线程的 CPU 平均使用率相关：经常睡眠的线程负载要低于不睡眠的线程负载。类似 vruntime，线程的负载也是线程的优先级加权得到的。而处理器的负载是在该处理器上可运行线程的负载之和。CFS 会尝试均衡处理器的负载。</p>
+<p>CFS 会在线程创建和唤醒时关注处理器的负载情况，调度器首先要决定将任务放在哪个处理器的运行队列中。这里也会涉及到启发式思想，比如，如果 CFS 检查到生产者-消费者模型，那么它会将消费者线程尽可能地分散到机器的多个处理器上，因为多数核心都适合处理唤醒的线程。</p>
+<p>负载均衡还会周期性发生，每隔 4ms，每个处理器都会尝试从其它处理器偷取一些工作。当然，这种 work-stealing 均衡方法还会考虑机器的拓扑结构：处理器会尝试从距离它们「更近」的其它处理器上尝试窃取工作，而非距离「更远」的处理器（如远程 NUMA 节点）。当处理器决定要从其它处理器窃取任务时，它会尝试在二者之间均衡负载，并且会窃取多达 32 个线程。此外，当处理器进入空闲状态时，它也会立刻调用负载均衡器。</p>
+<p>在大型的 NUMA 机器上，CFS 并不会粗暴地比较所有 CPU 的负载，而是以分层的方式进行负载均衡。以一台有两个 NUMA 节点的机器为例，CFS 会先在 NUMA 节点内部的处理器之间进行负载均衡，然后比较 NUMA 节点之间的负载（通过节点内部处理器负载计算得到），再决定要不要在两个节点之间进行负载均衡。如果 NUMA 节点之间的负载差距在 25% 以内，则不会进行负载均衡。总结来说，如果两个处理器（或处理器组）之间的距离越远，那么只有在不平衡性差距越大的情况下才会考虑负载均衡。</p>
+<h3 id="运行队列"><a href="#运行队列" class="headerlink" title="运行队列"></a>运行队列</h3><p>CFS 引入了<a href="https://en.wikipedia.org/wiki/Red%E2%80%93black_tree" target="_blank" rel="noopener">红黑树</a>（本质上是一棵半平衡二叉树，对于插入和查找都有 O(log(N)) 的时间复杂度）来维护运行队列，树的节点值是调度单元的 vruntime，拥有最小 vruntime 的节点位于树的最左下边。<br><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/66/Red-black_tree_example.svg/2560px-Red-black_tree_example.svg.png" alt=""></p>
+<p>接下来看看 <code>cfs_rq</code> 数据结构的定义（位于 <code>&lt;kernel/sched/sched.h&gt;</code>）：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">cfs_rq</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="comment">// 所有任务的累计权重值</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">load_weight</span> <span class="title">load</span>;</span></span><br><span class="line">    <span class="comment">// 表示该队列中有多少个可运行的任务</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> nr_running;</span><br><span class="line">    <span class="comment">// 运行队列中最小的 vruntime</span></span><br><span class="line">    u64 min_vruntime;</span><br><span class="line">    <span class="comment">// 红黑树的根节点，指向运行任务队列</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">rb_root</span> <span class="title">tasks_timeline</span>;</span></span><br><span class="line">    <span class="comment">// 下一个即将被调度的任务</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">rb_node</span> *<span class="title">rb_leftmost</span>;</span></span><br><span class="line">    <span class="comment">// 指向当前正在运行的调度单元</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sched_entity</span> *<span class="title">curr</span>;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>CFS 算法实际应用于调度单元（这是一个更通用的抽象，可以是线程、cgroups 等），调度单元数据结构定义如下（位于 <code>&lt;include/linux/sched.h&gt;</code>）：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sched_entity</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="comment">// 表示调度单元的负载权重（比如该调度单元是一个组，则该值就是该组下所有线程的负载权重的组合）</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">load_weight</span> <span class="title">load</span>;</span> <span class="comment">/* for load-balancing */</span></span><br><span class="line">    <span class="comment">// 表示红黑树的节点</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">rb_node</span> <span class="title">run_node</span>;</span></span><br><span class="line">    <span class="comment">// 表示当前调度单元是否位于运行队列</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> on_rq;</span><br><span class="line">    <span class="comment">// 开始执行时间</span></span><br><span class="line">    u64 exec_start;</span><br><span class="line">    <span class="comment">// 总共运行的时间，该值是通过 `update_curr()` 更新的。</span></span><br><span class="line">    u64 sum_exec_runtime;</span><br><span class="line">    <span class="comment">// 基于虚拟时钟计算出该调度单元已运行的时间</span></span><br><span class="line">    u64 vruntime;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 用于记录之前运行的时间之和</span></span><br><span class="line">    u64 prev_sum_exec_runtime;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<h3 id="虚拟时钟"><a href="#虚拟时钟" class="headerlink" title="虚拟时钟"></a>虚拟时钟</h3><p>前面提到的 vruntime 究竟是什么呢？为什么叫作虚拟运行时间呢？接下来就要揭开它的神秘面纱。为了更好地实现公平性，CFS 使用了虚拟时钟来测量一个等待的调度单元在一个<strong>完全公平的处理器</strong>上允许执行的时间。然而，虚拟时钟并没有真实的实现，它只是一个抽象概念。</p>
+<p>我们可以基于真实时间和任务的负载权重来计算出虚拟运行时间，该算法是在 <code>update_cur()</code> 函数中实现的，它会更新调度单元的时间记账信息，以及 CFS 运行队列的 <code>min_vruntime</code>（完整定义位于 <code>&lt;kernel/sched/fair.c&gt;</code>）：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">update_curr</span><span class="params">(struct cfs_rq *cfs_rq)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sched_entity</span> *<span class="title">curr</span> = <span class="title">cfs_rq</span>-&gt;<span class="title">curr</span>;</span></span><br><span class="line">    u64 now = rq_clock_task(rq_of(cfs_rq));</span><br><span class="line">    u64 delta_exec;</span><br><span class="line">    <span class="keyword">if</span> (unlikely(!curr))</span><br><span class="line">        <span class="keyword">return</span>;</span><br><span class="line">    <span class="comment">// 计算出调度单元开始执行时间和当前之间的差值，即真实运行时间</span></span><br><span class="line">    delta_exec = now - curr-&gt;exec_start;</span><br><span class="line">    curr-&gt;vruntime += calc_delta_fair(delta_exec, curr);</span><br><span class="line">    update_min_vruntime(cfs_rq);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">inline</span> u64 <span class="title">calc_delta_fair</span><span class="params">(u64 delta, struct sched_entity *se)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 如果任务的优先级是默认的优先级（内部 nice 值是 120），那么虚拟运行时间</span></span><br><span class="line">    <span class="comment">// 就是真实运行时间。否则，会基于 `__calc_delta` 计算出虚拟运行时间。</span></span><br><span class="line">    <span class="keyword">if</span> (unlikely(se-&gt;load.weight != NICE_0_LOAD))</span><br><span class="line">        <span class="comment">// 该计算过程基本等同于：</span></span><br><span class="line">        <span class="comment">// delta = delta_exec * NICE_0_LOAD / cur-&gt;load.weight;</span></span><br><span class="line">        delta = __calc_delta(delta, NICE_0_LOAD, &amp;se-&gt;load);</span><br><span class="line">    <span class="keyword">return</span> delta;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">void</span> <span class="title">update_min_vruntime</span><span class="params">(struct cfs_rq *cfs_rq)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    u64 vruntime = cfs_rq-&gt;min_vruntime;</span><br><span class="line">    <span class="keyword">if</span> (cfs_rq-&gt;curr)</span><br><span class="line">        <span class="comment">// 如果此时有任务在运行，就更新最小运行时间为当前任务的 vruntime</span></span><br><span class="line">        vruntime = cfs_rq-&gt;curr-&gt;vruntime;</span><br><span class="line">    <span class="keyword">if</span> (cfs_rq-&gt;rb_leftmost)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="comment">// 获得下一个要运行的调度单元</span></span><br><span class="line">        <span class="class"><span class="keyword">struct</span> <span class="title">sched_entity</span> *<span class="title">se</span> = <span class="title">rb_entry</span>(<span class="title">cfs_rq</span>-&gt;<span class="title">rb_leftmost</span>,</span></span><br><span class="line"><span class="class">                                           <span class="title">struct</span> <span class="title">sched_entity</span>,</span></span><br><span class="line"><span class="class">                                           <span class="title">run_node</span>);</span></span><br><span class="line">        <span class="keyword">if</span> (!cfs_rq-&gt;curr)</span><br><span class="line">            vruntime = se-&gt;vruntime;</span><br><span class="line">        <span class="keyword">else</span></span><br><span class="line">            <span class="comment">// 保证 min_vruntime 是二者之间较小的那个值</span></span><br><span class="line">            vruntime = min_vruntime(vruntime, se-&gt;vruntime);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 这里之所以去二者之间的最大值，是为了保证 min_vruntime 能够单调增长</span></span><br><span class="line">    <span class="comment">// 可以想想为什么需要这样做？</span></span><br><span class="line">    cfs_rq-&gt;min_vruntime = max_vruntime(cfs_rq-&gt;min_vruntime, vruntime);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>最后，来总结下使用虚拟时钟的意义：</p>
+<ul>
+<li>当任务运行时，它的虚拟时间总是会增加，从而保证它会被移动到红黑树的右侧；</li>
+<li>对于高优先级的任务，虚拟时钟的节拍更慢，从而让它移动到红黑树右侧的速度就越慢，因此它们被再次调度的机会就更大些。<br><img src="https://pic3.zhimg.com/v2-bcc1970ab1806342e946bf4e9b6ff1d7.jpg" alt=""></li>
+</ul>
+<h3 id="选择下一个任务"><a href="#选择下一个任务" class="headerlink" title="选择下一个任务"></a>选择下一个任务</h3><p>CFS 可以在红黑树中一直找到最左（leftmost）边的节点作为下一个运行的任务。但是真正实现 <code>__pick_first_entity()</code> 的函数其实并没有真正地执行查找（虽然可以在 O(log(N)) 时间内找到），我们可以看下它的定义（完整定义位于 <code>&lt;kernel/sched/fair.c&gt;</code>）：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sched_entity</span> *__<span class="title">pick_first_entity</span>(<span class="title">struct</span> <span class="title">cfs_rq</span> *<span class="title">cfs_rq</span>)</span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="comment">// 其实这里取的是缓存的 leftmost 节点</span></span><br><span class="line">    <span class="comment">// 所以执行就会更快了</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">rb_node</span> *<span class="title">left</span> = <span class="title">cfs_rq</span>-&gt;<span class="title">rb_leftmost</span>;</span></span><br><span class="line">    <span class="keyword">if</span> (!left)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">NULL</span>;</span><br><span class="line">    <span class="keyword">return</span> rb_entry(left, struct sched_entity, run_node);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="实时调度器"><a href="#实时调度器" class="headerlink" title="实时调度器"></a>实时调度器</h2><p>Linux 实时任务调度器实现位于 <code>&lt;kernel/sched/rt.c</code>，对于系统而言，实时任务属于贵客，一旦存在实时任务需要调度，那就应当尽可能及时地为它们服务。对于实时任务而言，有两种调度策略存在：</p>
+<ul>
+<li><p><code>SCHED_FIFO</code>: 这个其实就是一个先到先服务的调度算法。这类任务没有时间片限制，它们会一直运行直到阻塞或者主动放弃 CPU，亦或者被更高优先级的实时任务抢占。该类任务总会抢占 <code>SCHED_NORMAL</code> 任务。如果多个任务具有相同的优先级，那它们会以轮询的方式调度（也就是当一个任务完成后，会被放到队列尾部等待下次执行）；</p>
+</li>
+<li><p><code>SCHED_RR</code>: 这种策略类似于 <code>SCHED_FIFO</code>，只是多了时间片限制。相同优先级的任务会以轮询的方式被调度，每个运行的任务都会一直运行，直到其用光自己的时间片，或者被更高优先级的任务抢占。当任务的时间片用光后，它会重新补充能量，并被加入到队列尾部。默认的时间片是 100ms，可以在 <code>&lt;include/linux/sched/rt.h&gt;</code> 找到其定义。</p>
+</li>
+</ul>
+<p>实时任务的优先级是静态的，不会像之前提到的算法，会重新计算任务优先级。用户可以通过 <code>chrt</code> 命令更改任务优先级。</p>
+<h3 id="实现细节"><a href="#实现细节" class="headerlink" title="实现细节"></a>实现细节</h3><p>实时任务有自己的调度单元数据结构（位于 <code>&lt;include/linux/sched.h&gt;</code>），其定义如下：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">sched_rt_entity</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">run_list</span>;</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> timeout;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">long</span> watchdog_stamp;</span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> time_slice;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sched_rt_entity</span> *<span class="title">back</span>;</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">sched_rt_entity</span> *<span class="title">parent</span>;</span></span><br><span class="line">    <span class="comment">/* rq on which this entity is (to be) queued: */</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">rt_rq</span> *<span class="title">rt_rq</span>;</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p><code>SCHED_FIFO</code> 的时间片是 0，可以在 <code>&lt;kernel/sched/rt.c&gt;</code> 中看到具体定义：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> sched_rr_timeslice = RR_TIMESLICE;</span><br><span class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">unsigned</span> <span class="keyword">int</span> <span class="title">get_rr_interval_rt</span><span class="params">(struct rq *rq,</span></span></span><br><span class="line"><span class="function"><span class="params">                                       struct task_struct *task)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="keyword">if</span> (task-&gt;policy == SCHED_RR)</span><br><span class="line">        <span class="keyword">return</span> sched_rr_timeslice;</span><br><span class="line">    <span class="keyword">else</span></span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line">``` </span><br><span class="line"></span><br><span class="line">而关于运行队列的定义如下：</span><br><span class="line">```c</span><br><span class="line"><span class="comment">/* Real-Time classes' related field in a runqueue: */</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">rt_rq</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="comment">// 所有相同优先级的实时任务都保存在 `active.queue[prio]` 链表中</span></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">rt_prio_array</span> <span class="title">active</span>;</span></span><br><span class="line">    <span class="keyword">unsigned</span> <span class="keyword">int</span> rt_nr_running;</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">rq</span> *<span class="title">rq</span>;</span> <span class="comment">/* main runqueue */</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">* This is the priority-queue data structure of the RT scheduling class:</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">rt_prio_array</span></span></span><br><span class="line"><span class="class">&#123;</span></span><br><span class="line">    <span class="comment">/* include 1 bit for delimiter */</span></span><br><span class="line">    <span class="comment">// 类似 O(1) 调度器，使用位图来标记对应优先级的链表是否为空</span></span><br><span class="line">    DECLARE_BITMAP(bitmap, MAX_RT_PRIO + <span class="number">1</span>);</span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">list_head</span> <span class="title">queue</span>[<span class="title">MAX_RT_PRIO</span>];</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure></p>
+<p>类似于 CFS 中的 <code>update_curr()</code> 函数，<code>update_curr_rt()</code> 函数用来跟踪实时任务的 CPU 占用情况，收集一些统计信息，更新时间片等，但这里使用的是真实时间，而没有虚拟时间的概念。完整定义可以参考 <a href="https://github.com/torvalds/linux/blob/a6ed68d6468bd5a3da78a103344ded1435fed57a/kernel/sched/rt.c#L955" target="_blank" rel="noopener">kernel/sched/rt.c#L955</a>。</p>
+<h2 id="BFS-amp-MuqSS"><a href="#BFS-amp-MuqSS" class="headerlink" title="BFS &amp; MuqSS"></a>BFS &amp; MuqSS</h2><p>关于 BFS 和 MuqSS 的精彩介绍可以参考 <a href="https://mp.weixin.qq.com/s/kI3pFJ3qUgQJ2P_--G3ehQ" target="_blank" rel="noopener">这篇文章</a>，这里不再赘述。<br>总体来说，BFS 是一个适用于桌面或移动设备的调度器，设计地比较简洁，用于改善桌面应用的交互性，减小响应时间，提升用户体验。它采用了全局单任务队列设计，不再让每个 CPU 都有独立的运行队列。虽然使用单个全局队列，需要引入队列锁来保证并发安全性，但是对于桌面系统而言，处理器通常都比较少，锁的开销基本可以忽略。BFS 每次会在任务链表中选择具有最小 virtual deadline 的任务运行。</p>
+<p>MuqSS 是作者后来基于 BFS 改进的一款调度器，同样是用于桌面环境任务调度。它主要解决了 BFS 的两个问题：</p>
+<ol>
+<li>每次需要在对应优先级链表中遍历查找需要执行任务，这个时间复杂度为 O(n)。所以新的调度器引入了跳表来解决该问题，从而将时间复杂度降低到 O(1)。</li>
+<li>全局锁争夺的开销优化，采用 <code>try_lock</code> 替代 <code>lock</code>。<br><img src="https://mmbiz.qpic.cn/mmbiz_png/Ass1lsY6bytXicPsWIWNWxe47NbURjISJ8rdLqdPkHHW9vngCa5CojQPoI8s7f3f2V6I1OMBJXB1rbOhlmb6wrg/640?wx_fmt=png&amp;tp=webp&amp;wxfrom=5&amp;wx_lazy=1&amp;wx_co=1" alt=""></li>
+</ol>
+<h1 id="深入学习"><a href="#深入学习" class="headerlink" title="深入学习"></a>深入学习</h1><ul>
+<li>《Linux 设计与实现 第三版》进程调度章节</li>
+<li><a href="https://trepo.tuni.fi/bitstream/handle/10024/96864/GRADU-1428493916.pdf" target="_blank" rel="noopener">A complete guide to Linux process scheduling</a></li>
+<li><a href="https://oska874.gitbooks.io/process-scheduling-in-linux/chapter1.html" target="_blank" rel="noopener">Process Scheduling in Linux</a></li>
+<li><a href="https://www.kernel.org/doc/html/latest/scheduler/sched-design-CFS.html" target="_blank" rel="noopener">内核文档：CFS Scheduler 设计</a></li>
+<li>Linux 进程与线程：《Linux 系统编程手册 第 28 章及后续》<ul>
+<li>可以关注下和进程线程有关的系统调用</li>
+<li>Pthread 线程是怎么在 Linux 中实现的</li>
+</ul>
+</li>
+<li><a href="https://opensource.com/article/19/2/fair-scheduling-linux" target="_blank" rel="noopener">Linux 公平调度</a><ul>
+<li>对比了传统调度器和 CFS 的区别</li>
+<li>简单介绍了 CFS 的实现</li>
+</ul>
+</li>
+<li><a href="https://www.usenix.org/system/files/conference/atc18/atc18-bouron.pdf" target="_blank" rel="noopener">The Battle of Schedulers: FreeBSD ULE vs Linux CFS</a><ul>
+<li>重点可以看下关于 CFS 的简述 &amp; 负载均衡部分</li>
+<li>可以简单看看 ULE 是的实现原理（interactive, batch queue），为什么可能会有饿死的情况</li>
+</ul>
+</li>
+<li><a href="https://zhuanlan.zhihu.com/p/33621500" target="_blank" rel="noopener">NUMA 架构深究</a><ul>
+<li>早期的 x86 是 Universal Memory Arch, UMA 架构</li>
+<li>NUMA 架构出来后，访问不同内存地址，速度是有差别了，和硬件架构有很大关系</li>
+</ul>
+</li>
+<li><a href="https://jin-yang.github.io/post/linux-kernel-scheduler.html" target="_blank" rel="noopener">Kernel 调度系统</a><ul>
+<li>重点关注作者关于 CFS 列出的几个灵魂拷问</li>
+<li>vruntime 在什么时候发生改变？</li>
+<li>vruntime 初始值是怎么设定的？</li>
+</ul>
+</li>
+<li><a href="https://mp.weixin.qq.com/s/kI3pFJ3qUgQJ2P_--G3ehQ" target="_blank" rel="noopener">两个非常有意思的适合桌面使用的 Linux task 调度器: BFS 和 MuqSS</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2019/11/17/guide-to-linux-scheduler/" title="论文学习之 Linux 调度器">http://ifaceless.space/2019/11/17/guide-to-linux-scheduler/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Linux/" rel="tag"><i class="fa fa-tag"></i> Linux</a>
+          
+            <a href="/tags/调度器/" rel="tag"><i class="fa fa-tag"></i> 调度器</a>
+          
+            <a href="/tags/CFS/" rel="tag"><i class="fa fa-tag"></i> CFS</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/11/05/linux-kernel-scheduler-papers/" rel="next" title="Linux 调度器学习资料整理">
+                <i class="fa fa-chevron-left"></i> Linux 调度器学习资料整理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/11/28/portal/" rel="prev" title="Go 语言中如何以优雅的姿势实现对象序列化？">
+                Go 语言中如何以优雅的姿势实现对象序列化？ <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me@ifaceless.me" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#为什么需要调度"><span class="nav-number">2.</span> <span class="nav-text">为什么需要调度</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#调度有关的进程描述符"><span class="nav-number">3.</span> <span class="nav-text">调度有关的进程描述符</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#优先级-Priority"><span class="nav-number">4.</span> <span class="nav-text">优先级 Priority</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#进程优先级"><span class="nav-number">4.1.</span> <span class="nav-text">进程优先级</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#普通任务优先级"><span class="nav-number">4.1.1.</span> <span class="nav-text">普通任务优先级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实时任务优先级"><span class="nav-number">4.1.2.</span> <span class="nav-text">实时任务优先级</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#内核视角下的进程优先级"><span class="nav-number">4.2.</span> <span class="nav-text">内核视角下的进程优先级</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#优先级计算"><span class="nav-number">4.3.</span> <span class="nav-text">优先级计算</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#负载权重（Load-Weights）"><span class="nav-number">4.4.</span> <span class="nav-text">负载权重（Load Weights）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#调度类-Scheduling-Classes"><span class="nav-number">5.</span> <span class="nav-text">调度类 Scheduling Classes</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#运行队列-Run-Queue"><span class="nav-number">6.</span> <span class="nav-text">运行队列 Run Queue</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#何时运行调度器？"><span class="nav-number">7.</span> <span class="nav-text">何时运行调度器？</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Linux-调度器"><span class="nav-number">8.</span> <span class="nav-text">Linux 调度器</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#早期版本"><span class="nav-number">8.1.</span> <span class="nav-text">早期版本</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#O-n"><span class="nav-number">8.2.</span> <span class="nav-text">O(n)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#O-1"><span class="nav-number">8.3.</span> <span class="nav-text">O(1)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Staircase"><span class="nav-number">8.4.</span> <span class="nav-text">Staircase</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#CFS"><span class="nav-number">8.5.</span> <span class="nav-text">CFS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#单核调度"><span class="nav-number">8.5.1.</span> <span class="nav-text">单核调度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多核负载均衡"><span class="nav-number">8.5.2.</span> <span class="nav-text">多核负载均衡</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行队列"><span class="nav-number">8.5.3.</span> <span class="nav-text">运行队列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#虚拟时钟"><span class="nav-number">8.5.4.</span> <span class="nav-text">虚拟时钟</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#选择下一个任务"><span class="nav-number">8.5.5.</span> <span class="nav-text">选择下一个任务</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实时调度器"><span class="nav-number">8.6.</span> <span class="nav-text">实时调度器</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#实现细节"><span class="nav-number">8.6.1.</span> <span class="nav-text">实现细节</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#BFS-amp-MuqSS"><span class="nav-number">8.7.</span> <span class="nav-text">BFS &amp; MuqSS</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#深入学习"><span class="nav-number">9.</span> <span class="nav-text">深入学习</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>

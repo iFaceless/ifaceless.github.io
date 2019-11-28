@@ -283,7 +283,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/11/22/portal/">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/11/28/portal/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -302,7 +302,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/11/22/portal/" itemprop="url">Go 语言中如何以优雅的姿势实现对象序列化？</a></h2>
+                <a class="post-title-link" href="/2019/11/28/portal/" itemprop="url">Go 语言中如何以优雅的姿势实现对象序列化？</a></h2>
         
 
         <div class="post-meta">
@@ -314,8 +314,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-22T21:50:45+08:00">
-                2019-11-22
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-28T21:50:45+08:00">
+                2019-11-28
               </time>
             
 
@@ -408,20 +408,18 @@
 
       
         
-          
-          引言在我们的 Web 后端项目中，通常将数据源获取相关的结构体定义放在 models.go 中，不管其关联的数据是来自于数据库、Redis 还是 RPC，总之都是收敛在这一层以提供更好的复用性。
-而针对不同的场景，如 C 端 HTTP API 要求返回的数据，则定义对应的 Schema struct
-          ...
+          <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>在我们的 Web 后端项目中，通常将数据源获取相关的结构体定义放在 models.go 中，不管其关联的数据是来自于数据库、Redis 还是 RPC，总之都是收敛在这一层以提供更好的复用性。</p>
+<p>而针对不同的场景，如 C 端 HTTP API 要求返回的数据，则定义对应的 Schema struct，从而聚合需要的数据下发出去。当然，对于 Admin API 和 RPC API 也会根据需要定义不同的 Schema struct。但是，它们都会复用相同的 models。想必这些应该都是比较常规的操作了吧。<br>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2019/11/22/portal/" rel="contents">
+            <a class="btn" href="/2019/11/28/portal/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
           <!--/noindex-->
         
       
-    </div>
+    </p></div>
     
     
     
@@ -465,7 +463,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/11/22/python-stdlib-threading/">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/11/17/guide-to-linux-scheduler/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -484,7 +482,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/11/22/python-stdlib-threading/" itemprop="url">Python 标准库源码之 threading 模块</a></h2>
+                <a class="post-title-link" href="/2019/11/17/guide-to-linux-scheduler/" itemprop="url">论文学习之 Linux 调度器</a></h2>
         
 
         <div class="post-meta">
@@ -496,8 +494,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-22T21:03:33+08:00">
-                2019-11-22
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-17T23:20:14+08:00">
+                2019-11-17
               </time>
             
 
@@ -519,8 +517,8 @@
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/Python/" itemprop="url" rel="index">
-                    <span itemprop="name">Python</span>
+                  <a href="/categories/Linux/" itemprop="url" rel="index">
+                    <span itemprop="name">Linux</span>
                   </a>
                 </span>
 
@@ -552,7 +550,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  3.8k
+                  11k
                 </span>
               
 
@@ -568,7 +566,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  19
+                  41
                 </span>
               
             </div>
@@ -590,13 +588,10 @@
 
       
         
-          
-          引言虽然说 Python 受限于 CPython 的实现，存在的 GIL 会导致我们在使用多线程的时候，没法利用多核跑多线程。但是有的时候还是会用到线程的，尤其是针对一些 I/O 密集型的任务，也可以使用它们。
-在使用多线程编程时，我们随时需要注意竞态条件（race condition）和数据竞争（
-          ...
+          <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p><em>Linux Kernel Development</em> 一书中，关于 Linux 的进程调度器并没有讲解的很深入，只是提到了 CFS 调度器的基本思想和一些实现细节；并没有 Linux 早期的调度器介绍，以及最近这些年新增的在内核源码树外维护的调度器思想。所以在经过一番搜寻后，看到了这篇论文 <a href="https://trepo.tuni.fi/bitstream/handle/10024/96864/GRADU-1428493916.pdf" target="_blank" rel="noopener">A complete guide to Linux process scheduling</a>，对 Linux 的调度器历史进行了回顾，并且相对细致地讲解了 CFS 调度器。整体来说，虽然比较啰嗦，但是对于想要知道更多细节的我来说非常适合，所以就有了翻译它的冲动。当然，在学习过程也参考了其它论文。下面开启学习之旅吧~</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2019/11/22/python-stdlib-threading/" rel="contents">
+            <a class="btn" href="/2019/11/17/guide-to-linux-scheduler/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -647,7 +642,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/11/20/rate-limit-policies/">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/11/05/linux-kernel-scheduler-papers/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -666,7 +661,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/11/20/rate-limit-policies/" itemprop="url">限流算法学习：漏桶 & 令牌桶算法</a></h2>
+                <a class="post-title-link" href="/2019/11/05/linux-kernel-scheduler-papers/" itemprop="url">Linux 调度器学习资料整理</a></h2>
         
 
         <div class="post-meta">
@@ -678,190 +673,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-20T21:20:11+08:00">
-                2019-11-20
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/Web-开发/" itemprop="url" rel="index">
-                    <span itemprop="name">Web 开发</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-            <div class="post-wordcount">
-              
-                
-                  <span class="post-meta-divider">|</span>
-                
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">字数统计&#58;</span>
-                
-                <span title="字数统计">
-                  904
-                </span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">
-                  4
-                </span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          引言本节主要学习下两种常用的单机限流思想，分别是漏桶算法和令牌桶算法。此外，还将给出使用 Python 及 Go 语言实现，便于加深理解。当然，现实中肯定不能直接用下面的代码。实际应用时，我们不大可能在单机执行限流，下面的实现也并非线程或 goroutine 安全的。
-实际限流可以考虑在 Nginx
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/11/20/rate-limit-policies/" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/11/18/linux-kernel-scheduler-papers/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="iFaceless">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="黑白之院">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/11/18/linux-kernel-scheduler-papers/" itemprop="url">Linux 调度器学习资料整理</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-18T21:18:35+08:00">
-                2019-11-18
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-05T21:18:35+08:00">
+                2019-11-05
               </time>
             
 
@@ -954,20 +767,18 @@
 
       
         
-          
-          引言
-系统中的 CPU 数量有限，而用户希望「同时」得到服务的进程（任务）常常会多于可用的 CPU 核数，这时就需要聪明的任务调度器来为我们实现 CPU 虚拟化，让每个进程都能得到服务。调度器需要照顾到任务的响应时间（否则用户会在敲击键盘后等很久，体验很渣），还要保证一定的周转时间（CPU 密集型的
-          ...
+          <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p><img src="https://pic1.zhimg.com/80/v2-43f561d7d0646c34ed8c7bbf6fb52f23_hd.png" alt=""></p>
+<p>系统中的 CPU 数量有限，而用户希望「同时」得到服务的进程（任务）常常会多于可用的 CPU 核数，这时就需要聪明的任务调度器来为我们实现 CPU 虚拟化，让每个进程都能得到服务。调度器需要照顾到任务的响应时间（否则用户会在敲击键盘后等很久，体验很渣），还要保证一定的周转时间（CPU 密集型的任务期望获得更多的连续运行时间，从而利用 CPU 缓存亲和性，频繁的任务切换会导致一些性能损失，尤其是现代系统 TLB miss, Page Fault 惩罚非常严重），同时还不能让某些低优先级的任务饿死。可见调度器是实现多任务的核心，现代操作系统必备。<br>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2019/11/18/linux-kernel-scheduler-papers/" rel="contents">
+            <a class="btn" href="/2019/11/05/linux-kernel-scheduler-papers/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
           <!--/noindex-->
         
       
-    </div>
+    </p></div>
     
     
     
@@ -1011,7 +822,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/11/15/implement-lru-cache-in-go/">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/10/30/linux-kernel-dev-notes/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -1030,7 +841,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/11/15/implement-lru-cache-in-go/" itemprop="url">使用 Go 语言实现一个简单的 LRU Cache</a></h2>
+                <a class="post-title-link" href="/2019/10/30/linux-kernel-dev-notes/" itemprop="url">Linux Kernel Development 学习与总结</a></h2>
         
 
         <div class="post-meta">
@@ -1042,189 +853,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-15T21:28:32+08:00">
-                2019-11-15
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/Go/" itemprop="url" rel="index">
-                    <span itemprop="name">Go</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-            <div class="post-wordcount">
-              
-                
-                  <span class="post-meta-divider">|</span>
-                
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">字数统计&#58;</span>
-                
-                <span title="字数统计">
-                  822
-                </span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">
-                  3
-                </span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          
-          引言LRU (Least-Recently-Used) Cache 是经常使用的一种内存缓存，可以将一些热点数据存放在其中，进而提高接口的响应速度。在实际应用中，cache miss 后，实际可能会回源到 Redis 集群获取缓存数据，如果 Redis 集群也没有，才会回源数据库。也就是引入 LRU
-          ...
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/11/15/implement-lru-cache-in-go/" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/10/31/linux-kernel-dev-notes/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="iFaceless">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="黑白之院">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/10/31/linux-kernel-dev-notes/" itemprop="url">Linux Kernel Development 学习与总结</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-31T17:47:22+08:00">
-                2019-10-31
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-30T17:47:22+08:00">
+                2019-10-30
               </time>
             
 
@@ -1317,19 +947,17 @@
 
       
         
-          
-          引言最近抽时间把 Operating Systems: Three Easy Pieces 终于看完了（其实 2017 年就知道它了，没想到拖到了 2019 年末 😅），全书分三个部分（虚拟化、并发、持久化）对操作系统的一些通用设计思想进行了介绍，学完后，对于进程、内存虚拟化、并发、文件系统有了更
-          ...
+          <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>最近抽时间把 <a href="http://pages.cs.wisc.edu/~remzi/OSTEP/" target="_blank" rel="noopener"><em>Operating Systems: Three Easy Pieces</em></a> 终于看完了（其实 2017 年就知道它了，没想到拖到了 2019 年 😅），全书分三个部分（虚拟化、并发、持久化）对操作系统的一些通用设计思想进行了介绍，学完后，对于进程、内存虚拟化、并发、文件系统有了更加深刻的认识。但是，真实的世界是什么样子的呢？这就是希望在阅读《Linux 设计与实现》（<em>Linux Kernel Development</em>）后找到想要的答案。当然，在学习中也针对很多部分搜集了不少学习资料，整理在文后，方便加深理解。<br>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2019/10/31/linux-kernel-dev-notes/" rel="contents">
+            <a class="btn" href="/2019/10/30/linux-kernel-dev-notes/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
           <!--/noindex-->
         
       
-    </div>
+    </p></div>
     
     
     
@@ -1373,7 +1001,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/10/29/golang-traps/">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/10/11/rate-limit-policies/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -1392,7 +1020,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/10/29/golang-traps/" itemprop="url">Go 编写姿势</a></h2>
+                <a class="post-title-link" href="/2019/10/11/rate-limit-policies/" itemprop="url">限流算法学习：漏桶 & 令牌桶算法</a></h2>
         
 
         <div class="post-meta">
@@ -1404,8 +1032,546 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-29T21:44:19+08:00">
-                2019-10-29
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-10-11T21:20:11+08:00">
+                2019-10-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Web-开发/" itemprop="url" rel="index">
+                    <span itemprop="name">Web 开发</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  904
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  4
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>本节主要学习下两种常用的单机限流思想，分别是<strong>漏桶算法</strong>和<strong>令牌桶算法</strong>。此外，还将给出使用 Python 及 Go 语言实现，便于加深理解。当然，现实中肯定不能直接用下面的代码。实际应用时，我们不大可能在单机执行限流，下面的实现也并非线程或 goroutine 安全的。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/10/11/rate-limit-policies/" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </p></div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/09/22/implement-lru-cache-in-go/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/09/22/implement-lru-cache-in-go/" itemprop="url">使用 Go 语言实现一个简单的 LRU Cache</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-22T21:28:32+08:00">
+                2019-09-22
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Go/" itemprop="url" rel="index">
+                    <span itemprop="name">Go</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  822
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  3
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>LRU (Least-Recently-Used) Cache 是经常使用的一种内存缓存，可以将一些热点数据存放在其中，进而提高接口的响应速度。在实际应用中，cache miss 后，实际可能会回源到 Redis 集群获取缓存数据，如果 Redis 集群也没有，才会回源数据库。也就是引入 LRU Cache 后相当于给应用层添加了一级高速缓存。当然，更为实际一点的是，我们需要使用的是带有过期时间的 LRU Cache，否则后台更新了课程数据，由于内存缓存的原因而得不到及时更新。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/09/22/implement-lru-cache-in-go/" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </p></div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/09/14/python-stdlib-threading/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/09/14/python-stdlib-threading/" itemprop="url">Python 标准库源码之 threading 模块</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-14T21:03:33+08:00">
+                2019-09-14
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  3.8k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  19
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        
+          <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>虽然说 Python 受限于 CPython 的实现，存在的 GIL 会导致我们在使用多线程的时候，没法利用多核跑多线程。但是有的时候还是会用到线程的，尤其是针对一些 I/O 密集型的任务，也可以使用它们。</p>
+<p>在使用多线程编程时，我们随时需要注意<strong>竞态条件（race condition）</strong>和<strong>数据竞争（data race）</strong>的问题，前者会导致我们在不同的时间点运行程序得到的输出可能不同；而后者则更为可怕，容易导致共享的数据结构被错误修改，甚至导致程序崩溃或者出现莫名其妙的 Bug。这个时候自然就要用到 Python threading 模块为我们提供的若干同步原语了。<br>
+          <!--noindex-->
+          <div class="post-button text-center">
+            <a class="btn" href="/2019/09/14/python-stdlib-threading/" rel="contents">
+              阅读全文 &raquo;
+            </a>
+          </div>
+          <!--/noindex-->
+        
+      
+    </p></div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+
+      
+
+      
+
+      
+      
+        <div class="post-eof"></div>
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+    
+      
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/09/03/golang-traps/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">
+                
+                <a class="post-title-link" href="/2019/09/03/golang-traps/" itemprop="url">Go 编写姿势</a></h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-03T21:44:19+08:00">
+                2019-09-03
               </time>
             
 
@@ -1505,7 +1671,7 @@ Value Receiver 方法可以通过值或者指针调用；Pointer Receiver 则只
           ...
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2019/10/29/golang-traps/" rel="contents">
+            <a class="btn" href="/2019/09/03/golang-traps/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -1902,185 +2068,6 @@ Value Receiver 方法可以通过值或者指针调用；Pointer Receiver 则只
 
 
     
-      
-
-  
-
-  
-  
-  
-
-  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/08/14/ddia-data-sys-basics/">
-
-    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="iFaceless">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="黑白之院">
-    </span>
-
-    
-      <header class="post-header">
-
-        
-        
-          <h2 class="post-title" itemprop="name headline">
-                
-                <a class="post-title-link" href="/2019/08/14/ddia-data-sys-basics/" itemprop="url">野猪🐗书读书笔记之数据系统基础</a></h2>
-        
-
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-08-14T22:12:51+08:00">
-                2019-08-14
-              </time>
-            
-
-            
-
-            
-          </span>
-
-          
-            <span class="post-category">
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/系统设计/" itemprop="url" rel="index">
-                    <span itemprop="name">系统设计</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-            <div class="post-wordcount">
-              
-                
-                  <span class="post-meta-divider">|</span>
-                
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-file-word-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">字数统计&#58;</span>
-                
-                <span title="字数统计">
-                  4.7k
-                </span>
-              
-
-              
-                <span class="post-meta-divider">|</span>
-              
-
-              
-                <span class="post-meta-item-icon">
-                  <i class="fa fa-clock-o"></i>
-                </span>
-                
-                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
-                
-                <span title="阅读时长">
-                  16
-                </span>
-              
-            </div>
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        
-          <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>《数据密集型应用系统设计》（Design Data-Intensive Applications）是一本非常有诚意、非常优秀的讲解针对数据密集场景下系统设计相关的目标、原则和技术选型等知识。作者结合理论与实践，为我们展现了一些技术的发展趋势以及它们之间的对比；同时还介绍了一些关键技术（如存储引擎、序列化协议、分布式一致性）等的实现原理，让我们能够<strong>知其然，更知其所以然</strong>。</p>
-          <!--noindex-->
-          <div class="post-button text-center">
-            <a class="btn" href="/2019/08/14/ddia-data-sys-basics/" rel="contents">
-              阅读全文 &raquo;
-            </a>
-          </div>
-          <!--/noindex-->
-        
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-
-      
-
-      
-
-      
-      
-        <div class="post-eof"></div>
-      
-    </footer>
-  </div>
-  
-  
-  
-  </article>
-
-
-    
   </section>
 
   
@@ -2135,7 +2122,7 @@ Value Receiver 方法可以通过值或者指针调用；Pointer Receiver 则只
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-count">29</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>

@@ -93,11 +93,11 @@
 <meta name="keywords" content="LRU,缓存">
 <meta property="og:type" content="article">
 <meta property="og:title" content="使用 Go 语言实现一个简单的 LRU Cache">
-<meta property="og:url" content="http://ifaceless.space/2019/11/15/implement-lru-cache-in-go/index.html">
+<meta property="og:url" content="http://ifaceless.space/2019/09/22/implement-lru-cache-in-go/index.html">
 <meta property="og:site_name" content="黑白之院">
 <meta property="og:description" content="引言LRU (Least-Recently-Used) Cache 是经常使用的一种内存缓存，可以将一些热点数据存放在其中，进而提高接口的响应速度。在实际应用中，cache miss 后，实际可能会回源到 Redis 集群获取缓存数据，如果 Redis 集群也没有，才会回源数据库。也就是引入 LRU Cache 后相当于给应用层添加了一级高速缓存。当然，更为实际一点的是，我们需要使用的是带有过期时">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2019-11-24T09:45:59.949Z">
+<meta property="og:updated_time" content="2019-11-28T09:41:31.555Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="使用 Go 语言实现一个简单的 LRU Cache">
 <meta name="twitter:description" content="引言LRU (Least-Recently-Used) Cache 是经常使用的一种内存缓存，可以将一些热点数据存放在其中，进而提高接口的响应速度。在实际应用中，cache miss 后，实际可能会回源到 Redis 集群获取缓存数据，如果 Redis 集群也没有，才会回源数据库。也就是引入 LRU Cache 后相当于给应用层添加了一级高速缓存。当然，更为实际一点的是，我们需要使用的是带有过期时">
@@ -130,7 +130,7 @@
 
 
 
-  <link rel="canonical" href="http://ifaceless.space/2019/11/15/implement-lru-cache-in-go/">
+  <link rel="canonical" href="http://ifaceless.space/2019/09/22/implement-lru-cache-in-go/">
 
 
 
@@ -283,7 +283,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/11/15/implement-lru-cache-in-go/">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/09/22/implement-lru-cache-in-go/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -312,8 +312,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-11-15T21:28:32+08:00">
-                2019-11-15
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-09-22T21:28:32+08:00">
+                2019-09-22
               </time>
             
 
@@ -405,8 +405,7 @@
       
 
       
-        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>LRU (Least-Recently-Used) Cache 是经常使用的一种内存缓存，可以将一些热点数据存放在其中，进而提高接口的响应速度。在实际应用中，cache miss 后，实际可能会回源到 Redis 集群获取缓存数据，如果 Redis 集群也没有，才会回源数据库。也就是引入 LRU Cache 后相当于给应用层添加了一级高速缓存。当然，更为实际一点的是，我们需要使用的是带有过期时间的 LRU Cache，否则后台更新了课程数据，由于内存缓存的原因而得不到及时更新。</p>
-<p>本节主要是学习下 LRU Cache 实现原理，只探讨最核心的实现思想，不考虑复杂的情况（如 goroutine 安全，缓存带过期时间等）。</p>
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>LRU (Least-Recently-Used) Cache 是经常使用的一种内存缓存，可以将一些热点数据存放在其中，进而提高接口的响应速度。在实际应用中，cache miss 后，实际可能会回源到 Redis 集群获取缓存数据，如果 Redis 集群也没有，才会回源数据库。也就是引入 LRU Cache 后相当于给应用层添加了一级高速缓存。当然，更为实际一点的是，我们需要使用的是带有过期时间的 LRU Cache，否则后台更新了课程数据，由于内存缓存的原因而得不到及时更新。<br><a id="more"></a><br>本节主要是学习下 LRU Cache 实现原理，只探讨最核心的实现思想，不考虑复杂的情况（如 goroutine 安全，缓存带过期时间等）。</p>
 <h1 id="实现原理"><a href="#实现原理" class="headerlink" title="实现原理"></a>实现原理</h1><p>LRU Cache 提供的功能有两个：</p>
 <ol>
 <li>顾名思义，缓存能力</li>
@@ -440,7 +439,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://ifaceless.space/2019/11/15/implement-lru-cache-in-go/" title="使用 Go 语言实现一个简单的 LRU Cache">http://ifaceless.space/2019/11/15/implement-lru-cache-in-go/</a>
+    <a href="http://ifaceless.space/2019/09/22/implement-lru-cache-in-go/" title="使用 Go 语言实现一个简单的 LRU Cache">http://ifaceless.space/2019/09/22/implement-lru-cache-in-go/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -470,8 +469,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/10/31/linux-kernel-dev-notes/" rel="next" title="Linux Kernel Development 学习与总结">
-                <i class="fa fa-chevron-left"></i> Linux Kernel Development 学习与总结
+              <a href="/2019/09/14/python-stdlib-threading/" rel="next" title="Python 标准库源码之 threading 模块">
+                <i class="fa fa-chevron-left"></i> Python 标准库源码之 threading 模块
               </a>
             
           </div>
@@ -480,8 +479,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2019/11/18/linux-kernel-scheduler-papers/" rel="prev" title="Linux 调度器学习资料整理">
-                Linux 调度器学习资料整理 <i class="fa fa-chevron-right"></i>
+              <a href="/2019/10/11/rate-limit-policies/" rel="prev" title="限流算法学习：漏桶 & 令牌桶算法">
+                限流算法学习：漏桶 & 令牌桶算法 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -563,7 +562,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">28</span>
+                  <span class="site-state-item-count">29</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
