@@ -76,7 +76,7 @@
 
 
 
-  <meta name="keywords" content="LRU,缓存,">
+  <meta name="keywords" content="缓存,LRU,">
 
 
 
@@ -90,7 +90,7 @@
 
 
 <meta name="description" content="引言LRU (Least-Recently-Used) Cache 是经常使用的一种内存缓存，可以将一些热点数据存放在其中，进而提高接口的响应速度。在实际应用中，cache miss 后，实际可能会回源到 Redis 集群获取缓存数据，如果 Redis 集群也没有，才会回源数据库。也就是引入 LRU Cache 后相当于给应用层添加了一级高速缓存。当然，更为实际一点的是，我们需要使用的是带有过期时">
-<meta name="keywords" content="LRU,缓存">
+<meta name="keywords" content="缓存,LRU">
 <meta property="og:type" content="article">
 <meta property="og:title" content="使用 Go 语言实现一个简单的 LRU Cache">
 <meta property="og:url" content="http://ifaceless.space/2019/09/22/implement-lru-cache-in-go/index.html">
@@ -454,9 +454,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/LRU/" rel="tag"><i class="fa fa-tag"></i> LRU</a>
-          
             <a href="/tags/缓存/" rel="tag"><i class="fa fa-tag"></i> 缓存</a>
+          
+            <a href="/tags/LRU/" rel="tag"><i class="fa fa-tag"></i> LRU</a>
           
         </div>
       
@@ -562,7 +562,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">29</span>
+                  <span class="site-state-item-count">30</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -584,7 +584,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-count">61</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

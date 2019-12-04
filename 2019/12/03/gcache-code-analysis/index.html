@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="缓存,LRU,LFU,ARC,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言在 Web 请求中，后端可以引入内存缓存来改善接口的响应速度，方法就是对部分热点数据增加本地缓存。例如，我们经常会获取一个课程的详情页数据，对于其中基本不怎么变化的部分可以缓存到本地内存中，这样可以避免频繁回源（数据库、Redis 或者 RPC 调用）而造成额外的性能开销。当然，缓存的使用有利有弊，需要根据情况进行权衡。比如可能存在短时间的不一致性，或者容器内存使用增加等。 不过，我们一般只会">
+<meta name="keywords" content="缓存,LRU,LFU,ARC">
+<meta property="og:type" content="article">
+<meta property="og:title" content="gcache 源码学习">
+<meta property="og:url" content="http://ifaceless.space/2019/12/03/gcache-code-analysis/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言在 Web 请求中，后端可以引入内存缓存来改善接口的响应速度，方法就是对部分热点数据增加本地缓存。例如，我们经常会获取一个课程的详情页数据，对于其中基本不怎么变化的部分可以缓存到本地内存中，这样可以避免频繁回源（数据库、Redis 或者 RPC 调用）而造成额外的性能开销。当然，缓存的使用有利有弊，需要根据情况进行权衡。比如可能存在短时间的不一致性，或者容器内存使用增加等。 不过，我们一般只会">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pic4.zhimg.com/v2-a02528e2ad4f000c0bd227c33e4bf860.jpg">
+<meta property="og:image" content="https://pic3.zhimg.com/v2-52dbd57fc0605a869d42b8bf4d90c8a9.jpg">
+<meta property="og:image" content="https://pic1.zhimg.com/v2-dc1f58437df446b89ecb2f4636fbdab1.jpg">
+<meta property="og:updated_time" content="2019-12-04T06:23:32.490Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="gcache 源码学习">
+<meta name="twitter:description" content="引言在 Web 请求中，后端可以引入内存缓存来改善接口的响应速度，方法就是对部分热点数据增加本地缓存。例如，我们经常会获取一个课程的详情页数据，对于其中基本不怎么变化的部分可以缓存到本地内存中，这样可以避免频繁回源（数据库、Redis 或者 RPC 调用）而造成额外的性能开销。当然，缓存的使用有利有弊，需要根据情况进行权衡。比如可能存在短时间的不一致性，或者容器内存使用增加等。 不过，我们一般只会">
+<meta name="twitter:image" content="https://pic4.zhimg.com/v2-a02528e2ad4f000c0bd227c33e4bf860.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"hide","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2019/12/03/gcache-code-analysis/">
+
+
+
+
+
+  <title>gcache 源码学习 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/12/03/gcache-code-analysis/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">gcache 源码学习</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-03T20:36:43+08:00">
+                2019-12-03
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Go/" itemprop="url" rel="index">
+                    <span itemprop="name">Go</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  4.7k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  20
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>在 Web 请求中，后端可以引入内存缓存来改善接口的响应速度，方法就是对部分热点数据增加本地缓存。例如，我们经常会获取一个课程的详情页数据，对于其中基本不怎么变化的部分可以缓存到本地内存中，这样可以避免频繁回源（数据库、Redis 或者 RPC 调用）而造成额外的性能开销。当然，缓存的使用有利有弊，需要根据情况进行权衡。比如可能存在短时间的不一致性，或者容器内存使用增加等。</p>
+<p>不过，我们一般只会对一些请求量较大、且明显适合使用本地缓存来改善的接口应用本地缓存。在使用这种缓存时，通常需要设置过期时间和最大容量，避免过渡占用内存的问题。所以带失效时间的 LRU Cache 就非常适合。</p>
+<a id="more"></a>
+<p><a href="https://github.com/bluele/gcache" target="_blank" rel="noopener">gocache</a> 正好提供了我们期望的功能，整体来说，接口设计比较优雅，提供了灵活的 Hook 机制，对于一般业务来说已经很实用了。它的基本特点如下：</p>
+<ol>
+<li>提供了 LRU, LFU 和 ARC 三种缓存失效策略；</li>
+<li>支持基于过期时间的失效策略；</li>
+<li>考虑了并发访问失效 key 并回源的场景（可能引起击穿问题），采用单一 goroutine 执行回调函数，避免并发回源造成下游请求压力过大的问题；</li>
+<li><p>提供了非常丰富的 Hook，如：</p>
+<ul>
+<li><code>LoaderFunc</code></li>
+<li><code>LoaderWithExpireFunc</code></li>
+<li><code>EvictedFunc</code></li>
+<li><code>AddedFunc</code></li>
+<li><code>PurgeVisitorFunc</code></li>
+</ul>
+</li>
+<li><p>最最重要的是，goroutine safe。</p>
+</li>
+</ol>
+<p>本文对 <a href="https://github.com/bluele/gcache" target="_blank" rel="noopener">gocache</a> 核心源码进行了分析，重点是学习它提供的几种 Cache 的实现思想，正所谓知其然，还要知其所以然~</p>
+<h1 id="保证单个-goroutine-执行回源函数"><a href="#保证单个-goroutine-执行回源函数" class="headerlink" title="保证单个 goroutine 执行回源函数"></a>保证单个 goroutine 执行回源函数</h1><p>由于提供了 <code>LoaderFunc</code>，那么在 key 失效的情况下，假设存在 100 个并发的 goroutine 来访问的时候，就会存在一个问题，也就是它们可能会同时调用  <code>LoaderFunc</code>，从而对下游服务造成较大的请求压力。那么如何避免呢？如何保证只有一个真正干活的 goroutine 呢？其它 goroutine 是继续等待呢，还是直接返回 key 不存在的错误呢？</p>
+<p>我们来看看源码库中的 <code>singleflight.go</code> 文件中提供的算法。整体描述如下：</p>
+<ol>
+<li>将调用抽象为 <code>call</code> 结构，并且只会有一个 goroutine 能够成功创建这个 <code>call</code> 对象；</li>
+<li>使用 map 维护每个 key 对应的 call 对象，如果 key 对应的 call 对象存在，则表明当前 key 对应的回源回调已经在执行了，其它的 goroutine 则可以选择等待，或者认为 key 不存在；</li>
+<li>当完成回源回调执行后，所有等待的 goroutine （如果有的话）会得到 key 对应的结果。</li>
+</ol>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> call <span class="keyword">struct</span> &#123;</span><br><span class="line">    wg sync.WaitGroup</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 这里存放调用结果</span></span><br><span class="line">    val <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">    err error</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Group represents a class of work and forms a namespace in which</span></span><br><span class="line"><span class="comment">// units of work can be executed with duplicate suppression.</span></span><br><span class="line"><span class="keyword">type</span> Group <span class="keyword">struct</span> &#123;</span><br><span class="line">    cache Cache</span><br><span class="line">    mu sync.Mutex <span class="comment">// protects m</span></span><br><span class="line">    m <span class="keyword">map</span>[<span class="keyword">interface</span>&#123;&#125;]*call <span class="comment">// 这个对象惰性初始化的</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Do 会执行并返回给定回源函数回调，并会保证在并发的情况下，任意时刻</span></span><br><span class="line"><span class="comment">// 只有一个正在执行该函数的 worker。如果出现该 key 对应的 fn 并发重复调用的</span></span><br><span class="line"><span class="comment">// 情况，则该 worker 会直接等待，直到获取到最终的结果；或者也可以直接被告知</span></span><br><span class="line"><span class="comment">// key 不存在。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *Group)</span> <span class="title">Do</span><span class="params">(key <span class="keyword">interface</span>&#123;&#125;, fn <span class="keyword">func</span>()</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, error)</span>, <span class="title">isWait</span> <span class="title">bool</span>) <span class="params">(<span class="keyword">interface</span>&#123;&#125;, <span class="keyword">bool</span>, error)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 首先尝试看有没有缓存的结果了，如果有的话，就直接返回了</span></span><br><span class="line">    g.mu.Lock()</span><br><span class="line">    v, err := g.cache.get(key, <span class="literal">true</span>)</span><br><span class="line">    <span class="keyword">if</span> err == <span class="literal">nil</span> &#123;</span><br><span class="line">        g.mu.Unlock()</span><br><span class="line">        <span class="keyword">return</span> v, <span class="literal">false</span>, <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> g.m == <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="comment">// 这里执行惰性初始化</span></span><br><span class="line">        g.m = <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">interface</span>&#123;&#125;]*call)</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> c, ok := g.m[key]; ok &#123;</span><br><span class="line">        <span class="comment">// 此时表明已经有其它 goroutine 在执行了</span></span><br><span class="line">        g.mu.Unlock()</span><br><span class="line">        <span class="keyword">if</span> !isWait &#123;</span><br><span class="line">            <span class="comment">// 可以不等待，从而被告知 key 不存在</span></span><br><span class="line">            <span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">false</span>, KeyNotFoundError</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 阻塞等待被唤醒，当 c.wg.Done 的时候，会得到最终的结果</span></span><br><span class="line">        c.wg.Wait()</span><br><span class="line">        <span class="keyword">return</span> c.val, <span class="literal">false</span>, c.err</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 只有一个 worker 有权利创建 call 对象，代表一次调用</span></span><br><span class="line">    c := <span class="built_in">new</span>(call)</span><br><span class="line">    c.wg.Add(<span class="number">1</span>)</span><br><span class="line">    g.m[key] = c</span><br><span class="line">    g.mu.Unlock()</span><br><span class="line">    <span class="keyword">if</span> !isWait &#123;</span><br><span class="line">        <span class="comment">// 对于当前 worker 而言，如果是异步的回源，则同样是直接被告知 key</span></span><br><span class="line">        <span class="comment">// 不存在</span></span><br><span class="line">        <span class="keyword">go</span> g.call(c, key, fn)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span>, <span class="literal">false</span>, KeyNotFoundError</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 否则同步等待最终执行结果</span></span><br><span class="line">    v, err = g.call(c, key, fn)</span><br><span class="line">    <span class="keyword">return</span> v, <span class="literal">true</span>, err</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(g *Group)</span> <span class="title">call</span><span class="params">(c *call, key <span class="keyword">interface</span>&#123;&#125;, fn <span class="keyword">func</span>()</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, error)</span>) <span class="params">(<span class="keyword">interface</span>&#123;&#125;, error)</span></span> &#123;</span><br><span class="line">    c.val, c.err = fn()</span><br><span class="line">    c.wg.Done()</span><br><span class="line">    g.mu.Lock()</span><br><span class="line">    <span class="built_in">delete</span>(g.m, key)</span><br><span class="line">    g.mu.Unlock()</span><br><span class="line">    <span class="keyword">return</span> c.val, c.err</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="缓存实现源码"><a href="#缓存实现源码" class="headerlink" title="缓存实现源码"></a>缓存实现源码</h1><h2 id="Simple-Cache"><a href="#Simple-Cache" class="headerlink" title="Simple Cache"></a>Simple Cache</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> SimpleCache <span class="keyword">struct</span> &#123;</span><br><span class="line">    baseCache</span><br><span class="line">    items <span class="keyword">map</span>[<span class="keyword">interface</span>&#123;&#125;]*simpleItem</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> simpleItem <span class="keyword">struct</span> &#123;</span><br><span class="line">    clock Clock</span><br><span class="line">    value <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">    expiration *time.Time</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这是一个简单的基于 map 实现的内存缓存，基本上来说几乎是无限大小的，限定于实际的内存。它的 evict 策略也很简单，如果 key 指定了过期时间的的话，那么会在如下两种条件下进行 evict：</p>
+<ol>
+<li>当存储的 key 的个数超出限定大小时，执行 <code>c.evict(1)</code></li>
+<li>在执行查询某个 key 对应的 value 时，也会检查过期时间，如果过期，则执行 <code>remove()</code></li>
+</ol>
+<p>总结来说，实现的比较简单，满足基本的使用场景，对于一般性能要求不高的简单场景是绝对够用了。但可能的改进点还是有的：</p>
+<ol>
+<li>GC 的问题可能比较严重，尤其是如果字典中存放的 key 特别多的时候，GC Scan 自然会很耗时；</li>
+<li>对于内存的感知能力较弱，如果有一个硬限制就好了，至少保证别把内存耗尽（这个自然是 key-value 特别的多的情况下才需要考虑，不过结合过期时间来做缓存的话，实际中应该是不会太担心内存耗尽的问题）。</li>
+</ol>
+<h2 id="LRU-Cache"><a href="#LRU-Cache" class="headerlink" title="LRU Cache"></a>LRU Cache</h2><p>关于 LRU 实现思想其实很简单，只需要一个链表维护和访问活跃度有关的 entry 顺序，再使用一个字典存放 key 对应的 entry 映射，从而实现快速查找。</p>
+<p>LRU 存在的问题：针对循环出现的数字，缓存利用率不高。比如缓存空间为 3，访问列表  <code>1，1，1，2，2，2，3，4，1，1，1，2，2，2, ...</code> ，则当访问到 4 的时候，前面重复出现的 1 和 2 都被剔除了。</p>
+<p>看看这个库的实现源码吧，为了方便学习其核心思想，这里移除了一些不太要紧的代码：<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> LRUCache <span class="keyword">struct</span> &#123;</span><br><span class="line">    baseCache</span><br><span class="line">    items <span class="keyword">map</span>[<span class="keyword">interface</span>&#123;&#125;]*list.Element</span><br><span class="line">    evictList *list.List</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> lruItem <span class="keyword">struct</span> &#123;</span><br><span class="line">    clock Clock</span><br><span class="line">    key <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">    value <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">    expiration *time.Time</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *LRUCache)</span> <span class="title">set</span><span class="params">(key, value <span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, error)</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> err error</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> item *lruItem</span><br><span class="line">    <span class="comment">// 检查 key 是否已经缓存了</span></span><br><span class="line">    <span class="keyword">if</span> it, ok := c.items[key]; ok &#123;</span><br><span class="line">        <span class="comment">// 如果已经存在了，则直接更新该 key 对应的 value</span></span><br><span class="line">        <span class="comment">// 同时将该 key 移到链表头部</span></span><br><span class="line">        c.evictList.MoveToFront(it)</span><br><span class="line">        item = it.Value.(*lruItem)</span><br><span class="line">        item.value = value</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 如果链表长度超过限制，则需要移除一个节点</span></span><br><span class="line">        <span class="keyword">if</span> c.evictList.Len() &gt;= c.size &#123;</span><br><span class="line">            c.evict(<span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        item = &amp;lruItem&#123;</span><br><span class="line">            clock: c.clock,</span><br><span class="line">            key: key,</span><br><span class="line">            value: value,</span><br><span class="line">        &#125;</span><br><span class="line">        c.items[key] = c.evictList.PushFront(item)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> c.expiration != <span class="literal">nil</span> &#123;</span><br><span class="line">        t := c.clock.Now().Add(*c.expiration)</span><br><span class="line">        item.expiration = &amp;t</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> c.addedFunc != <span class="literal">nil</span> &#123;</span><br><span class="line">        c.addedFunc(key, value)</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> item, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *LRUCache)</span> <span class="title">getValue</span><span class="params">(key <span class="keyword">interface</span>&#123;&#125;, onLoad <span class="keyword">bool</span>)</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, error)</span></span> &#123;</span><br><span class="line">    c.mu.Lock()</span><br><span class="line">    item, ok := c.items[key]</span><br><span class="line">    <span class="keyword">if</span> ok &#123;</span><br><span class="line">        it := item.Value.(*lruItem)</span><br><span class="line">        <span class="keyword">if</span> !it.IsExpired(<span class="literal">nil</span>) &#123;</span><br><span class="line">            <span class="comment">// 如果 cache hits，直接将该 key 对应的 entry </span></span><br><span class="line">            <span class="comment">// 移动到链表头部</span></span><br><span class="line">            c.evictList.MoveToFront(item)</span><br><span class="line">            v := it.value</span><br><span class="line">            c.mu.Unlock()</span><br><span class="line">            <span class="keyword">return</span> v, <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        c.removeElement(item)</span><br><span class="line">    &#125;</span><br><span class="line">    c.mu.Unlock()</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, KeyNotFoundError</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h2 id="LFU-Cache"><a href="#LFU-Cache" class="headerlink" title="LFU Cache"></a>LFU Cache</h2><p>LFU 的全称就是 Least Frequently Used，也就是基于该策略的 Cache 会将访问频次低的数据剔除掉。所以它在实现的时候，需要记录每个 Key 访问的频率，并根据频率排序，在需要剔除的时候，找到访问频率最低的条目剔除即可。</p>
+<p>LFU 存在的问题是，对于交替出现的请求，缓存利用率较低。比如请求组合：<code>1，1，1，2，2，3，4，3，4，3，4，3，4，3, 4，3，4</code>。</p>
+<p>接下来看看该库中是如何实现 LFU Cache 的。首先是它的数据结构定义：<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> LFUCache <span class="keyword">struct</span> &#123;</span><br><span class="line">    baseCache</span><br><span class="line">    <span class="comment">// 这里使用一个 map 记录 key -&gt;  item 的映射</span></span><br><span class="line">    items <span class="keyword">map</span>[<span class="keyword">interface</span>&#123;&#125;]*lfuItem</span><br><span class="line">    <span class="comment">// 链表中维护的是基于访问频次排列的 Entry</span></span><br><span class="line">    freqList *list.List <span class="comment">// list for freqEntry</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> freqEntry <span class="keyword">struct</span> &#123;</span><br><span class="line">    <span class="comment">// freq 记录访问的频率</span></span><br><span class="line">    freq <span class="keyword">uint</span> </span><br><span class="line">    <span class="comment">// 相同访问频次下，关联的 items 集合</span></span><br><span class="line">    items <span class="keyword">map</span>[*lfuItem]<span class="keyword">struct</span>&#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> lfuItem <span class="keyword">struct</span> &#123;</span><br><span class="line">    clock Clock</span><br><span class="line">    key <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">    value <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">    <span class="comment">// 关联最长访问的链表节点，即 freqEntry</span></span><br><span class="line">    freqElement *list.Element</span><br><span class="line">    expiration *time.Time</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>示例图如下：<br><img src="https://pic4.zhimg.com/v2-a02528e2ad4f000c0bd227c33e4bf860.jpg" alt=""></p>
+<p>然后来看看核心操作的源码：</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *LFUCache)</span> <span class="title">init</span><span class="params">()</span></span> &#123;</span><br><span class="line">    c.freqList = list.New()</span><br><span class="line">    c.items = <span class="built_in">make</span>(<span class="keyword">map</span>[<span class="keyword">interface</span>&#123;&#125;]*lfuItem, c.size+<span class="number">1</span>)</span><br><span class="line">    <span class="comment">// 链表中是按照访问频次对 Entry 排序的</span></span><br><span class="line">    <span class="comment">// Entry(freq 0) -&gt; Entry(freq 1) -&gt; Entry(freq 2) -&gt; ...</span></span><br><span class="line">    c.freqList.PushFront(&amp;freqEntry&#123;</span><br><span class="line">        freq: <span class="number">0</span>,</span><br><span class="line">        items: <span class="built_in">make</span>(<span class="keyword">map</span>[*lfuItem]<span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *LFUCache)</span> <span class="title">set</span><span class="params">(key, value <span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, error)</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> err error</span><br><span class="line">    item, ok := c.items[key]</span><br><span class="line">    <span class="keyword">if</span> ok &#123;</span><br><span class="line">        <span class="comment">// key 命中时，只需要更新 value 即可</span></span><br><span class="line">        <span class="comment">// 这里不像 LRU，在 set 时将数据调整到链表头部</span></span><br><span class="line">        item.value = value</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> <span class="built_in">len</span>(c.items) &gt;= c.size &#123;</span><br><span class="line">            <span class="comment">// 确保有足够空间容纳新的 key-value</span></span><br><span class="line">            c.evict(<span class="number">1</span>)</span><br><span class="line">        &#125;</span><br><span class="line">        item = &amp;lfuItem&#123;</span><br><span class="line">            clock: c.clock,</span><br><span class="line">            key: key,</span><br><span class="line">            value: value,</span><br><span class="line">            freqElement: <span class="literal">nil</span>,</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 链表首节点是访问频次为 0 的 items 集合</span></span><br><span class="line">        el := c.freqList.Front()</span><br><span class="line">        fe := el.Value.(*freqEntry)</span><br><span class="line">        <span class="comment">// 把新建的 item 放到集合中，同时更新 item 关联的</span></span><br><span class="line">        <span class="comment">// Entry 指针</span></span><br><span class="line">        fe.items[item] = <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">        item.freqElement = el</span><br><span class="line">        c.items[key] = item</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> c.expiration != <span class="literal">nil</span> &#123;</span><br><span class="line">        t := c.clock.Now().Add(*c.expiration)</span><br><span class="line">        item.expiration = &amp;t</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> item, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *LFUCache)</span> <span class="title">getValue</span><span class="params">(key <span class="keyword">interface</span>&#123;&#125;, onLoad <span class="keyword">bool</span>)</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, error)</span></span> &#123;</span><br><span class="line">    c.mu.Lock()</span><br><span class="line">    item, ok := c.items[key]</span><br><span class="line">    <span class="keyword">if</span> ok &#123;</span><br><span class="line">        <span class="keyword">if</span> !item.IsExpired(<span class="literal">nil</span>) &#123;</span><br><span class="line">            <span class="comment">// 更新 item 的访问频率</span></span><br><span class="line">            c.increment(item)</span><br><span class="line">            v := item.value</span><br><span class="line">            c.mu.Unlock()</span><br><span class="line">            <span class="keyword">if</span> !onLoad &#123;</span><br><span class="line">                c.stats.IncrHitCount()</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="keyword">return</span> v, <span class="literal">nil</span></span><br><span class="line">        &#125;</span><br><span class="line">        c.removeItem(item)</span><br><span class="line">    &#125;</span><br><span class="line">    c.mu.Unlock()</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, KeyNotFoundError</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// increment 实际上是将 item 访问频率 +1。</span></span><br><span class="line"><span class="comment">// 它的实际操作如下：</span></span><br><span class="line"><span class="comment">// 1. 获得 item 在链表上的 Entry，该 Entry 记录了 item 此前的访问频率</span></span><br><span class="line"><span class="comment">// 2. 计算得到新的访问频率（+1）</span></span><br><span class="line"><span class="comment">// 3. 将 item 从原先的 Entry 关联的 items 集合中移除</span></span><br><span class="line"><span class="comment">// 4. 将 item 加入到下一个（在旧 Entry 之后）Entry 关联的 items 集合中</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *LFUCache)</span> <span class="title">increment</span><span class="params">(item *lfuItem)</span></span> &#123;</span><br><span class="line">    currentFreqElement := item.freqElement</span><br><span class="line">    currentFreqEntry := currentFreqElement.Value.(*freqEntry)</span><br><span class="line">    nextFreq := currentFreqEntry.freq + <span class="number">1</span></span><br><span class="line">    <span class="built_in">delete</span>(currentFreqEntry.items, item)</span><br><span class="line">    nextFreqElement := currentFreqElement.Next()</span><br><span class="line">    <span class="keyword">if</span> nextFreqElement == <span class="literal">nil</span> &#123;</span><br><span class="line">        nextFreqElement = c.freqList.InsertAfter(&amp;freqEntry&#123;</span><br><span class="line">            freq: nextFreq,</span><br><span class="line">            items: <span class="built_in">make</span>(<span class="keyword">map</span>[*lfuItem]<span class="keyword">struct</span>&#123;&#125;),</span><br><span class="line">        &#125;, currentFreqElement)</span><br><span class="line">    &#125;</span><br><span class="line">    nextFreqElement.Value.(*freqEntry).items[item] = <span class="keyword">struct</span>&#123;&#125;&#123;&#125;</span><br><span class="line">    item.freqElement = nextFreqElement</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *LFUCache)</span> <span class="title">removeItem</span><span class="params">(item *lfuItem)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 从大字典中删除 key-&gt;item 映射关系</span></span><br><span class="line">    <span class="built_in">delete</span>(c.items, item.key)</span><br><span class="line">    <span class="comment">// 从维护访问频率的链表对应的节点的关联 items 集合移除当前的 item</span></span><br><span class="line">    <span class="built_in">delete</span>(item.freqElement.Value.(*freqEntry).items, item)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="Adaptive-Replacement-Cache-ARC"><a href="#Adaptive-Replacement-Cache-ARC" class="headerlink" title="Adaptive Replacement Cache, ARC"></a>Adaptive Replacement Cache, ARC</h2><p>ARC 算法是由 IBM 所属的实验室开发出来的一种置换算法（甚至还为它申请了相关专利），它的性能要比传统的 LRU 算法更好。它主要的改进点就是自适应的特性，具体来说，它将管理缓存元素的 LRU 列表分成两组 T1 和 T2，其中 T1 存放的是最近访问的元素，而 T2 存放的是最近频繁访问（一次及以上）的元素。假设我们的缓存容器的容量为 M，则 T1 和 T2 的总大小最多也是 M。ARC 引入了另外两组 LRU 列表用来存放由 T1 和 T2 剔除的<strong>元素元信息</strong>（实际指向的数据可能已经被释放，这样也不必占用过多内存），即 B1 和 B2，它们被称为 ghost 列表。算法会根据元素访问在 B1 或者 B2 的命中情况来调整 T1 和 T2 容量，在下面介绍的源码中使用了 <code>part</code> 来表示 T1 需要占用的容量，剩下 T2 容量的自然是 <code>M-part</code>。<br><img src="https://pic3.zhimg.com/v2-52dbd57fc0605a869d42b8bf4d90c8a9.jpg" alt=""></p>
+<h3 id="具体策略"><a href="#具体策略" class="headerlink" title="具体策略"></a>具体策略</h3><p><img src="https://pic1.zhimg.com/v2-dc1f58437df446b89ecb2f4636fbdab1.jpg" alt=""></p>
+<p>我们以维基百科上的图为例，了解下在添加和置换时，使用了什么策略。在上图中，<code>!</code> 表示 L1(B1+T1) 和 L2(T2+B2) 实际分隔的位置；<code>^</code> 表示 T1 期望扩充或者缩小到的位置。</p>
+<p><strong>元素访问、添加策略</strong>：</p>
+<ol>
+<li>当新的元素加入时，会先进入 T1，也就是 <code>!</code> 左边。随着新元素的增加，之前加入的元素会逐渐移到最左边，然后被剔除到 B1，最终被从 L1 中移除；</li>
+<li>任意在 L1 中的元素被访问超过一次，都有机会移动到 T2 中，也就是 <code>!</code> 右边。随着访问时间推移，在 T2 中的元素逐渐右移，然后进入 B2，最终从 L2 移除。</li>
+</ol>
+<p><strong>元素置换和 T1 &amp; T2 容量调整策略</strong>：当元素进入 (T1, T2) 缓存时，会导致 <code>!</code> 移到到目标位置 <code>^</code>，实现 T1 的扩容或缩容。如果没有空闲空间的话，还需要考虑从 T1 或者 T2 中剔除一个元素。</p>
+<ol>
+<li>当命中 B1 时（表明不久前元素才被从 T1 中剔除，T1 容量应该再加点就好了），会导致 <code>^</code> 向右移动。T2 中最后一个元素会被剔除到 B2 中；</li>
+<li>当命中 B2 时（同理，表明 T2 的容量还要增加点才能放更多频繁访问的元素），会导致 <code>^</code> 向左移动。T1 中最后一个元素会被剔除到 B1 中；</li>
+<li>如果二者都不满足，则 <code>^</code> 不会收到影响，但是 <code>!</code> 会更加接近于 <code>^</code>。</li>
+</ol>
+<h3 id="源码实现"><a href="#源码实现" class="headerlink" title="源码实现"></a>源码实现</h3><p>一旦了解了 ARC 的基本原理，再来阅读代码就比较轻松了。由于实际的源码比较多，这里只是挑选了比较重要的，且能体现核心策略的部分源码加以注释，具体如下：<br><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ARC 通过自动调整的方式，在 LRU 和 LFU 策略之间进行</span></span><br><span class="line"><span class="comment">// 自动权衡（实际就是调整二者的容量，但保持总容量不变）</span></span><br><span class="line"><span class="keyword">type</span> ARC <span class="keyword">struct</span> &#123;</span><br><span class="line">    baseCache</span><br><span class="line">    items <span class="keyword">map</span>[<span class="keyword">interface</span>&#123;&#125;]*arcItem</span><br><span class="line">    part <span class="keyword">int</span></span><br><span class="line">    t1 *arcList <span class="comment">// 最近使用的元素，基于 LRU 剔除策略</span></span><br><span class="line">    t2 *arcList <span class="comment">// 频繁使用的元素，基于 LRU 剔除策略</span></span><br><span class="line">    b1 *arcList <span class="comment">// t1 关联的 ghost list，从 t1 剔除的元素会进来</span></span><br><span class="line">    b2 *arcList <span class="comment">// t2 关联的 ghost list，从 t2 剔除的元素会进来</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *ARC)</span> <span class="title">set</span><span class="params">(key, value <span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, error)</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> err error</span><br><span class="line">    item, ok := c.items[key]</span><br><span class="line">    <span class="keyword">if</span> ok &#123;</span><br><span class="line">        <span class="comment">// 如果 key 存在的话，直接更新对应的值</span></span><br><span class="line">        <span class="comment">// 此时并不关心 key 是在 t1/t2 中</span></span><br><span class="line">        item.value = value</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 如果 key 不存在，则新建一个并加到字典</span></span><br><span class="line">        <span class="comment">// 注意，此时还没有决定要将新的 item 放在 t1 还是 t2</span></span><br><span class="line">        <span class="comment">// 精彩操作还在后面</span></span><br><span class="line">        item = &amp;arcItem&#123;</span><br><span class="line">            clock: c.clock,</span><br><span class="line">            key: key,</span><br><span class="line">            value: value,</span><br><span class="line">        &#125;</span><br><span class="line">        c.items[key] = item</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 这里是针对缓存命中的情况，直接返回，无需执行复杂的剔除和调整大小等操作</span></span><br><span class="line">    <span class="keyword">if</span> c.t1.Has(key) || c.t2.Has(key) &#123;</span><br><span class="line">        <span class="keyword">return</span> item, <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 接下里需要决定将新的元素放在哪里？是否需要剔除元素？如果是，该从 t1/t2 剔除？</span></span><br><span class="line">    <span class="comment">// 是否需要根据 b1/b2 来调整 t1/t2 的大小（也就是 part 值的调整）？</span></span><br><span class="line">    <span class="keyword">if</span> elt := c.b1.Lookup(key); elt != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="comment">// 处理在 t1 关联的 ghost 链表 b1 中命中 key 的情况</span></span><br><span class="line">        <span class="comment">// 此时表明该 key 之前处于 t1 中，并且刚被移除不久，此时表明</span></span><br><span class="line">        <span class="comment">// t1 的大小需要再调大点，说明最存储近访问的元素空间不太够了</span></span><br><span class="line">        <span class="comment">// `c.b2.Len()/c.b1.Len()` 被称为 regret ratio，也就是需要增加的大小（delta）</span></span><br><span class="line">        c.setPart(minInt(c.size, c.part+maxInt(c.b2.Len()/c.b1.Len(), <span class="number">1</span>)))</span><br><span class="line">        <span class="comment">// 看看缓存空间是否已经满了，如果是的话，才会执行复杂的剔除逻辑</span></span><br><span class="line">        c.replace(key)</span><br><span class="line"></span><br><span class="line">        <span class="comment">// 这种情况下，表明该 key 算频繁访问了，会被移动到 t2</span></span><br><span class="line">        <span class="comment">// 自然以后过期会移动到 b2，所以需要在 b1 中移除该 key</span></span><br><span class="line">        c.b1.Remove(key, elt)</span><br><span class="line">        c.t2.PushFront(key)</span><br><span class="line">        <span class="keyword">return</span> item, <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> elt := c.b2.Lookup(key); elt != <span class="literal">nil</span> &#123;</span><br><span class="line">        <span class="comment">// 如果 key 在 b2 中命中，表明 key 曾经在 t2 存在过</span></span><br><span class="line">        <span class="comment">// 且是频繁访问过的，所以会放到 t2 中。同时会对 t2 的</span></span><br><span class="line">        <span class="comment">// 大小进行调整，delta = -b1.Len()/b2.Len()</span></span><br><span class="line">        c.setPart(maxInt(<span class="number">0</span>, c.part-maxInt(c.b1.Len()/c.b2.Len(), <span class="number">1</span>)))</span><br><span class="line">        c.replace(key)</span><br><span class="line">        c.b2.Remove(key, elt)</span><br><span class="line">        c.t2.PushFront(key)</span><br><span class="line">        <span class="keyword">return</span> item, <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 下面的部分处理 key 从来没有存在于 b1/b2 的情况，新元素</span></span><br><span class="line">    <span class="comment">// 最后会先加到 t1 中。</span></span><br><span class="line">    <span class="keyword">if</span> c.isCacheFull() &amp;&amp; c.t1.Len()+c.b1.Len() == c.size &#123;</span><br><span class="line">        <span class="keyword">if</span> c.t1.Len() &lt; c.size &#123;</span><br><span class="line">            c.b1.RemoveTail()</span><br><span class="line">            c.replace(key)</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            pop := c.t1.RemoveTail()</span><br><span class="line">            _, ok := c.items[pop]</span><br><span class="line">            <span class="keyword">if</span> ok &#123;</span><br><span class="line">                <span class="built_in">delete</span>(c.items, pop)</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        total := c.t1.Len() + c.b1.Len() + c.t2.Len() + c.b2.Len()</span><br><span class="line">        <span class="keyword">if</span> total &gt;= c.size &#123;</span><br><span class="line">            <span class="keyword">if</span> total == (<span class="number">2</span> * c.size) &#123;</span><br><span class="line">                <span class="keyword">if</span> c.b2.Len() &gt; <span class="number">0</span> &#123;</span><br><span class="line">                    c.b2.RemoveTail()</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    c.b1.RemoveTail()</span><br><span class="line">                &#125;</span><br><span class="line">            &#125;</span><br><span class="line">            c.replace(key)</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    c.t1.PushFront(key)</span><br><span class="line">    <span class="keyword">return</span> item, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *ARC)</span> <span class="title">replace</span><span class="params">(key <span class="keyword">interface</span>&#123;&#125;)</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> !c.isCacheFull() &#123;</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">var</span> old <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">    <span class="keyword">if</span> c.t1.Len() &gt; <span class="number">0</span> &amp;&amp; ((c.b2.Has(key) &amp;&amp; c.t1.Len() == c.part) || (c.t1.Len() &gt; c.part)) &#123;</span><br><span class="line">        <span class="comment">// 给 t1 瘦身</span></span><br><span class="line">        old = c.t1.RemoveTail()</span><br><span class="line">        c.b1.PushFront(old)</span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> c.t2.Len() &gt; <span class="number">0</span> &#123;</span><br><span class="line">        <span class="comment">// 给 t2 瘦身</span></span><br><span class="line">        old = c.t2.RemoveTail()</span><br><span class="line">        c.b2.PushFront(old)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        old = c.t1.RemoveTail()</span><br><span class="line">        c.b1.PushFront(old)</span><br><span class="line">    &#125;</span><br><span class="line">    _, ok := c.items[old]</span><br><span class="line">    <span class="keyword">if</span> ok &#123;</span><br><span class="line">        <span class="built_in">delete</span>(c.items, old)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// get 从缓存中查找指定的 key 队应的值，同时会调整元素到对应的</span></span><br><span class="line"><span class="comment">// LRU 列表中。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(c *ARC)</span> <span class="title">get</span><span class="params">(key <span class="keyword">interface</span>&#123;&#125;)</span> <span class="params">(<span class="keyword">interface</span>&#123;&#125;, error)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 如果在 t1 中找到了对应的元素，标记它为频繁访问的元素</span></span><br><span class="line">    <span class="comment">// 因此会被移动到 t2 中。</span></span><br><span class="line">    <span class="keyword">if</span> elt := c.t1.Lookup(key); elt != <span class="literal">nil</span> &#123;</span><br><span class="line">        c.t1.Remove(key, elt)</span><br><span class="line">        item := c.items[key]</span><br><span class="line">        c.t2.PushFront(key)</span><br><span class="line">        <span class="keyword">return</span> item.value, <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 如果在高频访问 LRU 缓存中找到，则依然保留在原 LRU 缓存</span></span><br><span class="line">    <span class="comment">// 只是需要将其移动到链表头部，表明是最近访问过的元素。</span></span><br><span class="line">    <span class="keyword">if</span> elt := c.t2.Lookup(key); elt != <span class="literal">nil</span> &#123;</span><br><span class="line">        item := c.items[key]</span><br><span class="line">        c.t2.MoveToFront(elt)</span><br><span class="line">        <span class="keyword">return</span> item.value, <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> <span class="literal">nil</span>, KeyNotFoundError</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// arcList 实际上是个 LRU 缓存</span></span><br><span class="line"><span class="keyword">type</span> arcList <span class="keyword">struct</span> &#123;</span><br><span class="line">    l *list.List</span><br><span class="line">    keys <span class="keyword">map</span>[<span class="keyword">interface</span>&#123;&#125;]*list.Element</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> arcItem <span class="keyword">struct</span> &#123;</span><br><span class="line">    clock Clock</span><br><span class="line">    key <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">    value <span class="keyword">interface</span>&#123;&#125;</span><br><span class="line">    expiration *time.Time</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li><a href="https://github.com/bluele/gcache/README.md" target="_blank" rel="noopener">gcache 文档</a></li>
+<li><a href="https://www.jianshu.com/p/1f8e36285539" target="_blank" rel="noopener">缓存淘汰算法 LRU 和 LFU</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Adaptive_replacement_cache" target="_blank" rel="noopener">Adaptive Replacement Cache</a></li>
+<li><a href="https://stackoverflow.com/questions/30671751/adaptive-replacement-cache-algorithm" target="_blank" rel="noopener">Adaptive replacement cache algorithm</a></li>
+<li><a href="https://blog.csdn.net/WSKINGS/article/details/46416451" target="_blank" rel="noopener">ARC 介绍</a>，看起来是翻译的，有点不太顺畅，但大体思想再加配图表达得比较清晰了</li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2019/12/03/gcache-code-analysis/" title="gcache 源码学习">http://ifaceless.space/2019/12/03/gcache-code-analysis/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/缓存/" rel="tag"><i class="fa fa-tag"></i> 缓存</a>
+          
+            <a href="/tags/LRU/" rel="tag"><i class="fa fa-tag"></i> LRU</a>
+          
+            <a href="/tags/LFU/" rel="tag"><i class="fa fa-tag"></i> LFU</a>
+          
+            <a href="/tags/ARC/" rel="tag"><i class="fa fa-tag"></i> ARC</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/11/28/portal/" rel="next" title="Go 语言中如何以优雅的姿势实现对象序列化？">
+                <i class="fa fa-chevron-left"></i> Go 语言中如何以优雅的姿势实现对象序列化？
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">30</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">12</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">61</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      
+                        <i class="fa fa-fw fa-github"></i></a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me@ifaceless.me" target="_blank" title="E-Mail">
+                      
+                        <i class="fa fa-fw fa-envelope"></i></a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#保证单个-goroutine-执行回源函数"><span class="nav-number">2.</span> <span class="nav-text">保证单个 goroutine 执行回源函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#缓存实现源码"><span class="nav-number">3.</span> <span class="nav-text">缓存实现源码</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Simple-Cache"><span class="nav-number">3.1.</span> <span class="nav-text">Simple Cache</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LRU-Cache"><span class="nav-number">3.2.</span> <span class="nav-text">LRU Cache</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#LFU-Cache"><span class="nav-number">3.3.</span> <span class="nav-text">LFU Cache</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Adaptive-Replacement-Cache-ARC"><span class="nav-number">3.4.</span> <span class="nav-text">Adaptive Replacement Cache, ARC</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#具体策略"><span class="nav-number">3.4.1.</span> <span class="nav-text">具体策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#源码实现"><span class="nav-number">3.4.2.</span> <span class="nav-text">源码实现</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>
