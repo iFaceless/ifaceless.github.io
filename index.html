@@ -283,7 +283,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/12/08/primitive-exploration-for-redis5/">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/12/08/primitive-exploration-of-redis5/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -302,7 +302,7 @@
         
           <h2 class="post-title" itemprop="name headline">
                 
-                <a class="post-title-link" href="/2019/12/08/primitive-exploration-for-redis5/" itemprop="url">Redis 5 源码初探</a></h2>
+                <a class="post-title-link" href="/2019/12/08/primitive-exploration-of-redis5/" itemprop="url">Redis 5 源码初探</a></h2>
         
 
         <div class="post-meta">
@@ -418,7 +418,7 @@
 <p>当然还有很多场景可以例举，但就我们常使用的 Redis 数据结构来看，主要就是<strong>字符串、无序集合、有序集合、列表、字典</strong>等。虽说 Redis 给我们提供了其它丰富的内存数据结构，但是我们在生产环境用到的并不多。</p>
           <!--noindex-->
           <div class="post-button text-center">
-            <a class="btn" href="/2019/12/08/primitive-exploration-for-redis5/" rel="contents">
+            <a class="btn" href="/2019/12/08/primitive-exploration-of-redis5/" rel="contents">
               阅读全文 &raquo;
             </a>
           </div>
@@ -556,7 +556,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  4.7k
+                  2.8k
                 </span>
               
 
@@ -572,7 +572,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  20
+                  10
                 </span>
               
             </div>
@@ -594,8 +594,14 @@
 
       
         
-          <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>在 Web 请求中，后端可以引入内存缓存来改善接口的响应速度，方法就是对部分热点数据增加本地缓存。例如，我们经常会获取一个课程的详情页数据，对于其中基本不怎么变化的部分可以缓存到本地内存中，这样可以避免频繁回源（数据库、Redis 或者 RPC 调用）而造成额外的性能开销。当然，缓存的使用有利有弊，需要根据情况进行权衡。比如可能存在短时间的不一致性，或者容器内存使用增加等。</p>
-<p>不过，我们一般只会对一些请求量较大、且明显适合使用本地缓存来改善的接口应用本地缓存。在使用这种缓存时，通常需要设置过期时间和最大容量，避免过渡占用内存的问题。所以带失效时间的 LRU Cache 就非常适合。</p>
+          <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p><a href="https://github.com/iFaceless/redis/tree/5.0" target="_blank" rel="noopener">Redis, REmote DIctionary Server</a> 因其高效、简单、丰富的数据结构支持、高性能、持久化和集群支持等特性得到了程序员们的青睐，并被广泛部署和应用在众多互联网公司。而因为它采用了比较简单的文本协议，使得客户端实现比较简单，因此也拥有众多编程语言实现的客户端；甚至也有一些其它类型的 K-V 数据库兼容了 Redis 协议！</p>
+<p>结合我们目前的业务来看，有非常多的场景使用到了 Redis：</p>
+<ol>
+<li>记录用户通知、短信发送标志，避免重复发送；</li>
+<li>使用 Redis 集合维护一些白名单用户表；</li>
+<li>为支持快速获得用户会员时长等基本信息，将这些信息在 Redis 集群中也维护了一份，并采取相关措施维持与 MySQL 数据库的最终一致性。</li>
+</ol>
+<p>当然还有很多场景可以例举，但就我们常使用的 Redis 数据结构来看，主要就是 <code>string</code>, <code>set</code>, <code>zset</code>, <code>list</code>, <code>hash map</code>。虽说 Redis 给我们提供了其它丰富的内存数据结构，但是我们在生产环境用到的并不多。</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2019/12/03/gcache-code-analysis/" rel="contents">
