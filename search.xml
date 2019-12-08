@@ -113,9 +113,9 @@
         <category>Python</category>
       </categories>
       <tags>
+        <tag>源码学习</tag>
         <tag>Python</tag>
         <tag>多线程</tag>
-        <tag>源码学习</tag>
       </tags>
   </entry>
   <entry>
@@ -180,7 +180,7 @@
       <tags>
         <tag>Go</tag>
         <tag>标准库</tag>
-        <tag>源码解读</tag>
+        <tag>源码学习</tag>
         <tag>Context</tag>
       </tags>
   </entry>
@@ -207,8 +207,8 @@
       <tags>
         <tag>前端</tag>
         <tag>JavaScript</tag>
-        <tag>Redux</tag>
         <tag>React</tag>
+        <tag>Redux</tag>
       </tags>
   </entry>
   <entry>
@@ -219,9 +219,9 @@
         <category>前端</category>
       </categories>
       <tags>
+        <tag>前端</tag>
         <tag>JavaScript</tag>
         <tag>React</tag>
-        <tag>前端框架</tag>
       </tags>
   </entry>
   <entry>
@@ -273,8 +273,6 @@
       <tags>
         <tag>Thrift</tag>
         <tag>RPC</tag>
-        <tag>序列化</tag>
-        <tag>反序列化</tag>
       </tags>
   </entry>
   <entry>
@@ -285,7 +283,7 @@
         <category>消息队列</category>
       </categories>
       <tags>
-        <tag>源码阅读</tag>
+        <tag>源码学习</tag>
         <tag>消息队列</tag>
         <tag>Beanstalkd</tag>
       </tags>

@@ -76,7 +76,7 @@
 
 
 
-  <meta name="keywords" content="Go,标准库,源码解读,Context,">
+  <meta name="keywords" content="Go,标准库,源码学习,Context,">
 
 
 
@@ -90,7 +90,7 @@
 
 
 <meta name="description" content="引言在一次排查某 HTTP 接口请求频繁因 context canceled 错误导致请求处理失败的问题期间，深入了解了下 Go 语言的 Context 实现。本文将首先介绍我们是如何排查诡异的 context canceled 产生原因（也就是在哪儿因为什么而导致取消的）；接下来将深入介绍 Context 诞生的目的、源码解析及应用场景等，便于更进一步加深对它的理解；最后我们也会谈及使用 Con">
-<meta name="keywords" content="Go,标准库,源码解读,Context">
+<meta name="keywords" content="Go,标准库,源码学习,Context">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go 源码学习之 Context">
 <meta property="og:url" content="http://ifaceless.space/2019/08/02/go-context-intro/index.html">
@@ -101,7 +101,7 @@
 <meta property="og:image" content="http://ifaceless.space/2019/08/02/go-context-intro/context-tree.png">
 <meta property="og:image" content="http://ifaceless.space/2019/08/02/go-context-intro/conn-close-error.png">
 <meta property="og:image" content="http://ifaceless.space/2019/08/02/go-context-intro/context-cancel.png">
-<meta property="og:updated_time" content="2019-11-24T09:45:59.939Z">
+<meta property="og:updated_time" content="2019-12-08T07:04:53.530Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 源码学习之 Context">
 <meta name="twitter:description" content="引言在一次排查某 HTTP 接口请求频繁因 context canceled 错误导致请求处理失败的问题期间，深入了解了下 Go 语言的 Context 实现。本文将首先介绍我们是如何排查诡异的 context canceled 产生原因（也就是在哪儿因为什么而导致取消的）；接下来将深入介绍 Context 诞生的目的、源码解析及应用场景等，便于更进一步加深对它的理解；最后我们也会谈及使用 Con">
@@ -507,7 +507,7 @@
           
             <a href="/tags/标准库/" rel="tag"><i class="fa fa-tag"></i> 标准库</a>
           
-            <a href="/tags/源码解读/" rel="tag"><i class="fa fa-tag"></i> 源码解读</a>
+            <a href="/tags/源码学习/" rel="tag"><i class="fa fa-tag"></i> 源码学习</a>
           
             <a href="/tags/Context/" rel="tag"><i class="fa fa-tag"></i> Context</a>
           
@@ -637,7 +637,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">62</span>
+                  <span class="site-state-item-count">57</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
