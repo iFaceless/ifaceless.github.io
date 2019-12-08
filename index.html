@@ -415,7 +415,7 @@
 <li>使用 Redis 集合维护一些白名单用户表；</li>
 <li>为支持快速获得用户会员时长等基本信息，将这些信息在 Redis 集群中也维护了一份，并采取相关措施维持与 MySQL 数据库的最终一致性。</li>
 </ol>
-<p>当然还有很多场景可以例举，但就我们常使用的 Redis 数据结构来看，主要就是<strong>字符串、无序集合、有序集合、列表、字典</strong>等。虽说 Redis 给我们提供了其它丰富的内存数据结构，但是我们在生产环境用到的并不多。</p>
+<p>当然还有很多场景可以例举，但就我们常使用的 Redis 数据结构来看，主要就是<strong>字符串、集合（有序/无序）、字典、列表</strong>等。虽说 Redis 给我们提供了其它丰富的内存数据结构，但是我们在生产环境用到的并不多。</p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2019/12/08/primitive-exploration-of-redis5/" rel="contents">

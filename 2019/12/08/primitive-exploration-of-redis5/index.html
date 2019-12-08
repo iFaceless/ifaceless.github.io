@@ -100,7 +100,7 @@
 <meta property="og:image" content="https://pic4.zhimg.com/v2-aab236e8173ddcc8e76721fbf651ea53.jpg">
 <meta property="og:image" content="https://pic1.zhimg.com/v2-823df912ab47cf9dbe7ccc53a0eae03f.jpg">
 <meta property="og:image" content="https://pic2.zhimg.com/v2-66bb67315fc0d86701b95ae306679eeb.jpg">
-<meta property="og:updated_time" content="2019-12-08T07:14:10.853Z">
+<meta property="og:updated_time" content="2019-12-08T07:17:34.297Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis 5 源码初探">
 <meta name="twitter:description" content="引言Redis, REmote DIctionary Server 因其高效、简单、丰富的数据结构支持、高性能、持久化和集群支持等特性得到了程序员们的青睐，并被广泛部署和应用在众多互联网公司。而因为它采用了比较简单的文本协议，使得客户端实现比较简单，因此也拥有众多编程语言实现的客户端；甚至也有一些其它类型的 K-V 数据库兼容了 Redis 协议！ 结合我们目前的业务来看，有非常多的场景使用到了">
@@ -416,7 +416,7 @@
 <li>使用 Redis 集合维护一些白名单用户表；</li>
 <li>为支持快速获得用户会员时长等基本信息，将这些信息在 Redis 集群中也维护了一份，并采取相关措施维持与 MySQL 数据库的最终一致性。</li>
 </ol>
-<p>当然还有很多场景可以例举，但就我们常使用的 Redis 数据结构来看，主要就是<strong>字符串、无序集合、有序集合、列表、字典</strong>等。虽说 Redis 给我们提供了其它丰富的内存数据结构，但是我们在生产环境用到的并不多。</p>
+<p>当然还有很多场景可以例举，但就我们常使用的 Redis 数据结构来看，主要就是<strong>字符串、集合（有序/无序）、字典、列表</strong>等。虽说 Redis 给我们提供了其它丰富的内存数据结构，但是我们在生产环境用到的并不多。</p>
 <a id="more"></a>
 <p>既然 Redis 这么重要，自然很有必要花时间去研究下 Redis，并阅读它的源码来学习它的一些设计思想，编程风格等。不得不说，Redis 官方文档非常给力，源码注释很充分，代码风格、质量都是非常一流的。</p>
 <p>我们已经了解了 Redis 是什么？为什么那么重要？接下来就是怎么来学习它？然后是期望达成什么样的目标？</p>
@@ -437,12 +437,12 @@
 </ol>
 <p>除此之外，还有如下特点：</p>
 <ol>
-<li>key-value 中的 value 除了普通的字符串，还支持复杂的数据类型（如集合、字典、位图等）；</li>
+<li><code>&lt;key, value&gt;</code> 中的 value 除了普通的字符串，还支持复杂的数据类型（如集合、字典、位图等）；</li>
 <li>支持数据持久化，可在重启后恢复，支持 AOF、RDB 和 AOF + RDB 三种持久化方案；</li>
 <li>支持主从结构，从节点可做数据备份，也可对外提供读服务；</li>
 <li>支持集群。</li>
 </ol>
-<h1 id="源码概览"><a href="#源码概览" class="headerlink" title="源码概览"></a>源码概览</h1><p><em>后面的源码学习会基于 Redis 最新的稳定版 5.0.7，参见仓库：<a href="https://github.com/iFaceless/redis/tree/5.0，源码注释会推送到该仓库的" target="_blank" rel="noopener">https://github.com/iFaceless/redis/tree/5.0，源码注释会推送到该仓库的</a> <code>comment-src</code> 分支下。</em></p>
+<h1 id="源码概览"><a href="#源码概览" class="headerlink" title="源码概览"></a>源码概览</h1><p><em>后面的源码学习会基于 Redis 最新的稳定版 5.0.7，参见仓库：<a href="https://github.com/iFaceless/redis/tree/5.0" target="_blank" rel="noopener">https://github.com/iFaceless/redis/tree/5.0</a>，源码注释会推送到该仓库的 <code>comment-src</code> 分支下。</em></p>
 <p>关于 Redis 源码的结构，在 Redis 的 <a href="https://github.com/antirez/redis/tree/5.0#source-code-layout" target="_blank" rel="noopener">README.md</a> 中有所介绍。具体来说，有如下几个重要的目录：</p>
 <ul>
 <li><code>src</code>: Redis 核心实现（C 语言）</li>
