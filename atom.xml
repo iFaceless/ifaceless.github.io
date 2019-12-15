@@ -508,9 +508,9 @@
     
       <category term="JavaScript" scheme="http://ifaceless.space/tags/JavaScript/"/>
     
-      <category term="React" scheme="http://ifaceless.space/tags/React/"/>
-    
       <category term="Redux" scheme="http://ifaceless.space/tags/Redux/"/>
+    
+      <category term="React" scheme="http://ifaceless.space/tags/React/"/>
     
   </entry>
   
