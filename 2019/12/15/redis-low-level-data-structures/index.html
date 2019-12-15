@@ -89,13 +89,13 @@
 
 
 
-<meta name="description" content="引言 Redis 底层的基础数据结构包括：动态字符串（sds）、跳表（skiplist）、压缩列表（ziplist）、字典（dict）、整数集合（intset），快速链表（quicklist）等，t_hash，t_set, t_zset, t_list 等对外类型的内部实现都依赖于这些数据结构，所以非常值得学习。在学习每种数据结构时，需要重点关注如下几个问题：  为什么这样设计，做了什么样的权衡？">
+<meta name="description" content="引言 Redis 底层的基础数据结构包括：动态字符串（sds）、跳表（skiplist）、压缩列表（ziplist）、字典（dict）、整数集合（intset），快速链表（quicklist）等，t_hash，t_set, t_zset, t_list 等对外类型的内部实现都依赖于这些数据结构，所以非常值得学习。">
 <meta name="keywords" content="源码学习,Redis">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Redis 源码学习之基本数据结构">
 <meta property="og:url" content="http://ifaceless.space/2019/12/15/redis-low-level-data-structures/index.html">
 <meta property="og:site_name" content="黑白之院">
-<meta property="og:description" content="引言 Redis 底层的基础数据结构包括：动态字符串（sds）、跳表（skiplist）、压缩列表（ziplist）、字典（dict）、整数集合（intset），快速链表（quicklist）等，t_hash，t_set, t_zset, t_list 等对外类型的内部实现都依赖于这些数据结构，所以非常值得学习。在学习每种数据结构时，需要重点关注如下几个问题：  为什么这样设计，做了什么样的权衡？">
+<meta property="og:description" content="引言 Redis 底层的基础数据结构包括：动态字符串（sds）、跳表（skiplist）、压缩列表（ziplist）、字典（dict）、整数集合（intset），快速链表（quicklist）等，t_hash，t_set, t_zset, t_list 等对外类型的内部实现都依赖于这些数据结构，所以非常值得学习。">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://pic4.zhimg.com/v2-1d46ebdc21d0364fefecf710d01f473d.jpeg">
 <meta property="og:image" content="https://pic1.zhimg.com/80/v2-102788cac4f586778ffbf6767eb99d4f.png">
@@ -107,10 +107,10 @@
 <meta property="og:image" content="https://pic2.zhimg.com/80/v2-5eace6803426c11a9f2b27a83ff5d94f.png">
 <meta property="og:image" content="https://pic1.zhimg.com/80/v2-1f634fd2892ebc00aef8aeb8f03ceb09.png">
 <meta property="og:image" content="https://pic2.zhimg.com/80/v2-82b204f0b41afb79e21e84d76a4806ef.png">
-<meta property="og:updated_time" content="2019-12-15T06:15:12.985Z">
+<meta property="og:updated_time" content="2019-12-15T06:17:36.398Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Redis 源码学习之基本数据结构">
-<meta name="twitter:description" content="引言 Redis 底层的基础数据结构包括：动态字符串（sds）、跳表（skiplist）、压缩列表（ziplist）、字典（dict）、整数集合（intset），快速链表（quicklist）等，t_hash，t_set, t_zset, t_list 等对外类型的内部实现都依赖于这些数据结构，所以非常值得学习。在学习每种数据结构时，需要重点关注如下几个问题：  为什么这样设计，做了什么样的权衡？">
+<meta name="twitter:description" content="引言 Redis 底层的基础数据结构包括：动态字符串（sds）、跳表（skiplist）、压缩列表（ziplist）、字典（dict）、整数集合（intset），快速链表（quicklist）等，t_hash，t_set, t_zset, t_list 等对外类型的内部实现都依赖于这些数据结构，所以非常值得学习。">
 <meta name="twitter:image" content="https://pic4.zhimg.com/v2-1d46ebdc21d0364fefecf710d01f473d.jpeg">
 
 
@@ -417,7 +417,9 @@
 
       
         <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p><img src="https://pic4.zhimg.com/v2-1d46ebdc21d0364fefecf710d01f473d.jpeg" alt=""></p>
-<p>Redis 底层的基础数据结构包括：动态字符串（sds）、跳表（skiplist）、压缩列表（ziplist）、字典（dict）、整数集合（intset），快速链表（quicklist）等，<code>t_hash</code>，<code>t_set</code>, <code>t_zset</code>, <code>t_list</code> 等对外类型的内部实现都依赖于这些数据结构，所以非常值得学习。在学习每种数据结构时，需要重点关注如下几个问题：</p>
+<p>Redis 底层的基础数据结构包括：动态字符串（sds）、跳表（skiplist）、压缩列表（ziplist）、字典（dict）、整数集合（intset），快速链表（quicklist）等，<code>t_hash</code>，<code>t_set</code>, <code>t_zset</code>, <code>t_list</code> 等对外类型的内部实现都依赖于这些数据结构，所以非常值得学习。</p>
+<a id="more"></a>
+<p>在学习每种数据结构时，需要重点关注如下几个问题：</p>
 <ol>
 <li>为什么这样设计，做了什么样的权衡？比如，有些数据结构是为了节约内存而设计的，所以会牺牲一定的查找效率；</li>
 <li>每种数据结构的基本特点是什么？具体在什么场景下应用到？</li>
