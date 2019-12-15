@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Go,跳表,Redis,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言读过 Redis 源码的童鞋，想必会知道 zset 实现时，使用了「跳表」（Skiplist）这种数据结构吧。它的原理非常容易理解，如果对链表比较熟悉，那么也会很容易理解「跳表」的工作原理（核心：有序链表 + 分层）。当然，本文并不会详细讲解「跳表」的工作原理，以及对于 Redis 跳表源码的详细分析。因为已经有前辈们产出了非常丰富的文章来讲解 Redis 跳表，需要的话，推荐阅读 这篇文章">
+<meta name="keywords" content="Go,跳表,Redis">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Go 语言实现 Redis 跳表">
+<meta property="og:url" content="http://ifaceless.space/2019/12/11/implement-redis-skiplist-in-go/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言读过 Redis 源码的童鞋，想必会知道 zset 实现时，使用了「跳表」（Skiplist）这种数据结构吧。它的原理非常容易理解，如果对链表比较熟悉，那么也会很容易理解「跳表」的工作原理（核心：有序链表 + 分层）。当然，本文并不会详细讲解「跳表」的工作原理，以及对于 Redis 跳表源码的详细分析。因为已经有前辈们产出了非常丰富的文章来讲解 Redis 跳表，需要的话，推荐阅读 这篇文章">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pic1.zhimg.com/80/v2-102788cac4f586778ffbf6767eb99d4f.png">
+<meta property="og:updated_time" content="2019-12-15T06:08:45.313Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Go 语言实现 Redis 跳表">
+<meta name="twitter:description" content="引言读过 Redis 源码的童鞋，想必会知道 zset 实现时，使用了「跳表」（Skiplist）这种数据结构吧。它的原理非常容易理解，如果对链表比较熟悉，那么也会很容易理解「跳表」的工作原理（核心：有序链表 + 分层）。当然，本文并不会详细讲解「跳表」的工作原理，以及对于 Redis 跳表源码的详细分析。因为已经有前辈们产出了非常丰富的文章来讲解 Redis 跳表，需要的话，推荐阅读 这篇文章">
+<meta name="twitter:image" content="https://pic1.zhimg.com/80/v2-102788cac4f586778ffbf6767eb99d4f.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2019/12/11/implement-redis-skiplist-in-go/">
+
+
+
+
+
+  <title>Go 语言实现 Redis 跳表 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/12/11/implement-redis-skiplist-in-go/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Go 语言实现 Redis 跳表</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-11T20:58:39+08:00">
+                2019-12-11
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Redis/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2.5k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  10
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p><img src="https://pic1.zhimg.com/80/v2-102788cac4f586778ffbf6767eb99d4f.png" alt=""><br>读过 Redis 源码的童鞋，想必会知道 zset 实现时，使用了「跳表」（Skiplist）这种数据结构吧。它的原理非常容易理解，如果对链表比较熟悉，那么也会很容易理解「跳表」的工作原理（核心：<strong>有序链表</strong> + <strong>分层</strong>）。当然，本文并不会详细讲解「跳表」的工作原理，以及对于 Redis 跳表源码的详细分析。因为已经有前辈们产出了非常丰富的文章来讲解 Redis 跳表，需要的话，推荐阅读 <a href="https://juejin.im/post/57fa935b0e3dd90057c50fbc" target="_blank" rel="noopener">这篇文章</a> 了解更多细节。</p>
+<a id="more"></a>
+<p>总的来说，Redis 的 zset 实现中，选用「跳表」的主要原因如下：</p>
+<ol>
+<li><strong>原理清晰易懂，且容易实现，方便维护</strong>：对比下平衡树或者红黑树（可能就像 Raft v.s. Paxos 的感觉一样），不管是原理还是实现都简单了很多。平衡树或者红黑树在实现时，还要时刻维护节点关系，必要时还需要执行树的左旋或者右旋来保持平衡；</li>
+<li><strong>拥有媲美平衡树或者红黑树的查询效率</strong>：插入、删除、查找的平均时间复杂度可以达到 O(logN)。</li>
+</ol>
+<p>当然，相对于 William Pugh 在他的论文中所描述的「跳表」算法而言，作者在实现 Redis 中的「跳表」时，给它加了点「料」：</p>
+<ol>
+<li>允许重复的分数存在；</li>
+<li>在进行比较时，不仅会比较 score，还会考虑关联的数据；</li>
+<li>添加了一个回退指针，从而构成了一个双向链表（level[0]），便于倒序遍历链表（<code>ZREVRANGE</code>）使用。</li>
+</ol>
+<p>好了，废话完毕。接下来进入正题，看看如何使用 Go 语言来实现「跳表」吧（贴代码模式开启~）。</p>
+<h1 id="跳表实现"><a href="#跳表实现" class="headerlink" title="跳表实现"></a>跳表实现</h1><p>以下仅仅列出了几个比较有趣且关键的方法实现，即：插入、删除和更新分数。完整的实现源码可以参考 <a href="https://gitee.com/ifaceless/goskiplist/tree/master" target="_blank" rel="noopener">这里</a> 或者 <a href="https://github.com/iFaceless/always-coding/tree/master/datastructure/skiplist" target="_blank" rel="noopener">这里</a>，包含了比较详细的单元测试。</p>
+<h2 id="数据结构定义"><a href="#数据结构定义" class="headerlink" title="数据结构定义"></a>数据结构定义</h2><p>需要说明的是，为了简单起见，假设存储的元素是字符串类型（要是使用 <code>interface{}</code> 的话，又得加些代码支持元素之间的比较了）。但是在 Redis 中，实际的 <code>element</code>  类型是 <code>sds</code>。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> (</span><br><span class="line">    MaxLevel = <span class="number">64</span> <span class="comment">// 足以容纳 2^64 个元素</span></span><br><span class="line">    P = <span class="number">0.25</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Node <span class="keyword">struct</span> &#123;</span><br><span class="line">    elem <span class="keyword">string</span></span><br><span class="line">    score <span class="keyword">float64</span></span><br><span class="line">    backward *Node</span><br><span class="line">    level []skipLevel</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> skipLevel <span class="keyword">struct</span> &#123;</span><br><span class="line">    <span class="comment">// forward 每层都要有指向下一个节点的指针</span></span><br><span class="line">    forward *Node</span><br><span class="line">    <span class="comment">// span 间隔定义为：从当前节点到 forward 指向的下个节点之间间隔的节点数</span></span><br><span class="line">    span <span class="keyword">int</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Skiplist <span class="keyword">struct</span> &#123;</span><br><span class="line">    header, tail *Node</span><br><span class="line">    level <span class="keyword">int</span> <span class="comment">// 记录跳表的实际高度</span></span><br><span class="line">    length <span class="keyword">int</span> <span class="comment">// 记录跳表的长度（不含头节点）</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="辅助方法"><a href="#辅助方法" class="headerlink" title="辅助方法"></a>辅助方法</h2><p>考虑到在实现时，经常需要比较 score 和 element，所以这里直接给 <code>Node</code> 实现了一些比较方法，便于使用。</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(node *Node)</span> <span class="title">Compare</span><span class="params">(other *Node)</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> node.score &lt; other.score || (node.score == other.score &amp;&amp; node.elem &lt; other.elem) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">-1</span></span><br><span class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> node.score &gt; other.score || (node.score == other.score &amp;&amp; node.elem &gt; other.elem) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(node *Node)</span> <span class="title">Lt</span><span class="params">(other *Node)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> node.Compare(other) &lt; <span class="number">0</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(node *Node)</span> <span class="title">Lte</span><span class="params">(other *Node)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> node.Compare(other) &lt;= <span class="number">0</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(node *Node)</span> <span class="title">Gt</span><span class="params">(other *Node)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> node.Compare(other) &gt; <span class="number">0</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(node *Node)</span> <span class="title">Eq</span><span class="params">(other *Node)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">return</span> node.Compare(other) == <span class="number">0</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="插入元素"><a href="#插入元素" class="headerlink" title="插入元素"></a>插入元素</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Insert 向跳表中插入一个新的元素。</span></span><br><span class="line"><span class="comment">// 步骤：</span></span><br><span class="line"><span class="comment">// 1. 查找插入位置</span></span><br><span class="line"><span class="comment">// 2. 创建新节点，并在目标位置插入节点</span></span><br><span class="line"><span class="comment">// 3. 调整跳表 backward 指针等</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sl *Skiplist)</span> <span class="title">Insert</span><span class="params">(score <span class="keyword">float64</span>, elem <span class="keyword">string</span>)</span> *<span class="title">Node</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> (</span><br><span class="line">        <span class="comment">// update 用于记录每层待更新的节点</span></span><br><span class="line">        update [MaxLevel]*Node</span><br><span class="line">        <span class="comment">// rank 用来记录每层经过的节点记录（可以看成到头节点的距离）</span></span><br><span class="line">        rank [MaxLevel]<span class="keyword">int</span></span><br><span class="line">        <span class="comment">// 构建一个新节点，用于下面的大小判断，其 level 在后面设置</span></span><br><span class="line">        node = &amp;Node&#123;score: score, elem: elem&#125;</span><br><span class="line">    )</span><br><span class="line">    cur := sl.header</span><br><span class="line">    <span class="keyword">for</span> i := sl.level - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i-- &#123;</span><br><span class="line">        <span class="keyword">if</span> cur == sl.header &#123;</span><br><span class="line">            rank[i] = <span class="number">0</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            rank[i] = rank[i+<span class="number">1</span>]</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="comment">// 与同层的后一个节点比较，如果后一个比目标值小，则可以继续向后</span></span><br><span class="line">        <span class="comment">// 否则下降到一层查找。注意这里的大小比较是按照 score 和</span></span><br><span class="line">        <span class="comment">// elem 综合计算得到的。</span></span><br><span class="line">        <span class="keyword">for</span> cur.level[i].forward != <span class="literal">nil</span> &amp;&amp; cur.level[i].forward.Lt(node) &#123;</span><br><span class="line">            rank[i] += cur.level[i].span</span><br><span class="line">            <span class="comment">// 同层继续往后查找</span></span><br><span class="line">            cur = cur.level[i].forward</span><br><span class="line">        &#125;</span><br><span class="line">        update[i] = cur</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 调整跳表高度</span></span><br><span class="line">    level := sl.randomLevel()</span><br><span class="line">    <span class="keyword">if</span> level &gt; sl.level &#123;</span><br><span class="line">        <span class="comment">// 初始化每层</span></span><br><span class="line">        <span class="keyword">for</span> i := level - <span class="number">1</span>; i &gt;= sl.level; i-- &#123;</span><br><span class="line">            rank[i] = <span class="number">0</span></span><br><span class="line">            update[i] = sl.header</span><br><span class="line">            update[i].level[i].span = sl.length</span><br><span class="line">        &#125;</span><br><span class="line">        sl.level = level</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 更新节点 level，并插入新节点</span></span><br><span class="line">    node.setLevel(level)</span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; level; i++ &#123;</span><br><span class="line">        <span class="comment">// 更新每层的节点指向</span></span><br><span class="line">        node.level[i].forward = update[i].level[i].forward</span><br><span class="line">        update[i].level[i].forward = node</span><br><span class="line">        <span class="comment">// 更新 span 信息</span></span><br><span class="line">        node.level[i].span = update[i].level[i].span - (rank[<span class="number">0</span>] - rank[i])</span><br><span class="line">        update[i].level[i].span = (rank[<span class="number">0</span>] - rank[i]) + <span class="number">1</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 针对新增节点 level &lt; sl.level 的情况，需要更新上面没有扫到的层 span</span></span><br><span class="line">    <span class="keyword">for</span> i := level; i &lt; sl.level; i++ &#123;</span><br><span class="line">        update[i].level[i].span++</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 调整 backward 指针</span></span><br><span class="line">    <span class="comment">// 如果前一个节点是头节点，则 backward 为 nil</span></span><br><span class="line">    <span class="comment">// 否则 backward 指向之前节点</span></span><br><span class="line">    <span class="keyword">if</span> update[<span class="number">0</span>] != sl.header &#123;</span><br><span class="line">        <span class="comment">// update[0] 就是和新增节点相邻的前一个节点</span></span><br><span class="line">        node.backward = update[<span class="number">0</span>]</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 如果新增节点是最后一个，则需要更新 tail 指针</span></span><br><span class="line">    <span class="keyword">if</span> node.level[<span class="number">0</span>].forward == <span class="literal">nil</span> &#123;</span><br><span class="line">        sl.tail = node</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 中间节点，需要更新后一个节点的回退指针</span></span><br><span class="line">        node.level[<span class="number">0</span>].forward.backward = node</span><br><span class="line">    &#125;</span><br><span class="line">    sl.length++</span><br><span class="line">    <span class="keyword">return</span> node</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// randomLevel 对于新增节点，返回一个随机的 level</span></span><br><span class="line"><span class="comment">// 返回的 level 范围为 [1, MaxLevel]。并且，采用的</span></span><br><span class="line"><span class="comment">// 算法会保证，更大的 level 返回的概率越低。</span></span><br><span class="line"><span class="comment">// 每个 level 出现的概率计算：(1-p) * p^(level-1)</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sl *Skiplist)</span> <span class="title">randomLevel</span><span class="params">()</span> <span class="title">int</span></span> &#123;</span><br><span class="line">    level := <span class="number">1</span></span><br><span class="line">    <span class="keyword">for</span> rand.Float64() &lt; P &amp;&amp; level &lt; MaxLevel &#123;</span><br><span class="line">        level++</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> level</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="删除元素"><a href="#删除元素" class="headerlink" title="删除元素"></a>删除元素</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Delete 用于删除跳表中指定的节点。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sl *Skiplist)</span> <span class="title">Delete</span><span class="params">(score <span class="keyword">float64</span>, elem <span class="keyword">string</span>)</span> *<span class="title">Node</span></span> &#123;</span><br><span class="line">    <span class="comment">// 第一步，找到需要删除节点</span></span><br><span class="line">    <span class="keyword">var</span> (</span><br><span class="line">        update [MaxLevel]*Node</span><br><span class="line">        targetNode = &amp;Node&#123;elem: elem, score: score&#125;</span><br><span class="line">    )</span><br><span class="line">    cur := sl.header</span><br><span class="line">    <span class="keyword">for</span> i := sl.level - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i-- &#123;</span><br><span class="line">        <span class="keyword">for</span> cur.level[i].forward != <span class="literal">nil</span> &amp;&amp; cur.level[i].forward.Lt(targetNode) &#123;</span><br><span class="line">            cur = cur.level[i].forward</span><br><span class="line">        &#125;</span><br><span class="line">        update[i] = cur</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 目标节点找到后，这里需要判断下 elem 是否相等</span></span><br><span class="line">    <span class="comment">// score 可以重复，所以必须要谨慎</span></span><br><span class="line">    nodeToBeDeleted := update[<span class="number">0</span>].level[<span class="number">0</span>].forward</span><br><span class="line">    <span class="keyword">if</span> nodeToBeDeleted == <span class="literal">nil</span> || !nodeToBeDeleted.Eq(targetNode) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    sl.deleteNode(update, nodeToBeDeleted)</span><br><span class="line">    <span class="keyword">return</span> nodeToBeDeleted</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sl *Skiplist)</span> <span class="title">deleteNode</span><span class="params">(update [64]*Node, nodeToBeDeleted *Node)</span></span> &#123;</span><br><span class="line">    <span class="comment">// 这时我们要删除的节点就是 nodeToBeDeleted</span></span><br><span class="line">    <span class="comment">// 调整每层待更新节点，修改 forward 指向</span></span><br><span class="line">    <span class="keyword">for</span> i := <span class="number">0</span>; i &lt; sl.level; i++ &#123;</span><br><span class="line">        <span class="keyword">if</span> update[i].level[i].forward == nodeToBeDeleted &#123;</span><br><span class="line">            update[i].level[i].forward = nodeToBeDeleted.level[i].forward</span><br><span class="line">            update[i].level[i].span += nodeToBeDeleted.level[i].span - <span class="number">1</span></span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            update[i].level[i].span--</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 调整回退指针：</span></span><br><span class="line">    <span class="comment">// 1. 如果被删除的节点是最后一个节点，需要更新 sl.tail</span></span><br><span class="line">    <span class="comment">// 2. 如果被删除的节点位于中间，则直接更新后一个节点 backward 即可</span></span><br><span class="line">    <span class="keyword">if</span> sl.tail == nodeToBeDeleted &#123;</span><br><span class="line">        sl.tail = nodeToBeDeleted.backward</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        nodeToBeDeleted.level[<span class="number">0</span>].forward.backward = nodeToBeDeleted.backward</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 调整层数</span></span><br><span class="line">    <span class="keyword">for</span> sl.header.level[sl.level<span class="number">-1</span>].forward == <span class="literal">nil</span> &#123;</span><br><span class="line">        sl.level--</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// 减少节点计数</span></span><br><span class="line">    sl.length--</span><br><span class="line">    nodeToBeDeleted.backward = <span class="literal">nil</span></span><br><span class="line">    nodeToBeDeleted.level[<span class="number">0</span>].forward = <span class="literal">nil</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="更新分数"><a href="#更新分数" class="headerlink" title="更新分数"></a>更新分数</h2><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// UpdateScore 用于更新节点的分数。该函数会保证更新分数后，</span></span><br><span class="line"><span class="comment">// 节点的有序性依然可以维持。</span></span><br><span class="line"><span class="comment">// 策略如下：</span></span><br><span class="line"><span class="comment">// 1. 快速判断能否原节点修改，如果可以则直接修改并返回；</span></span><br><span class="line"><span class="comment">// 2. 采用更加昂贵的操作：删除再添加。</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sl *Skiplist)</span> <span class="title">UpdateScore</span><span class="params">(curScore <span class="keyword">float64</span>, elem <span class="keyword">string</span>, newScore <span class="keyword">float64</span>)</span> *<span class="title">Node</span></span> &#123;</span><br><span class="line">    <span class="keyword">var</span> (</span><br><span class="line">        update [MaxLevel]*Node</span><br><span class="line">        targetNode = &amp;Node&#123;elem: elem, score: curScore&#125;</span><br><span class="line">    )</span><br><span class="line">    cur := sl.header</span><br><span class="line">    <span class="comment">// 第一步，找到符合条件的目标节点</span></span><br><span class="line">    <span class="keyword">for</span> i := sl.level - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i-- &#123;</span><br><span class="line">        <span class="keyword">for</span> cur.level[i].forward != <span class="literal">nil</span> &amp;&amp; cur.level[i].forward.Lt(targetNode) &#123;</span><br><span class="line">            cur = cur.level[i].forward</span><br><span class="line">        &#125;</span><br><span class="line">        update[i] = cur</span><br><span class="line">    &#125;</span><br><span class="line">    node := cur.level[<span class="number">0</span>].forward</span><br><span class="line">    <span class="keyword">if</span> node == <span class="literal">nil</span> || !node.Eq(targetNode) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> sl.canUpdateScoreFor(node, newScore) &#123;</span><br><span class="line">        node.score = newScore</span><br><span class="line">        <span class="keyword">return</span> node</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        <span class="comment">// 需要删除旧节点，增加新节点</span></span><br><span class="line">        sl.deleteNode(update, node)</span><br><span class="line">        <span class="keyword">return</span> sl.Insert(newScore, node.elem)</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// canUpdateScoreFor 确定能否直接在原有的节点上进行修改</span></span><br><span class="line"><span class="comment">// 什么条件才可以直接原地更新 score 呢？</span></span><br><span class="line"><span class="comment">// 1. node 是唯一一个数据节点（node.backward == NULL &amp;&amp; node-&gt;level[0].forward == NULL）</span></span><br><span class="line"><span class="comment">// 2. node 是第一个数据节点，且新的分数要比 node 之后节点分数要小（这样才能保证有序）</span></span><br><span class="line"><span class="comment">// 即：node.backward == NULL &amp;&amp; node-&gt;level[0].forward-&gt;score &gt; newScore）</span></span><br><span class="line"><span class="comment">// 3. node 是最后一个数据节点，且 node 之前节点的分数要比新改的分数小</span></span><br><span class="line"><span class="comment">// 即：node-&gt;backward-&gt;score &lt; newScore &amp;&amp; node-&gt;level[0].forward == NULL</span></span><br><span class="line"><span class="comment">// 4. node 是修改的后的分数恰好还能保证位于前一个和后一个节点分数之间</span></span><br><span class="line"><span class="comment">// 即：node-&gt;backward-&gt;score &lt; newscore &amp;&amp; node-&gt;level[0].forward-&gt;score &gt; newscore</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(sl *Skiplist)</span> <span class="title">canUpdateScoreFor</span><span class="params">(node *Node, newScore <span class="keyword">float64</span>)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (node.backward == <span class="literal">nil</span> || node.backward.score &lt; newScore) &amp;&amp;</span><br><span class="line">        (node.level[<span class="number">0</span>].forward == <span class="literal">nil</span> || node.level[<span class="number">0</span>].forward.score &gt; newScore) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> <span class="literal">false</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>俗话说，「说起来容易，做起来难」。在实现「跳表」的时候感受颇深，似乎看完 Redis 的「跳表」源码和网上诸多前辈编写的文章后，自以为懂得了原理（可能确实懂了），但是在具体实现的时候还是踩了不少坑。比如，空指针引起 panic；<code>i--</code> 写成了 <code>i++</code> 导致查找失败；一些边界情况的判断等。总之，细节决定成败，需要在保持思路清晰的同时，更加谨慎一些才能写出足够健壮的代码来。当然，这期间自然少不了单元测试的助攻，否则有很多问题可能都没法暴露出来~</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://zhuanlan.zhihu.com/p/53975333" target="_blank" rel="noopener">漫画：什么是跳表？</a></li>
+<li><a href="https://juejin.im/post/57fa935b0e3dd90057c50fbc" target="_blank" rel="noopener">Redis 为什么用跳表而不用平衡树？</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2019/12/11/implement-redis-skiplist-in-go/" title="Go 语言实现 Redis 跳表">http://ifaceless.space/2019/12/11/implement-redis-skiplist-in-go/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Go/" rel="tag"><i class="fa fa-tag"></i> Go</a>
+          
+            <a href="/tags/跳表/" rel="tag"><i class="fa fa-tag"></i> 跳表</a>
+          
+            <a href="/tags/Redis/" rel="tag"><i class="fa fa-tag"></i> Redis</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/12/08/primitive-exploration-of-redis5/" rel="next" title="Redis 5 源码初探">
+                <i class="fa fa-chevron-left"></i> Redis 5 源码初探
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/12/15/redis-low-level-data-structures/" rel="prev" title="Redis 源码学习之基础数据结构">
+                Redis 源码学习之基础数据结构 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">33</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">58</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me#ifaceless.space" target="_blank" title="邮箱">
+                      邮箱</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://zhuanlan.zhihu.com/0xe8551ccb" target="_blank" title="专栏">
+                      专栏</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#跳表实现"><span class="nav-number">2.</span> <span class="nav-text">跳表实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#数据结构定义"><span class="nav-number">2.1.</span> <span class="nav-text">数据结构定义</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#辅助方法"><span class="nav-number">2.2.</span> <span class="nav-text">辅助方法</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#插入元素"><span class="nav-number">2.3.</span> <span class="nav-text">插入元素</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#删除元素"><span class="nav-number">2.4.</span> <span class="nav-text">删除元素</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更新分数"><span class="nav-number">2.5.</span> <span class="nav-text">更新分数</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">4.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>
