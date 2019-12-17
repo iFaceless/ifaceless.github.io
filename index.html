@@ -409,13 +409,13 @@
       
         
           <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p><img src="https://pic3.zhimg.com/80/v2-c3ed9fd26f9d28528282d51827b76e91.png" alt=""></p>
-<p>字典在 Redis 中是一个非常重要的数据结构，因为 Redis 本身就是一个 Key-Value 数据库。我们先来回顾下在 <a href="https://ifaceless.space/2019/12/15/redis-low-level-data-structures/">Redis 源码学习之基本数据结构</a>  中提到的 Redis 字典实现的一些特点：</p>
+<p>字典在 Redis 中是一个非常重要的数据结构，因为 Redis 本身就是一个键值数据库。我们先来回顾下在 <a href="https://ifaceless.space/2019/12/15/redis-low-level-data-structures/">Redis 源码学习之基本数据结构</a>  中提到的 Redis 字典实现的一些特点：</p>
 <ol>
-<li>支持海量 key-value 存储；</li>
+<li>支持海量 <code>&lt;key, value&gt;</code> 存储；</li>
 <li>使用渐进式 Rehash 策略，避免因为需要迁移的 buckets 太多导致阻塞时间过久（Redis 核心处理逻辑是单线程模型）；</li>
-<li>默认使用 siph hash 算法计算键的 hash 值；</li>
+<li>默认使用 SipHash 算法计算键的 hash 值；</li>
 <li>对于哈希冲突问题，采用了常见的链地址法，且新加入的节点会插入到链表的头部；</li>
-<li>字典内部维护了两张哈希表，其中第二个哈希表会在扩容期间（rehash）使用；</li>
+<li>字典内部维护了两张哈希表，其中第二个哈希表会在扩容期间（Rehash）使用；</li>
 <li>提供了安全和非安全的迭代器，方便对整个字典进行迭代。</li>
 </ol>
           <!--noindex-->
