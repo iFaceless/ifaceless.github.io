@@ -102,7 +102,7 @@
 <meta property="og:image" content="https://pic1.zhimg.com/v2-f3e683ab99b911d184e6e1dd244bdba4.jpg">
 <meta property="og:image" content="https://pic4.zhimg.com/v2-57c48d5ad99dc3fca76727492cbd8a8d.jpg">
 <meta property="og:image" content="https://pic1.zhimg.com/v2-2152cb65cd8c5d140c444b4bda0be2f4.jpg">
-<meta property="og:updated_time" content="2019-12-19T05:32:33.877Z">
+<meta property="og:updated_time" content="2019-12-19T05:34:30.805Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="理解文件描述符与文件句柄">
 <meta name="twitter:description" content="引言在《Linux 系统编程手册》5.4 节，关于文件描述符和打开的文件关系是这样描述的：「内核为所有打开的文件维护了一个系统级的描述表（open file description table），有时也称之为打开文件表（open file table），并将表中的每个条目称为打开文件句柄（open file handle）。而针对每个进程，内核又为其维护了打开文件的描述符表（open file d">
@@ -416,7 +416,7 @@
 <p><img src="https://pic4.zhimg.com/80/v2-3064b2743259ac1b79da998a595b7c3b.png" alt=""></p>
 <p>后来在这篇文章 <a href="https://juejin.im/entry/5b56f9045188251b157bb645" target="_blank" rel="noopener">Linux 文件句柄的这些技术内幕，只有 1% 的人知道</a> 中，看到了这样的的描述：「简单来说，每个进程都有一个<strong>打开的文件表（fdtable)</strong>。表中的每一项是struct file类型，包含了打开文件的一些属性比如偏移量，读写访问模式等，这是真正意义上的文件句柄」。</p>
 <p><img src="https://pic1.zhimg.com/80/v2-c315f6671cc7038e8199346a98d4e300.png" alt=""></p>
-<p>那么这里提到的「打开的文件表」又是什么呢，怎么又变成了每个进程都有的呢？《Linux 系统编程》中不是说「打开文件表（open file table）」是独立于进程的系统级表吗？是不是觉得有点困惑和矛盾呢？</p>
+<p>那么这里提到的「打开的文件表」又是什么呢，怎么又变成了每个进程都有的呢？《Linux 系统编程手册》中不是说「打开文件表（open file table）」是独立于进程的系统级表吗？是不是觉得有点困惑和矛盾呢？</p>
 <p>为了能够解答困惑，加深对文件描述符的理解，特地深扒了下 Linux 内核的相关源码。接下来，我们将会看到上文提到的<strong>描述表（open file description table）</strong>、<strong>打开文件表（open file table）</strong>、<strong>打开文件句柄（open file handle）</strong>这三种抽象的数据结构具体是怎么实现的？以便能够更好地理解书中的概念。</p>
 <h1 id="文件描述符与打开的文件关系"><a href="#文件描述符与打开的文件关系" class="headerlink" title="文件描述符与打开的文件关系"></a>文件描述符与打开的文件关系</h1><p>在区分这些概念前，我们先来看看 <code>open()</code> 系统调用的 <code>man page</code> 中提到的一段说明：</p>
 <blockquote>
