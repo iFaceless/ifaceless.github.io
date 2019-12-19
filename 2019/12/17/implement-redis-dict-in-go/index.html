@@ -98,7 +98,7 @@
 <meta property="og:description" content="引言 字典在 Redis 中是一个非常重要的数据结构，因为 Redis 本身就是一个键值数据库。我们先来回顾下在 Redis 源码学习之基本数据结构  中提到的 Redis 字典实现的一些特点：  支持海量 &amp;lt;key, value&amp;gt; 存储； 使用渐进式 Rehash 策略，避免因为需要迁移的 buckets 太多导致阻塞时间过久（Redis 核心处理逻辑是单线程模型）； 默认使用 Si">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://pic3.zhimg.com/80/v2-c3ed9fd26f9d28528282d51827b76e91.png">
-<meta property="og:updated_time" content="2019-12-17T11:09:54.790Z">
+<meta property="og:updated_time" content="2019-12-19T05:26:12.447Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 语言实现 Redis 字典">
 <meta name="twitter:description" content="引言 字典在 Redis 中是一个非常重要的数据结构，因为 Redis 本身就是一个键值数据库。我们先来回顾下在 Redis 源码学习之基本数据结构  中提到的 Redis 字典实现的一些特点：  支持海量 &amp;lt;key, value&amp;gt; 存储； 使用渐进式 Rehash 策略，避免因为需要迁移的 buckets 太多导致阻塞时间过久（Redis 核心处理逻辑是单线程模型）； 默认使用 Si">
@@ -447,7 +447,7 @@
 <p>最后，我们来看看迭代器最重要的 <code>next()</code> 方法实现，就可以看到安全迭代器和普通迭代器的区别了：</p>
 <figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// next 会依次扫描字典中哈希表的所有 buckets，并将其中的 entry 一一返回。</span></span><br><span class="line"><span class="comment">// 如果字典正在 rehash，那么会在扫描完哈希表 1 后，继续扫描哈希表 2。需要</span></span><br><span class="line"><span class="comment">// 注意的是，如果在迭代期间，继续向字典中添加数据可能没法被扫描到！</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(it *iterator)</span> <span class="title">next</span><span class="params">()</span> *<span class="title">entry</span></span> &#123;</span><br><span class="line">    <span class="keyword">for</span> &#123;</span><br><span class="line">        <span class="keyword">if</span> it.entry == <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">if</span> it.waitFirstIteration &#123;</span><br><span class="line">                <span class="comment">// 第一次迭代，要做点特别的事情~</span></span><br><span class="line">                <span class="keyword">if</span> it.safe &#123;</span><br><span class="line">                    <span class="comment">// 告诉 dict，有正在运行的安全迭代器，进而阻止某些操作时的 Rehash 操作</span></span><br><span class="line">                    it.d.iterators++</span><br><span class="line">                &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">                    it.fingerprint = it.d.fingerprint()</span><br><span class="line">                &#125;</span><br><span class="line">                it.waitFirstIteration = <span class="literal">false</span></span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            ht := it.d.hashTables[it.tableIndex]</span><br><span class="line">            <span class="keyword">if</span> it.bucketIndex &gt;= ht.size &#123;</span><br><span class="line">                <span class="keyword">if</span> !it.d.isRehashing() || it.tableIndex != <span class="number">0</span> &#123;</span><br><span class="line">                    <span class="keyword">return</span> <span class="literal">nil</span></span><br><span class="line">                &#125;</span><br><span class="line">                <span class="comment">// 切换到第二个哈希表继续扫描</span></span><br><span class="line">                it.tableIndex = <span class="number">1</span></span><br><span class="line">                it.bucketIndex = <span class="number">0</span></span><br><span class="line">                ht = it.d.hashTables[<span class="number">1</span>]</span><br><span class="line">            &#125;</span><br><span class="line"></span><br><span class="line">            it.entry = ht.buckets[it.bucketIndex]</span><br><span class="line">            it.bucketIndex++</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            it.entry = it.entry.next</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> it.entry != <span class="literal">nil</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> it.entry</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <h1 id="使用示例"><a href="#使用示例" class="headerlink" title="使用示例"></a>使用示例</h1><figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">main</span><span class="params">()</span></span> &#123;</span><br><span class="line">    d := dict.New()</span><br><span class="line">    d.Store(<span class="string">"hello"</span>, <span class="string">"world"</span>)</span><br><span class="line">    d.Store(<span class="number">100</span>, <span class="number">200</span>)</span><br><span class="line">    fmt.Println(d.Load(<span class="string">"hello"</span>))</span><br><span class="line">    fmt.Println(d.LoadOrStore(<span class="string">"language"</span>, <span class="string">"Eng"</span>))</span><br><span class="line">    d.Range(<span class="function"><span class="keyword">func</span><span class="params">(key, value <span class="keyword">interface</span>&#123;&#125;)</span> <span class="title">bool</span></span> &#123;</span><br><span class="line">        fmt.Println(key, <span class="string">"=&gt;"</span>, value)</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span></span><br><span class="line">    &#125;)</span><br><span class="line">    _ = d.Resize()</span><br><span class="line">    d.RehashForAWhile(<span class="number">1</span> * time.Microsecond)</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>好啦，关于 Redis 字典的实现介绍就到此为止啦。相信看完上面的代码后，应该可以了解到 Redis 字典的扩容机制、渐进式 rehash 策略，以及哈希冲突解决方案。完整的实现代码及其单元测试参见 <a href="https://gitee.com/ifaceless/go-redis-dict" target="_blank" rel="noopener">go-redis-dict</a>。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>好啦，关于 Redis 字典的实现介绍就到此为止啦。相信看完上面的代码后，应该可以了解到 Redis 字典的扩容机制、渐进式 Rehash 策略，以及哈希冲突解决方案。完整的实现代码及其单元测试参见 <a href="https://gitee.com/ifaceless/go-redis-dict" target="_blank" rel="noopener">go-redis-dict</a>。</p>
 
       
     </div>
@@ -509,6 +509,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/12/19/understand-file-descriptor-and-file-description/" rel="prev" title="理解文件描述符与文件句柄">
+                理解文件描述符与文件句柄 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -589,7 +593,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">34</span>
+                  <span class="site-state-item-count">35</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -611,7 +615,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">59</span>
+                  <span class="site-state-item-count">61</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
