@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="爬虫,Python,数据可视化,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言应求开发一个简单的爬虫，用于从快递 100 抓取快递网点的分布，输入省份+城市+区县，然后是快递公司名称，抓取其对应的快递网点的信息（包括名称、地址、电话、坐标等）。说起来，开发这样一个简单的爬虫其实没什么难度，也没什么技术含量（没有时间要求、不需要分布式抓取、没什么反反爬策略加持等），不过这期间也遇到一些比较有趣的问题，特此记录下。 另外就是第一次接触了 pyecharts 这个数据可视化工">
+<meta name="keywords" content="爬虫,Python,数据可视化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="快递网点抓取杂记">
+<meta property="og:url" content="http://ifaceless.space/2019/12/29/craw-dilivery-network-distribution/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言应求开发一个简单的爬虫，用于从快递 100 抓取快递网点的分布，输入省份+城市+区县，然后是快递公司名称，抓取其对应的快递网点的信息（包括名称、地址、电话、坐标等）。说起来，开发这样一个简单的爬虫其实没什么难度，也没什么技术含量（没有时间要求、不需要分布式抓取、没什么反反爬策略加持等），不过这期间也遇到一些比较有趣的问题，特此记录下。 另外就是第一次接触了 pyecharts 这个数据可视化工">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pic4.zhimg.com/80/v2-5e4a1966207a0722b6027de8c59575fa.png">
+<meta property="og:image" content="https://pic4.zhimg.com/80/v2-68027253f03f285b193cbede8deff551.png">
+<meta property="og:image" content="https://pic4.zhimg.com/80/v2-e0a0299c70020102ca4f261123572f1a.png">
+<meta property="og:image" content="https://pic4.zhimg.com/80/v2-7349b600693e94c344c2246ad63c1548.png">
+<meta property="og:image" content="https://pic4.zhimg.com/80/v2-bac9ebd7eb25c1b40feaff8d07ef3396.png">
+<meta property="og:image" content="https://pic1.zhimg.com/80/v2-5273d05981d0d6e9b4d611ea5408f785.png">
+<meta property="og:image" content="https://pic3.zhimg.com/80/v2-16533f8a8c8f62a9433df19e188dd305.png">
+<meta property="og:image" content="https://pic2.zhimg.com/80/v2-af251174caa70eb0ca1f9285db7423ef.png">
+<meta property="og:image" content="https://pic4.zhimg.com/80/v2-1c41db550a36616d2df8808bfaa61540.png">
+<meta property="og:updated_time" content="2020-01-01T04:34:08.208Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="快递网点抓取杂记">
+<meta name="twitter:description" content="引言应求开发一个简单的爬虫，用于从快递 100 抓取快递网点的分布，输入省份+城市+区县，然后是快递公司名称，抓取其对应的快递网点的信息（包括名称、地址、电话、坐标等）。说起来，开发这样一个简单的爬虫其实没什么难度，也没什么技术含量（没有时间要求、不需要分布式抓取、没什么反反爬策略加持等），不过这期间也遇到一些比较有趣的问题，特此记录下。 另外就是第一次接触了 pyecharts 这个数据可视化工">
+<meta name="twitter:image" content="https://pic4.zhimg.com/80/v2-5e4a1966207a0722b6027de8c59575fa.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2019/12/29/craw-dilivery-network-distribution/">
+
+
+
+
+
+  <title>快递网点抓取杂记 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/12/29/craw-dilivery-network-distribution/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">快递网点抓取杂记</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-12-29T13:02:30+08:00">
+                2019-12-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Python/" itemprop="url" rel="index">
+                    <span itemprop="name">Python</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2.9k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  11
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>应求开发一个简单的爬虫，用于从<a href="https://www.kuaidi100.com/network/" target="_blank" rel="noopener">快递 100</a> 抓取快递网点的分布，输入省份+城市+区县，然后是快递公司名称，抓取其对应的快递网点的信息（包括名称、地址、电话、坐标等）。说起来，开发这样一个简单的爬虫其实没什么难度，也没什么技术含量（没有时间要求、不需要分布式抓取、没什么反反爬策略加持等），不过这期间也遇到一些比较有趣的问题，特此记录下。</p>
+<p>另外就是第一次接触了 <a href="https://pyecharts.org/#/zh-cn/geography_charts" target="_blank" rel="noopener">pyecharts</a> 这个数据可视化工具，用起来还挺方便的。样式配置好，还是会带来很好的视觉冲击的！当然，关键是利用这种工具有助于增加对抓取数据的理解（看具体需要的分析维度了）。</p>
+<a id="more"></a>
+<p>整个过程还是挺有趣的，虽然定位某些元素的时候很麻烦，写 XPath 表达式也比较枯燥（不要指望浏览器自动生成的 XPath，通常都不够通用）。但是完成整个任务后，还是有些收获的。下面开始吧~</p>
+<h1 id="确定方案"><a href="#确定方案" class="headerlink" title="确定方案"></a>确定方案</h1><h2 id="尝试-API-直接获取"><a href="#尝试-API-直接获取" class="headerlink" title="尝试 API 直接获取"></a>尝试 API 直接获取</h2><p>快递 100 对外公开的 API 文档<a href="https://www.kuaidi100.com/openapi/cloud_api.shtml" target="_blank" rel="noopener">在此</a>，但是并没有开放网点查询的接口，故无法使用。<em>直接通过 API 查询是最省心的方式，但是目前这条路行不通</em>。</p>
+<h2 id="尝试分析网页请求，间接使用-API-请求"><a href="#尝试分析网页请求，间接使用-API-请求" class="headerlink" title="尝试分析网页请求，间接使用 API 请求"></a>尝试分析网页请求，间接使用 API 请求</h2><p>网点查询的<a href="https://www.kuaidi100.com/network/" target="_blank" rel="noopener">主页</a>，可以根据选择的城市和快递公司，页面内容自动切换。此时，还是尝试分析其 API 请求，因为这个通常是抓取网站最简单的方式。</p>
+<p>打开 Chrome 浏览器的调试模式，通过点击页面上的筛选项，查看网络请求，确定请求了什么接口，传递的参数是什么，返回的参数是什么，从而能够模拟其请求方式来获取数据。接下来演示的是查询上海地区的某快递公司的网点。</p>
+<p>截图 1：请求方式为 POST，URL 为 <code>www.kuaidi100.com/network/searchapi.do</code><br><img src="https://pic4.zhimg.com/80/v2-5e4a1966207a0722b6027de8c59575fa.png" alt=""></p>
+<p>截图 2：以表单的形式，提交了请求的参数，也就是页面点击的筛选项。<br><img src="https://pic4.zhimg.com/80/v2-68027253f03f285b193cbede8deff551.png" alt=""></p>
+<p>截图 3：当完成请求后，可以看到其返回结果为 JSON 结构，其中的 <code>netList</code> 正是想要找的网点数据。<br><img src="https://pic4.zhimg.com/80/v2-e0a0299c70020102ca4f261123572f1a.png" alt=""></p>
+<h2 id="尝试分析网页结构，采用传统的方式抓取"><a href="#尝试分析网页结构，采用传统的方式抓取" class="headerlink" title="尝试分析网页结构，采用传统的方式抓取"></a>尝试分析网页结构，采用传统的方式抓取</h2><p>一般在进行网站数据抓取时，能通过其 API 获取，就尽可能去利用。使用 API 请求数据的好处有这么几点：</p>
+<ol>
+<li>省去了分析网页 HTML 结构的时间，可以直接解析接口返回的数据，提取想要的信息并存储即可；</li>
+<li>API 请求方式最为简单可靠灵活，且能适应较高的抓取频率；</li>
+<li>相对于分析网页 HTML 结构，提取信息的方式，API 抓取通常不用像担心前端页面频繁改版而导致爬虫程序也要即使更新的困境，方便维护。</li>
+</ol>
+<p>不过只是通过 API 来抓取，感觉不是很有趣，在 Selenium 的帮助下，以可视化的方式抓取页面貌似更有趣点。这里的思路如下：</p>
+<ol>
+<li>安装 Selenium + Chrome Web Driver，通过操纵浏览器模拟人类访问页面的方式来抓取数据；</li>
+<li>编写爬虫程序，控制浏览器打开网点查询的首页：<a href="https://www.kuaidi100.com/network/" target="_blank" rel="noopener">https://www.kuaidi100.com/network/</a></li>
+<li>接收输入的城市和快递公司名称作为参数，然后操纵浏览器点击下拉框，选择城市；然后操纵浏览器点击指定的快递公司；</li>
+<li>接下来开始解析页面结构，提取快递网点数据转换为 JSON 格式（地理位置坐标通过百度地图 API 获得），存储在指定路径下；然后不断控制浏览器翻页，完成剩余页面解析，至此对应的网点信息抓取完成。</li>
+</ol>
+<h1 id="准备开发环境"><a href="#准备开发环境" class="headerlink" title="准备开发环境"></a>准备开发环境</h1><ol>
+<li>Python 3.7 环境；</li>
+<li><a href="https://pypi.org/project/selenium/" target="_blank" rel="noopener">selenium-python</a>，其使用文档参考<a href="https://selenium-python-zh.readthedocs.io/en/latest/getting-started.html" target="_blank" rel="noopener">此处</a>；</li>
+<li><a href="http://npm.taobao.org/mirrors/chromedriver/" target="_blank" rel="noopener">chromedriver</a> 下载，并解压得到可执行文件；</li>
+<li>Anaconda 环境安装，并且需要保证 Jupter Notebook 能够正常工作；</li>
+<li>依赖的重要 Python 包安装：<ul>
+<li>pyecharts</li>
+<li>echarts-countries-pypkg </li>
+<li>echarts-china-provinces-pypkg </li>
+<li>echarts-china-cities-pypkg </li>
+<li>echarts-china-counties-pypkg </li>
+<li>echarts-china-misc-pypkg</li>
+<li>requests</li>
+</ul>
+</li>
+<li>记得安装 Chrome 浏览器。</li>
+</ol>
+<h1 id="页面关键元素定位"><a href="#页面关键元素定位" class="headerlink" title="页面关键元素定位"></a>页面关键元素定位</h1><p>根据上述抓取思路，需要做的是定位一些关键元素，并且能够从 HTML 中抽取出需要的信息。页面元素定位，需要了解下 <a href="https://www.w3school.com.cn/xpath/xpath_syntax.asp" target="_blank" rel="noopener">XPath</a> 语法，摘取想要的元素。</p>
+<p><em>小技巧，可以在 Chrome 控制台通过 <code>$x(&#39;xpath-expression&#39;)</code> 验证选择器是否正常：</em><br><img src="https://pic4.zhimg.com/80/v2-7349b600693e94c344c2246ad63c1548.png" alt=""></p>
+<ul>
+<li><p>省份选择下拉框元素 id 为 <code>provinceSelect</code>：<br>  <img src="https://pic4.zhimg.com/80/v2-bac9ebd7eb25c1b40feaff8d07ef3396.png" alt=""></p>
+</li>
+<li><p>定位省份位置（拷贝其 XPATH）<br>  <img src="https://pic1.zhimg.com/80/v2-5273d05981d0d6e9b4d611ea5408f785.png" alt=""></p>
+</li>
+</ul>
+<h2 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h2><p>其它关键元素确定方式类似，主要以 XPath 的方式查找。得到最终需要的 XPath 表达式如下：</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">XPathExpression</span>:</span></span><br><span class="line">    <span class="comment"># 省份下拉框 Tab</span></span><br><span class="line">    PROVINCE_TAB = <span class="string">'//*[@id="provinces"]/div/ul/li[2]'</span></span><br><span class="line">    <span class="comment"># 具体某个省份</span></span><br><span class="line">    PROVINCE_ITEM = <span class="string">'//*[contains(@class, "place province") and contains(text(), "&#123;&#125;")]'</span></span><br><span class="line">    <span class="comment"># 具体某个城市</span></span><br><span class="line">    CITY_ITEM = <span class="string">'//*[contains(@class, "place city") and contains(text(), "&#123;&#125;")]'</span></span><br><span class="line">    <span class="comment"># 具体某个区县</span></span><br><span class="line">    COUNTY_ITEM = <span class="string">'//*[contains(@class, "place county") and contains(text(), "&#123;&#125;")]'</span></span><br><span class="line">    <span class="comment"># 右侧查询按钮</span></span><br><span class="line">    QUERY_BUTTON = <span class="string">'//*[contains(@class, "btn-query")]'</span></span><br><span class="line">    <span class="comment"># 快递公司选择</span></span><br><span class="line">    PROVIDER_ITEM = <span class="string">'//ul[@id="companyCount"]/li/*[contains(text(), "&#123;&#125;")]'</span></span><br><span class="line">    <span class="comment"># 下一页</span></span><br><span class="line">    NEXT_PAGE_BUTTON = <span class="string">'//*[contains(@class, "page-down-active")]'</span></span><br><span class="line">    <span class="comment"># 页面中的快递公司信息条目</span></span><br><span class="line">    QUERY_ITEMS = <span class="string">'//*[@id="queryResult"]/dl'</span></span><br></pre></td></tr></table></figure>
+<h1 id="写代码"><a href="#写代码" class="headerlink" title="写代码"></a>写代码</h1><p><code>main</code> 函数是关键入口，它会调用爬虫类搜索指定位置指定公司的快递网点信息，并将返回的数据存储到指定的路径下，使用 <code>json line</code> 格式（即每一行都是 json 格式字符串）存储。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">main</span><span class="params">(province, city, provider=<span class="string">'全部'</span>)</span>:</span></span><br><span class="line">    spider = DeliveryNetworkSpider(</span><br><span class="line">        driver_path=os.path.join(PROJECT_DIR, <span class="string">'dep/mac/chromedriver'</span>))</span><br><span class="line"></span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        results = spider.search(province=province, city=city, provider=provider)</span><br><span class="line">    <span class="keyword">except</span> Exception <span class="keyword">as</span> err:</span><br><span class="line">        print(err)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">for</span> result <span class="keyword">in</span> results:</span><br><span class="line">            print(result)</span><br><span class="line">            store_result(os.path.join(PROJECT_DIR, <span class="string">'results'</span>, <span class="string">f'<span class="subst">&#123;province&#125;</span>-<span class="subst">&#123;city&#125;</span>-<span class="subst">&#123;provider&#125;</span>.jl'</span>), result)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">finally</span>:</span><br><span class="line">        spider.close()</span><br></pre></td></tr></table></figure>
+<h2 id="核心爬虫类"><a href="#核心爬虫类" class="headerlink" title="核心爬虫类"></a>核心爬虫类</h2><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">DeliveryNetworkSpider</span><span class="params">(object)</span>:</span></span><br><span class="line">    <span class="string">"""基于快递 100 的快递网点查询爬虫</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, driver_path)</span>:</span></span><br><span class="line">        <span class="string">"""</span></span><br><span class="line"><span class="string">        初始化快递网点爬虫，关键参数是要指定 webdriver 路径，否则</span></span><br><span class="line"><span class="string">        无法控制浏览器进行模拟查询。当前仅支持 Chrome 浏览器。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :param driver_path: 默认是 Mac 版本所在的路径，如果是 win</span></span><br><span class="line"><span class="string">                版本，需要自行修改路径。</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        <span class="comment"># Windows 下需要替换成对应的 chromedriver，可以在 dep 目录下新建 win</span></span><br><span class="line">        <span class="comment"># 目录，将 windows 版本的放到目录下，并修改 mac-&gt;win</span></span><br><span class="line">        self._driver = webdriver.Chrome(executable_path=driver_path)</span><br><span class="line">        self._driver.implicitly_wait(<span class="number">10</span>)  <span class="comment"># 隐式等待元素出现</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">close</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self._driver.close()</span><br><span class="line">        <span class="keyword">except</span>:</span><br><span class="line">            <span class="keyword">pass</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">search</span><span class="params">(self, province, city, county=<span class="string">'暂不选择'</span>, provider=<span class="string">'全部'</span>)</span>:</span></span><br><span class="line">        <span class="string">"""执行网点查询的核心方法。</span></span><br><span class="line"><span class="string"></span></span><br><span class="line"><span class="string">        :param province: 省份（一定要是快递 100 上有的名字）</span></span><br><span class="line"><span class="string">        :param city: 城市（一定要是快递 100 上有的名字）</span></span><br><span class="line"><span class="string">        :param county: 区县，默认为全部区县</span></span><br><span class="line"><span class="string">        :param provider: 快递服务商名字，不传则查询所有快递公司</span></span><br><span class="line"><span class="string">        """</span></span><br><span class="line">        self._open_home_page()</span><br><span class="line">        self._select_location(province, city, county)</span><br><span class="line">        self._select_provider(provider)</span><br><span class="line">        <span class="keyword">while</span> <span class="keyword">True</span>:</span><br><span class="line">            <span class="keyword">yield</span> <span class="keyword">from</span> self._parse_page(province, city)</span><br><span class="line">            <span class="keyword">if</span> self._has_next_page():</span><br><span class="line">                time.sleep(<span class="number">.5</span>)  <span class="comment"># 防止翻页太快被抓到</span></span><br><span class="line">                self._visit_next_page()</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                <span class="keyword">break</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_open_home_page</span><span class="params">(self)</span>:</span></span><br><span class="line">        self._driver.get(<span class="string">'https://www.kuaidi100.com/network/'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_select_location</span><span class="params">(self, province, city, county)</span>:</span></span><br><span class="line">        <span class="comment"># 找到输入下拉框位置</span></span><br><span class="line">        elem = self._driver.find_element_by_id(<span class="string">'provinceSelect'</span>)</span><br><span class="line">        self.__highlight(elem)</span><br><span class="line">        elem.click()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 定位选择省份 Tab</span></span><br><span class="line">        elem = self._driver.find_element_by_xpath(XPathExpression.PROVINCE_TAB)</span><br><span class="line">        self.__highlight(elem)</span><br><span class="line">        elem.click()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 接下来选择省份</span></span><br><span class="line">        elem = self._driver.find_element_by_xpath(</span><br><span class="line">            XPathExpression.PROVINCE_ITEM.format(province))</span><br><span class="line">        self.__highlight(elem)</span><br><span class="line">        elem.click()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 紧接着选择城市</span></span><br><span class="line">        elem = self._driver.find_element_by_xpath(</span><br><span class="line">            XPathExpression.CITY_ITEM.format(city))</span><br><span class="line">        self.__highlight(elem)</span><br><span class="line">        elem.click()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 选择所有区域</span></span><br><span class="line">        elem = self._driver.find_element_by_xpath(</span><br><span class="line">            XPathExpression.COUNTY_ITEM.format(county))</span><br><span class="line">        self.__highlight(elem)</span><br><span class="line">        elem.click()</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 定位到查询按钮，并点击查询跳转页面</span></span><br><span class="line">        elem = self._driver.find_element_by_xpath(XPathExpression.QUERY_BUTTON)</span><br><span class="line">        self.__highlight(elem)</span><br><span class="line">        elem.click()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_select_provider</span><span class="params">(self, provider)</span>:</span></span><br><span class="line">        elem = self._driver.find_element_by_xpath(</span><br><span class="line">            XPathExpression.PROVIDER_ITEM.format(provider))</span><br><span class="line">        self.__highlight(elem)</span><br><span class="line">        elem.click()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_has_next_page</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            self._driver.find_element_by_xpath(XPathExpression.NEXT_PAGE_BUTTON)</span><br><span class="line">        <span class="keyword">except</span> NoSuchElementException:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">False</span></span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">True</span></span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_visit_next_page</span><span class="params">(self)</span>:</span></span><br><span class="line">        elem = self._driver.find_element_by_xpath(XPathExpression.NEXT_PAGE_BUTTON)</span><br><span class="line">        self.__highlight(elem)</span><br><span class="line">        elem.click()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">__highlight</span><span class="params">(self, elem)</span>:</span></span><br><span class="line">        <span class="string">"""高亮操作的元素"""</span></span><br><span class="line">        self._driver.execute_script(</span><br><span class="line">            <span class="string">"arguments[0].setAttribute('style',arguments[1]);"</span>,</span><br><span class="line">            elem,</span><br><span class="line">            <span class="string">"outline:2px solid red;"</span>)</span><br><span class="line">        time.sleep(<span class="number">.2</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_parse_page</span><span class="params">(self, province, city)</span>:</span></span><br><span class="line">        <span class="keyword">try</span>:</span><br><span class="line">            elements = self._driver.find_elements_by_xpath(XPathExpression.QUERY_ITEMS)</span><br><span class="line">        <span class="keyword">except</span> NoSuchElementException:</span><br><span class="line">            <span class="keyword">return</span> []</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">for</span> el <span class="keyword">in</span> elements:</span><br><span class="line">                <span class="keyword">yield</span> self._extract(el.text, province, city)</span><br><span class="line"></span><br><span class="line"><span class="meta">    @staticmethod</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_extract</span><span class="params">(text, province, city)</span>:</span></span><br><span class="line">        item = dict(</span><br><span class="line">            province=province,</span><br><span class="line">            city=city,</span><br><span class="line">            name=<span class="string">''</span>,  <span class="comment"># 名称</span></span><br><span class="line">            address=<span class="string">''</span>,  <span class="comment"># 地址</span></span><br><span class="line">            contact_phone=<span class="string">''</span>,  <span class="comment"># 联系电话</span></span><br><span class="line">            pickup_phone=<span class="string">''</span>,  <span class="comment"># 取件电话</span></span><br><span class="line">            check_phone=<span class="string">''</span>,  <span class="comment"># 查件电话</span></span><br><span class="line">            complaint_phone=<span class="string">''</span>,  <span class="comment"># 投诉电话</span></span><br><span class="line">            location=dict(</span><br><span class="line">                lng=<span class="number">0.0</span>,  <span class="comment"># 经度</span></span><br><span class="line">                lat=<span class="number">0.0</span>,  <span class="comment"># 纬度</span></span><br><span class="line">            )</span><br><span class="line">        )</span><br><span class="line">        <span class="keyword">if</span> <span class="keyword">not</span> text:</span><br><span class="line">            <span class="keyword">return</span> item</span><br><span class="line"></span><br><span class="line">        <span class="comment"># 提取出纯文本后换行解析</span></span><br><span class="line">        lines = [l.strip() <span class="keyword">for</span> l <span class="keyword">in</span> text.splitlines() <span class="keyword">if</span> l.strip()]</span><br><span class="line"></span><br><span class="line">        <span class="function"><span class="keyword">def</span> <span class="title">__</span><span class="params">(k)</span>:</span></span><br><span class="line">            r = [l <span class="keyword">for</span> l <span class="keyword">in</span> lines <span class="keyword">if</span> l.startswith(k)]</span><br><span class="line">            <span class="keyword">return</span> r[<span class="number">0</span>].replace(k, <span class="string">''</span>) <span class="keyword">if</span> r <span class="keyword">else</span> <span class="string">''</span></span><br><span class="line"></span><br><span class="line">        item[<span class="string">'name'</span>] = lines[<span class="number">0</span>]</span><br><span class="line">        item[<span class="string">'address'</span>] = __(<span class="string">'公司地址：'</span>)</span><br><span class="line">        item[<span class="string">'contact_phone'</span>] = __(<span class="string">'联系电话：'</span>)</span><br><span class="line">        item[<span class="string">'pickup_phone'</span>] = __(<span class="string">'取件电话：'</span>)</span><br><span class="line">        item[<span class="string">'check_phone'</span>] = __(<span class="string">'查件电话：'</span>)</span><br><span class="line">        item[<span class="string">'complaint_phone'</span>] = __(<span class="string">'投诉电话：'</span>)</span><br><span class="line">        item[<span class="string">'location'</span>] = get_location(</span><br><span class="line">            item[<span class="string">'address'</span>], city=<span class="string">u"&#123;&#125;&#123;&#125;"</span>.format(province, city))</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> item</span><br></pre></td></tr></table></figure>
+<h2 id="坐标查询"><a href="#坐标查询" class="headerlink" title="坐标查询"></a>坐标查询</h2><figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line">BASE_API = <span class="string">'http://api.map.baidu.com'</span></span><br><span class="line">LOCATION_API = <span class="string">'/geocoding/v3/?address=&#123;&#125;&amp;city=&#123;&#125;&amp;output=json&amp;ak=&#123;&#125;'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 加缓存，避免重复查询</span></span><br><span class="line"><span class="meta">@filecache(YEAR)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">get_location</span><span class="params">(addr, city=<span class="string">''</span>)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    文档参考：http://lbsyun.baidu.com/index.php?title=webapi/guide/webservice-geocoding</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> addr:</span><br><span class="line">        <span class="keyword">return</span> dict(lng=<span class="number">0.0</span>, lat=<span class="number">0.0</span>)</span><br><span class="line"></span><br><span class="line">    url = _get_query_url(LOCATION_API.format(addr, city, AK))</span><br><span class="line">    r = requests.get(url)</span><br><span class="line">    result = r.json()</span><br><span class="line">    <span class="keyword">assert</span> result[<span class="string">'status'</span>] == <span class="number">0</span>, <span class="string">u"获取经纬度信息失败！请求：&#123;&#125;，返回结果：&#123;&#125;"</span>.format(url, result)</span><br><span class="line">    <span class="keyword">return</span> result[<span class="string">'result'</span>][<span class="string">'location'</span>]</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">_get_query_url</span><span class="params">(query_str)</span>:</span></span><br><span class="line">    query_str = query_str.replace(<span class="string">'#'</span>, <span class="string">''</span>)  <span class="comment"># 去除特殊字符</span></span><br><span class="line">    <span class="comment"># 对 query_str 进行转码，safe 内的保留字符不转换</span></span><br><span class="line">    qs = quote(query_str, safe=<span class="string">"/:=&amp;?#+!$,;'@()*[]"</span>)</span><br><span class="line">    sn = hashlib.md5(quote_plus(qs + SK).encode(<span class="string">'utf8'</span>)).hexdigest()</span><br><span class="line">    <span class="keyword">return</span> BASE_API + query_str + <span class="string">f'&amp;sn=<span class="subst">&#123;sn&#125;</span>'</span></span><br></pre></td></tr></table></figure>
+<h1 id="控制抓取数据"><a href="#控制抓取数据" class="headerlink" title="控制抓取数据"></a>控制抓取数据</h1><p>比如，下面就是抓取中通快递在北京各个地区的网点。启动后，会通过 Selenuium 控制 Chrome 浏览器访问查询网站，并点击对应的元素，完成数据的抓取。</p>
+<figure class="highlight py"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">main(province=<span class="string">'北京'</span>, city=<span class="string">'北京'</span>, provider=<span class="string">'中通'</span>)</span><br></pre></td></tr></table></figure>
+<p>整个工作过程演示参见 <a href="https://pan.baidu.com/s/1HD_fwdNHZqr1k1w3vzWyMQ" target="_blank" rel="noopener">百度网盘（提取码: kaun）</a>。抓取到的数据示例如下：</p>
+<p><img src="https://pic3.zhimg.com/80/v2-16533f8a8c8f62a9433df19e188dd305.png" alt=""></p>
+<h1 id="绘制简单的热点地图"><a href="#绘制简单的热点地图" class="headerlink" title="绘制简单的热点地图"></a>绘制简单的热点地图</h1><p>这里就需要使用关键的 <a href="https://pyecharts.org/" target="_blank" rel="noopener">pyecharts</a> 了，具体怎么安装和配置就不多说了，它有非常完善的中文文档，以及一些 Demo 可以学习。以下就是利用上述抓到的数据，做个简单的演示，看看这些快递网点的具体分布热点是怎么样的。</p>
+<p>我们需要切换到爬虫目录下，并启动 Jupter Notebook：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd path/to/kuaidi100/src</span><br><span class="line">jupter notebook # 启动服务</span><br></pre></td></tr></table></figure>
+<p>紧接着，选择 <code>src/heatmap.ipynb</code> 文件打开：<br><img src="https://pic2.zhimg.com/80/v2-af251174caa70eb0ca1f9285db7423ef.png" alt=""></p>
+<p>菜单栏 <code>Cell-&gt;Run All</code> 执行所有代码，可以看到简单的热点地图如下所示：<br><img src="https://pic4.zhimg.com/80/v2-1c41db550a36616d2df8808bfaa61540.png" alt=""></p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>至此，整个折腾的过程就完结咯。主要时间花费在确定爬重的方案，以及使用灵活的方式定位元素上。在实际测试中，也遇到一些小问题，并做了部分优化：</p>
+<ol>
+<li>比如某些情况下元素 <code>click</code> 会失败，这时为了保证爬虫的健壮性，需要做异常捕获；页面加载未完成时，可能无法查找到指定元素，导致爬虫程序挂了，这里就需要配置 Selenium 隐式等待 10s。</li>
+<li>为了方便观察 Selenium 正在操纵的元素，这里借助了 <code>driver.execute_script()</code> 的方式给选中的元素添加红色边框。</li>
+<li>另外，考虑到爬取频率过快，可能导致触发反爬策略，这里简单做了延迟等待（<code>time.sleep()</code>）。</li>
+</ol>
+<p>整体而言，写得比较简单，所以这里也就简单记录下。完整的代码仓库参见：<a href="https://gitee.com/ifaceless/kuaidi100-spider" target="_blank" rel="noopener">kuaidi100-spider</a>。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ol>
+<li><a href="https://pyecharts.org/#/zh-cn/geography_charts" target="_blank" rel="noopener">pyecharts 地理图标文档</a></li>
+<li><a href="https://blog.csdn.net/qq_31362537/article/details/90667814" target="_blank" rel="noopener">pyecharts 在地图上根据经纬度和量值，画出散点图/热力图</a></li>
+<li><a href="http://lbsyun.baidu.com/index.php?title=webapi/guide/webservice-geocoding" target="_blank" rel="noopener">百度地图文档</a></li>
+<li><a href="https://www.w3school.com.cn/xpath/xpath_syntax.asp" target="_blank" rel="noopener">XPath 语法</a></li>
+</ol>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2019/12/29/craw-dilivery-network-distribution/" title="快递网点抓取杂记">http://ifaceless.space/2019/12/29/craw-dilivery-network-distribution/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/爬虫/" rel="tag"><i class="fa fa-tag"></i> 爬虫</a>
+          
+            <a href="/tags/Python/" rel="tag"><i class="fa fa-tag"></i> Python</a>
+          
+            <a href="/tags/数据可视化/" rel="tag"><i class="fa fa-tag"></i> 数据可视化</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/12/19/understand-file-descriptor-and-file-description/" rel="next" title="理解文件描述符与文件句柄">
+                <i class="fa fa-chevron-left"></i> 理解文件描述符与文件句柄
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">36</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">13</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">63</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me#ifaceless.space" target="_blank" title="邮箱">
+                      邮箱</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://zhuanlan.zhihu.com/0xe8551ccb" target="_blank" title="专栏">
+                      专栏</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#确定方案"><span class="nav-number">2.</span> <span class="nav-text">确定方案</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#尝试-API-直接获取"><span class="nav-number">2.1.</span> <span class="nav-text">尝试 API 直接获取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#尝试分析网页请求，间接使用-API-请求"><span class="nav-number">2.2.</span> <span class="nav-text">尝试分析网页请求，间接使用 API 请求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#尝试分析网页结构，采用传统的方式抓取"><span class="nav-number">2.3.</span> <span class="nav-text">尝试分析网页结构，采用传统的方式抓取</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#准备开发环境"><span class="nav-number">3.</span> <span class="nav-text">准备开发环境</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#页面关键元素定位"><span class="nav-number">4.</span> <span class="nav-text">页面关键元素定位</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#小结"><span class="nav-number">4.1.</span> <span class="nav-text">小结</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#写代码"><span class="nav-number">5.</span> <span class="nav-text">写代码</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#核心爬虫类"><span class="nav-number">5.1.</span> <span class="nav-text">核心爬虫类</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#坐标查询"><span class="nav-number">5.2.</span> <span class="nav-text">坐标查询</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#控制抓取数据"><span class="nav-number">6.</span> <span class="nav-text">控制抓取数据</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#绘制简单的热点地图"><span class="nav-number">7.</span> <span class="nav-text">绘制简单的热点地图</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">9.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>
