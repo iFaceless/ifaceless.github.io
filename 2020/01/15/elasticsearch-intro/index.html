@@ -99,8 +99,9 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://pic3.zhimg.com/v2-8ea49800d9c7e5e4f147349ca3237593.png">
 <meta property="og:image" content="https://pic1.zhimg.com/v2-b165c6321a00d62c6c5ab2b2ac0994bb.png">
+<meta property="og:image" content="https://pic3.zhimg.com/v2-f8f2d20ee4cd5a1cc87c4ddba58f0078.jpg">
 <meta property="og:image" content="https://pic2.zhimg.com/v2-f2d85b3f20fc985bf5b47c8927c2afcf.jpg">
-<meta property="og:updated_time" content="2020-01-15T06:12:00.962Z">
+<meta property="og:updated_time" content="2020-01-15T06:44:16.554Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="初识 Elasticsearch">
 <meta name="twitter:description" content="引言在很多应用场景下，我们都需要搜索功能，不管是在 App 中还是网站中。搜索每时每刻都在发生，比如搜索喜欢的零食、好看的衣服、喜欢的文章、想要学习的课程等等。如今要为我们的应用添加搜索已经非常容易了，早期我们可以使用 MySQL 的 MyISAM 存储引擎来做全文本搜索支持，不过今天要说的 Elasticsearch 同样可以做到，而且更强大。简单来说，Elasticsearch 是一个分布式搜">
@@ -471,7 +472,8 @@
 <p>此外，还支持单独分词（individual terms）查询，我们可以执行短语搜索（phrase searches）、相似度搜索（similarity searches）和前缀搜索（prefix searches），甚至可以得到自动补全的建议。当然，对于地理位置或者数字类型的数据，ES 也可以提供高效的查询功能。</p>
 <h2 id="分析数据"><a href="#分析数据" class="headerlink" title="分析数据"></a>分析数据</h2><p>ES 允许我们执行<strong>聚合（aggregation）</strong>操作，从而对关键的指标、 增长趋势等有更为深刻的认识。ES 高效聚合的能力，可以让我们能够实时地分析和可视化数据。我们可以把搜索和聚合联合在一起使用，这样就可以在搜索、过滤文档的同时，对相同的结果进行分析。</p>
 <p>此外，ES 还提供了自动分析时序数据的功能，也就是利用机器学习来发现数据中的异常，不过这块属于高级功能了，有兴趣的话可以自行研究下~</p>
-<h1 id="高可用、可伸缩与可靠性"><a href="#高可用、可伸缩与可靠性" class="headerlink" title="高可用、可伸缩与可靠性"></a>高可用、可伸缩与可靠性</h1><p>既然是分布式搜索引擎，高可用和可伸缩的能力自然是 ES 必备技能。我们可以按需给集群增加服务器（节点）实现扩容。ES 会自动将数据和查询负载均衡到<strong>可用节点</strong>上，以实现伸缩和高可用。</p>
+<h1 id="高可用、可伸缩与可靠性"><a href="#高可用、可伸缩与可靠性" class="headerlink" title="高可用、可伸缩与可靠性"></a>高可用、可伸缩与可靠性</h1><p><img src="https://pic3.zhimg.com/v2-f8f2d20ee4cd5a1cc87c4ddba58f0078.jpg" alt=""></p>
+<p>既然是分布式搜索引擎，高可用和可伸缩的能力自然是 ES 必备技能。我们可以按需给集群增加服务器（节点）实现扩容。ES 会自动将数据和查询负载均衡到<strong>可用节点</strong>上，以实现伸缩和高可用。</p>
 <p>那么，ES 是如何存储和维护索引的呢？简单来说，每个 ES <strong>索引（index）</strong>其实是一个到多个<strong>物理分片（physical shards）</strong> 所组成的<strong>逻辑分组（logical group）</strong>；每个分片实际是<strong>自包含索引（self-contained index）</strong>。通过将索引放到多个分片存储，然后将分片分布到多个节点上，ES 可以为分片提供冗余备份，从而达到水平扩展和高可用的目的。随着集群的扩容（或缩容），ES 会自动再均衡，必要时也会合并分片。</p>
 <h2 id="关于分片（shards）"><a href="#关于分片（shards）" class="headerlink" title="关于分片（shards）"></a>关于分片（shards）</h2><p>分片分为两种类型：</p>
 <ol>
