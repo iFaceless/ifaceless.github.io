@@ -100,7 +100,7 @@
 <meta property="og:image" content="https://pic3.zhimg.com/v2-8ea49800d9c7e5e4f147349ca3237593.png">
 <meta property="og:image" content="https://pic1.zhimg.com/v2-b165c6321a00d62c6c5ab2b2ac0994bb.png">
 <meta property="og:image" content="https://pic2.zhimg.com/v2-f2d85b3f20fc985bf5b47c8927c2afcf.jpg">
-<meta property="og:updated_time" content="2020-01-15T06:10:34.563Z">
+<meta property="og:updated_time" content="2020-01-15T06:12:00.962Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="初识 Elasticsearch">
 <meta name="twitter:description" content="引言在很多应用场景下，我们都需要搜索功能，不管是在 App 中还是网站中。搜索每时每刻都在发生，比如搜索喜欢的零食、好看的衣服、喜欢的文章、想要学习的课程等等。如今要为我们的应用添加搜索已经非常容易了，早期我们可以使用 MySQL 的 MyISAM 存储引擎来做全文本搜索支持，不过今天要说的 Elasticsearch 同样可以做到，而且更强大。简单来说，Elasticsearch 是一个分布式搜">
@@ -452,7 +452,7 @@
 </ol>
 <p>默认设置下，ES 会为文档中的每个字段建立索引，并且每个字段都会匹配专门优化的数据结构以达到高效存储和快速搜索的目的。比如：文本使用<strong>倒排索引</strong>，数字和地理位置使用 <a href="https://www.shenyanchao.cn/blog/2018/12/04/lucene-bkd/" target="_blank" rel="noopener">BKD 树</a>。</p>
 <p>ES 支持 schema-less，这样我们就不用为每个字段显式指定索引方式。当我们启用动态映射（dynamic mapping）时（这个是默认设置），ES 会自动检测到新增字段，自动将文档中的 bool 值、浮点数、整数、日期、字符串等映射成合适的 ES 数据类型。</p>
-<p>当然，某些情况下，我们可能想要关闭动态映射的功能，这时可以自定义映射规则，从而控制每个字段存储和索引的方式。自定义映射带可让我们：</p>
+<p>当然，某些情况下，我们可能想要关闭动态映射的功能，这时可以自定义映射规则，从而控制每个字段存储和索引的方式。自定义映射带可以：</p>
 <ol>
 <li>区分全文本字符串字段和精确匹配的字符串字段；</li>
 <li>执行特定语言的文本分析；</li>
