@@ -97,7 +97,7 @@
 <meta property="og:site_name" content="黑白之院">
 <meta property="og:description" content="引言async-std 旨在简化异步编程，由于是模拟 Rust 标准库接口，所以熟悉标准库的话，使用起来也会非常舒服。目前 async-std 给我们提供了很多接口：文件系统、网络、计时器等等；它还提供了一个 task 模型，有点类似 Rust 标准库中的 thread 模块。此外，还有 async/await 风格的 Mutex 原语。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-01-20T10:32:19.410Z">
+<meta property="og:updated_time" content="2020-01-21T02:07:35.711Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Rust async-std 入门">
 <meta name="twitter:description" content="引言async-std 旨在简化异步编程，由于是模拟 Rust 标准库接口，所以熟悉标准库的话，使用起来也会非常舒服。目前 async-std 给我们提供了很多接口：文件系统、网络、计时器等等；它还提供了一个 task 模型，有点类似 Rust 标准库中的 thread 模块。此外，还有 async/await 风格的 Mutex 原语。">
@@ -419,7 +419,7 @@
 <p>Futures 是对<strong>计算</strong>的抽象，它们描述了「做什么（what）」，但是与「在哪儿（where）」、「什么时候（when）」执行是分开的。因此，我们的目标是将代码打散成小段的、可组合的行为，这样可以作为系统的一部分执行。接下来我们来看看什么是<strong>计算</strong>（compute things），并找到可以抽象的地方。</p>
 <h2 id="Send-和-Sync"><a href="#Send-和-Sync" class="headerlink" title="Send 和 Sync"></a>Send 和 Sync</h2><p>Rust 安全并发中有两个重要的抽象（Markers）：<code>Send</code> 和 <code>Sync</code>。下面来看看简单的介绍：</p>
 <ul>
-<li><code>Send</code> 标记的数据类型是可以安全地从一个计算（computation）<strong>转移到（moved）</strong>另外一个并发计算（所以权也同样被转移了，发送方将不能再访问它）。</li>
+<li><code>Send</code> 标记的数据类型是可以安全地从一个计算（computation）<strong>转移到（moved）</strong>另外一个并发计算（所有权也同样被转移了，发送方将不能再访问它）。</li>
 <li><code>Sync</code> 是指我们可以在并发环境中<strong>共享（sharing）</strong>数据。</li>
 </ul>
 <p>以上没有使用 <code>thread</code> 即线程这样的字眼，而是使用了抽象的 <code>computation</code>。<code>Send</code> 和 <code>Sync</code> 最强大的特点在于它为我们减轻了知道共享什么的负担。在实现时，我们只需要知道对于相应的数据类型采用什么分享方式即可。</p>
