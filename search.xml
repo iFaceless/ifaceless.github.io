@@ -227,8 +227,8 @@
         <category>系统设计</category>
       </categories>
       <tags>
-        <tag>事务</tag>
         <tag>《数据密集型应用设计》</tag>
+        <tag>事务</tag>
       </tags>
   </entry>
   <entry>
@@ -296,8 +296,8 @@
       <tags>
         <tag>前端</tag>
         <tag>JavaScript</tag>
-        <tag>React</tag>
         <tag>Redux</tag>
+        <tag>React</tag>
       </tags>
   </entry>
   <entry>
