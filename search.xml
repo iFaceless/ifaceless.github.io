@@ -9,8 +9,8 @@
       </categories>
       <tags>
         <tag>Go</tag>
-        <tag>PingCAP</tag>
         <tag>Rust</tag>
+        <tag>PingCAP</tag>
         <tag>分布式系统</tag>
         <tag>存储系统</tag>
       </tags>
@@ -100,8 +100,8 @@
       </categories>
       <tags>
         <tag>Go</tag>
-        <tag>Redis</tag>
         <tag>跳表</tag>
+        <tag>Redis</tag>
       </tags>
   </entry>
   <entry>
