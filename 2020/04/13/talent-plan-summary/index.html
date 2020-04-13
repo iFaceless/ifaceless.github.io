@@ -1,0 +1,934 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Go,PingCAP,Rust,分布式系统,存储系统,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言随着移动互联网、物联网、云计算以及未来 5G 技术场景的应用拓展，相关应用的数据规模也在不断增长，面临的存储压力越发明显。在此背景下，传统的单机 MySQL 数据库已经无法轻松应付，即便以分库分表的方式应对，也依然存在扩展性较差、可伸缩能力不足、自动化运维能力不足等问题。伴随着 Google 内部的分布式数据库 Spanner 和 F1 的设计思想开放，PingCAP 公司在 2015 年受到">
+<meta name="keywords" content="Go,PingCAP,Rust,分布式系统,存储系统">
+<meta property="og:type" content="article">
+<meta property="og:title" content="PingCAP Talent Plan 课程介绍">
+<meta property="og:url" content="http://ifaceless.space/2020/04/13/talent-plan-summary/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言随着移动互联网、物联网、云计算以及未来 5G 技术场景的应用拓展，相关应用的数据规模也在不断增长，面临的存储压力越发明显。在此背景下，传统的单机 MySQL 数据库已经无法轻松应付，即便以分库分表的方式应对，也依然存在扩展性较差、可伸缩能力不足、自动化运维能力不足等问题。伴随着 Google 内部的分布式数据库 Spanner 和 F1 的设计思想开放，PingCAP 公司在 2015 年受到">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pic4.zhimg.com/v2-c752ea0558eed832482ebfc32708aeb1.jpg">
+<meta property="og:image" content="https://pic4.zhimg.com/v2-2ae2e76368fd0f0cdf08042f7d195029.jpg">
+<meta property="og:updated_time" content="2020-04-13T10:40:05.357Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="PingCAP Talent Plan 课程介绍">
+<meta name="twitter:description" content="引言随着移动互联网、物联网、云计算以及未来 5G 技术场景的应用拓展，相关应用的数据规模也在不断增长，面临的存储压力越发明显。在此背景下，传统的单机 MySQL 数据库已经无法轻松应付，即便以分库分表的方式应对，也依然存在扩展性较差、可伸缩能力不足、自动化运维能力不足等问题。伴随着 Google 内部的分布式数据库 Spanner 和 F1 的设计思想开放，PingCAP 公司在 2015 年受到">
+<meta name="twitter:image" content="https://pic4.zhimg.com/v2-c752ea0558eed832482ebfc32708aeb1.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2020/04/13/talent-plan-summary/">
+
+
+
+
+
+  <title>PingCAP Talent Plan 课程介绍 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2020/04/13/talent-plan-summary/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">PingCAP Talent Plan 课程介绍</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-13T14:24:31+08:00">
+                2020-04-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/分布式系统/" itemprop="url" rel="index">
+                    <span itemprop="name">分布式系统</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.2k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  4
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>随着移动互联网、物联网、云计算以及未来 5G 技术场景的应用拓展，相关应用的数据规模也在不断增长，面临的存储压力越发明显。在此背景下，传统的单机 MySQL 数据库已经无法轻松应付，即便以分库分表的方式应对，也依然存在扩展性较差、可伸缩能力不足、自动化运维能力不足等问题。伴随着 Google 内部的分布式数据库 Spanner 和 F1 的设计思想开放，<a href="https://www.pingcap.com" target="_blank" rel="noopener">PingCAP</a> 公司在 2015 年受到相应的启发后开发了 <a href="https://book.tidb.io/" target="_blank" rel="noopener">TiDB</a> 数据库，历经将近五年的迭代，目前它已经成为开源社区非常知名的 NewSQL 数据库代表了，并且已经在<a href="https://pingcap.com/cases-cn/" target="_blank" rel="noopener">诸多知名企业中得到了部署和应用</a>。</p>
+<p>在正式引入 PingCAP Talent Plan 系列课程介绍前，有必要对 TiDB 有所了解。以下将要介绍的内容包括：</p>
+<ol>
+<li>TiDB 是什么？</li>
+<li>TiDB 的核心组件有哪些？</li>
+<li>为什么会诞生 Talent Plan 课程？</li>
+<li>Talent Plan 课程内容是什么？</li>
+</ol>
+<h1 id="初识-TiDB"><a href="#初识-TiDB" class="headerlink" title="初识 TiDB"></a>初识 TiDB</h1><p>从官网上得知，TiDB 是一款真正意义上的分布式关系型数据库，并且高度兼容 MySQL 协议，这也为我们迁移广泛基于 MySQL 的应用奠定了基础。下面来看看它主要有哪些特性呢？</p>
+<ol>
+<li>支持 OLTP + OLAP 的混合场景，是一款 HTAP（Hybrid Transactional/Analytical Processing） 融合型数据库产品；</li>
+<li>支持分布式事务（乐观事务+悲观事务模型均支持）；</li>
+<li>高可用，具备故障自动恢复能力；</li>
+<li>易于伸缩，TiDB 和 TiKV 均可水平扩展，支持海量数据存储；</li>
+<li>TiDB 4.0 全面拥抱云原生，提供了非常多的部署方式，同时为了方便本地部署测试，<a href="https://github.com/pingcap-incubator/tiup" target="_blank" rel="noopener">tiup</a> 工具的诞生，也为像笔者这样的小白用户铺平了道路。</li>
+</ol>
+<h2 id="核心组件"><a href="#核心组件" class="headerlink" title="核心组件"></a>核心组件</h2><p><img src="https://pic4.zhimg.com/v2-c752ea0558eed832482ebfc32708aeb1.jpg" alt=""></p>
+<p><a href="https://book.tidb.io/session1/chapter1/tidb-architecture.html" target="_blank" rel="noopener">TiDB in Action</a> 中对于 TiDB 的整体架构有详细的描述。概括来说，TiDB 的整体架构清晰易懂，包括三个核心组件：</p>
+<ul>
+<li><a href="https://github.com/pingcap/tidb" target="_blank" rel="noopener">TiDB</a>：此为 SQL 层，即无状态计算层。负责 SQL 解析、优化，并生成分布式执行计划。实际的数据请求会发送给底层的存储引擎 TiKV。具体可以阅读 <a href="https://book.tidb.io/session1/chapter3/tidb-computing.html" target="_blank" rel="noopener">谈计算</a> 了解更多细节。</li>
+<li><a href="https://github.com/pingcap/tikv" target="_blank" rel="noopener">TiKV</a>：此为存储引擎层，本身是一个支持分布式事务的 KV 数据库。TiFlash 是列式存储引擎，主要是针对分析型场景查询而设计。 具体可以阅读 <a href="https://book.tidb.io/session1/chapter2/tidb-storage.html" target="_blank" rel="noopener">说存储</a> 和 <a href="https://book.tidb.io/session1/chapter9/tiflash-architecture.html" target="_blank" rel="noopener">TiFlash 架构原理</a> 了解更多细节。</li>
+<li><a href="https://github.com/pingcap/pd" target="_blank" rel="noopener">PD</a>：全称为 Placement Driver，它负责整个 TiDB 集群的元信息管理、存储节点访问自动负载均衡调度、分布式事务 ID 分配等，可以看成整个集群的大脑。可以阅读 <a href="https://book.tidb.io/session1/chapter4/scheduling-overview.html" target="_blank" rel="noopener">讲调度</a> 了解更多细节。</li>
+</ul>
+<h2 id="更多学习资源"><a href="#更多学习资源" class="headerlink" title="更多学习资源"></a>更多学习资源</h2><p>TiDB 的社区资源相当丰富，在 PingCAP 官网中可以看到很多学习资源，笔者简单整理了下，传送门如下：</p>
+<ol>
+<li><a href="https://pingcap.com/docs-cn/stable/how-to/get-started/deploy-tidb-from-docker-compose/" target="_blank" rel="noopener">快速入门</a>；</li>
+<li><a href="https://pingcap.com/blog-cn/tidb-best-practice/" target="_blank" rel="noopener">最佳实践</a>；</li>
+<li><a href="https://pingcap.com/docs-cn/stable/reference/tools/user-guide/" target="_blank" rel="noopener">周边工具</a>；</li>
+<li><a href="https://pingcap.com/blog-cn/#DM-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB" target="_blank" rel="noopener">DM 源码解读</a>；</li>
+<li><a href="https://pingcap.com/blog-cn/#TiDB-Binlog-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB" target="_blank" rel="noopener">TiDB Binglog 源码解读</a>；</li>
+<li><a href="https://pingcap.com/blog-cn/#TiDB-%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB" target="_blank" rel="noopener">TiDB 源码解读</a>；</li>
+<li><a href="https://pingcap.com/blog-cn/#TiKV-%E6%BA%90%E7%A0%81%E8%A7%A3%E6%9E%90" target="_blank" rel="noopener">TiKV 源码解读</a>；</li>
+<li><a href="https://university.pingcap.com/" target="_blank" rel="noopener">PingCAP University</a>；</li>
+<li><a href="https://tikv.org/deep-dive/introduction/" target="_blank" rel="noopener">深入 TiKV</a>。</li>
+</ol>
+<h1 id="跃跃欲试"><a href="#跃跃欲试" class="headerlink" title="跃跃欲试"></a>跃跃欲试</h1><p>如果对于分布式系统，尤其是分布式存储系统感兴趣的话，那么跟着 PingCAP 推出的系列课程学习并参与到开源项目中，一定会有很多收获。不过面对如此庞大的系统，想要深入了解其原理并能够读懂源码还是有些门槛的。好在有很多官方的源码解读博客可以学习~</p>
+<p>不过在实际学习中还是遇到一些困难，比如编程语言（Go 和 Rust）实践不足，分布式系统理论和实践结合存在鸿沟等。所以，PingCAP 官方推出了 Talent Plan 课程，分为 TiDB 方向和 TiKV 方向。由于笔者对于 Rust 语言的了解仅仅浮于表面，实践不多，刚好 Talent Plan 提供了这样的机会，可以从 0 到 1 设计并实现一个分布式存储系统。在完成这个系列课程学习后，也能让我们更好地理解 TiDB 和 TiKV，并且在尝试阅读它们的源码时，也不至于一头雾水啦~</p>
+<p>在 GitHub <a href="https://github.com/pingcap/talent-plan" target="_blank" rel="noopener">talent-plan</a> 仓库中可以看到关于这个系列课程的介绍。为了便于快速了解课程大纲，画了一个思维导图如下（笔者主要关注的是 Rust 部分）：</p>
+<p><img src="https://pic4.zhimg.com/v2-2ae2e76368fd0f0cdf08042f7d195029.jpg" alt=""></p>
+<h1 id="上车，走吧"><a href="#上车，走吧" class="headerlink" title="上车，走吧"></a>上车，走吧</h1><p>接下来，笔者将按照 Talent Plan 安排的课程循序渐进地学习，并在学习中做一些笔记，以便随时复习，欢迎围观交流~</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://www.pingcap.com" target="_blank" rel="noopener">PingCAP 官网</a></li>
+<li><a href="https://book.tidb.io/" target="_blank" rel="noopener">TiDB in Action</a></li>
+<li><a href="https://studygolang.com/articles/21947" target="_blank" rel="noopener">我们是如何设计 Rust &amp; 分布式存储教程的？ | Talent Plan 背后的故事</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2020/04/13/talent-plan-summary/" title="PingCAP Talent Plan 课程介绍">http://ifaceless.space/2020/04/13/talent-plan-summary/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Go/" rel="tag"><i class="fa fa-tag"></i> Go</a>
+          
+            <a href="/tags/PingCAP/" rel="tag"><i class="fa fa-tag"></i> PingCAP</a>
+          
+            <a href="/tags/Rust/" rel="tag"><i class="fa fa-tag"></i> Rust</a>
+          
+            <a href="/tags/分布式系统/" rel="tag"><i class="fa fa-tag"></i> 分布式系统</a>
+          
+            <a href="/tags/存储系统/" rel="tag"><i class="fa fa-tag"></i> 存储系统</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/01/20/rust-async-std-intro/" rel="next" title="Rust async-std 入门">
+                <i class="fa fa-chevron-left"></i> Rust async-std 入门
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">39</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">70</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me#ifaceless.space" target="_blank" title="邮箱">
+                      邮箱</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://zhuanlan.zhihu.com/0xe8551ccb" target="_blank" title="专栏">
+                      专栏</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://draveness.me/" title="Draveness's Blog" target="_blank">Draveness's Blog</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#初识-TiDB"><span class="nav-number">2.</span> <span class="nav-text">初识 TiDB</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#核心组件"><span class="nav-number">2.1.</span> <span class="nav-text">核心组件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#更多学习资源"><span class="nav-number">2.2.</span> <span class="nav-text">更多学习资源</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#跃跃欲试"><span class="nav-number">3.</span> <span class="nav-text">跃跃欲试</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#上车，走吧"><span class="nav-number">4.</span> <span class="nav-text">上车，走吧</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>
