@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[Talent Plan 之 Rust 网络编程实践入门]]></title>
+    <url>%2F2020%2F04%2F15%2Ftalent-plan-rust-network-programming-intro%2F</url>
+    <content type="text"><![CDATA[引言本节将开始「Talent Plan 之 Rust 网络编程实践」系列课程学习啦，该系列课程的最终目标是使用 Rust 语言编写一个高性能的单机日志类型（log-structured） key/value 存储服务，分为客户端和服务端两个部分，并使用自定义的协议进行通信，能够使用命令行进行操作。 需要注意的是，该系列课程并非面向初级编程爱好者。参与该系列课程学习和实践前，最好已经有过其它语言编程经验，并且对 Rust 语言有基本了解，写过一些 Rust 代码。笔者强烈建议阅读 The Rust Book 或者《Rust 编程之道》这样的书籍来打好基础。Rust 中引入的所有权、生命周期等概念需要转变思维来理解它，才能更好地领悟到这门语言的精髓。 大纲以下是 Rust 网络编程实践课程大纲，总共分为六个部分（最后一个部分还没完成），循序渐进地引导 Rust 爱好者阅读一些博客，掌握最佳编程实践，通过不断实践来加深对这门语言的理解。 学习姿势GitHub talent-plan 仓库中存放了课程中安排的编程项目，位于 /rust/projects 目录下。这里的每一个项目都是基于前一个项目进行改造的，在每个项目中都会增量应用一些新的 Rust 知识，比如学习引入第三方 crates，使用标准网络库，使用多线程编程改进服务性能等。 在进行每个项目实践之前，会有一个针对性的 Building Block，可以看成是一些预备知识。在预备知识中，会针对和接下来要实践的项目有关的话题，提供一些阅读材料和练习题，在阅读完成后可以通过练习题巩固下学习到的知识，这样在进行项目实践时会更加得心应手，提升效率。 开发环境准备我们可以通过 rustup 管理 Rust 版本及相关的工具链。如果还没有安装 Rust 编译器，可以通过下面的命令行完成（Linux 或者 macOS 环境）： 1$ curl https://sh.rustup.rs -sSf | sh rustup 工具会为我们安装最新稳定版本的 Rust 编译器。之后也可以通过 rustup update 进行版本更新，或者使用 rustup self uninstall 完成 Rust 编译器和 rustup 卸载。详细操作不再赘述，可参见 Rust Getting Started。 下面笔者将要安利两款神器级插件，便于提升 Rust 编程体验。早期的 Rust IDE 支持比较差，明显没有其它语言在 IDE 中编程的体验舒服（笔者曾经在 Clion 中尝试 Rust 插件，但是效果欠佳）。不过社区一直都在努力改进这一点，下面介绍下笔者的开发环境，仅供参考，目前用起来还挺舒服的。 代码编辑器：Visual Studio Code 插件： rust-analyzer：这个是用来替代 RLS（Rust Language Server）的实验产品，目标是提供更加优秀的 IDE 功能支持。目前虽然处于 alpha 阶段，不过相对已有的其它插件，已经非常实用了。支持代码自动补齐、文档提示、函数实现跳转、main 函数识别、单元测试识别等。推荐使用~ TabNine：这是一款智能代码自动补全工具，采用深度学习技术加速代码编写，支持主流编程语言。值得一提的是，TabNine 本身是使用 Rust 编写，所以它的很多付费功能都是对 Rust 语言开放的，所以尽管使用吧。 关于调试掌握调试技能，对于排查程序问题非常有帮助。那么如何在 Visual Studio Code 中调试我们的 Rust 项目呢？下面将以一个简单的例子来演示下如何进行调试。 首先，在工程目录下新建一个示例项目 cargo new miao，然后输入如下代码，然后执行 cargo build，生成的可执行文件位于 target/debug 目录下。 1234567891011121314151617181920212223242526fn main() &#123; assert_eq!(binary_search(vec![1, 2, 3, 4, 5, 8], 10), -1); assert_eq!(binary_search(vec![1, 2, 3, 4, 5, 8], 1), 0);&#125;fn binary_search(nums: Vec&lt;i32&gt;, target: i32) -&gt; i32 &#123; if nums.len() == 0 &#123; return -1; &#125; let mut left = 0; let mut right = nums.len() - 1; while left &lt; right &#123; let mid = left + (right - left) / 2; if nums[mid] == target &#123; return mid as i32; &#125; else if nums[mid] &lt; target &#123; left = mid + 1; &#125; else &#123; right = mid - 1; &#125; &#125; -1&#125; 接下来，点击 vscode 左侧工具栏中的「调试」按钮，并且点击「create a launch.json file」按钮，创建启动配置文件。在弹出的候选框中选择「C++ (GDB/LLDB)」。 紧接着，编辑生成的 .vscode/launch.json 文件，修改其中的程序启动配置，即 configurations.program 指向可执行文件 ${workspaceFolder}/target/debug/miao。 接下来，在代码中添加断点，然后执行 cargo build（默认会以 debug 模式构建），最后启动调试即可。 当然，也可以使用命令行工具 rust-lldb 执行调试，感兴趣的话，可以前往 Rust LLDB 调试入门指北 了解更多细节。 小节本节对「Talent Plan 之 Rust 网络编程实践」系列课程进行了简单介绍，了解课程的具体安排，并在最后给出了 Rust 开发环境搭建的一些参考。从下一节开始，将按照上述大纲，从第一部分开始学习~]]></content>
+      <categories>
+        <category>Rust</category>
+      </categories>
+      <tags>
+        <tag>Rust</tag>
+        <tag>系统编</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[PingCAP Talent Plan 课程介绍]]></title>
     <url>%2F2020%2F04%2F13%2Ftalent-plan-summary%2F</url>
     <content type="text"><![CDATA[引言随着移动互联网、物联网、云计算以及未来 5G 技术场景的应用拓展，相关应用的数据规模也在不断增长，面临的存储压力越发明显。在此背景下，传统的单机 MySQL 数据库已经无法轻松应付，即便以分库分表的方式应对，也依然存在扩展性较差、可伸缩能力不足、自动化运维能力不足等问题。伴随着 Google 内部的分布式数据库 Spanner 和 F1 的设计思想开放，PingCAP 公司在 2015 年受到相应的启发后开发了 TiDB 数据库，历经将近五年的迭代，目前它已经成为开源社区非常知名的 NewSQL 数据库代表了，并且已经在诸多知名企业中得到了部署和应用。 在正式引入 PingCAP Talent Plan 系列课程介绍前，有必要对 TiDB 有所了解。以下将要介绍的内容包括： TiDB 是什么？ TiDB 的核心组件有哪些？ 为什么会诞生 Talent Plan 课程？ Talent Plan 课程内容是什么？ 初识 TiDB从官网上得知，TiDB 是一款真正意义上的分布式关系型数据库，并且高度兼容 MySQL 协议，这也为我们迁移广泛基于 MySQL 的应用奠定了基础。下面来看看它主要有哪些特性呢？ 支持 OLTP + OLAP 的混合场景，是一款 HTAP（Hybrid Transactional/Analytical Processing） 融合型数据库产品； 支持分布式事务（乐观事务+悲观事务模型均支持）； 高可用，具备故障自动恢复能力； 易于伸缩，TiDB 和 TiKV 均可水平扩展，支持海量数据存储； TiDB 4.0 全面拥抱云原生，提供了非常多的部署方式，同时为了方便本地部署测试，tiup 工具的诞生，也为像笔者这样的小白用户铺平了道路。 核心组件 TiDB in Action 中对于 TiDB 的整体架构有详细的描述。概括来说，TiDB 的整体架构清晰易懂，包括三个核心组件： TiDB：此为 SQL 层，即无状态计算层。负责 SQL 解析、优化，并生成分布式执行计划。实际的数据请求会发送给底层的存储引擎 TiKV。具体可以阅读 谈计算 了解更多细节。 TiKV：此为存储引擎层，本身是一个支持分布式事务的 KV 数据库。TiFlash 是列式存储引擎，主要是针对分析型场景查询而设计。 具体可以阅读 说存储 和 TiFlash 架构原理 了解更多细节。 PD：全称为 Placement Driver，它负责整个 TiDB 集群的元信息管理、存储节点访问自动负载均衡调度、分布式事务 ID 分配等，可以看成整个集群的大脑。可以阅读 讲调度 了解更多细节。 更多学习资源TiDB 的社区资源相当丰富，在 PingCAP 官网中可以看到很多学习资源，笔者简单整理了下，传送门如下： 快速入门； 最佳实践； 周边工具； DM 源码解读； TiDB Binglog 源码解读； TiDB 源码解读； TiKV 源码解读； PingCAP University； 深入 TiKV。 跃跃欲试如果对于分布式系统，尤其是分布式存储系统感兴趣的话，那么跟着 PingCAP 推出的系列课程学习并参与到开源项目中，一定会有很多收获。不过面对如此庞大的系统，想要深入了解其原理并能够读懂源码还是有些门槛的。好在有很多官方的源码解读博客可以学习~ 不过在实际学习中还是遇到一些困难，比如编程语言（Go 和 Rust）实践不足，分布式系统理论和实践结合存在鸿沟等。所以，PingCAP 官方推出了 Talent Plan 课程，分为 TiDB 方向和 TiKV 方向。由于笔者对于 Rust 语言的了解仅仅浮于表面，实践不多，刚好 Talent Plan 提供了这样的机会，可以从 0 到 1 设计并实现一个分布式存储系统。在完成这个系列课程学习后，也能让我们更好地理解 TiDB 和 TiKV，并且在尝试阅读它们的源码时，也不至于一头雾水啦~ 在 GitHub talent-plan 仓库中可以看到关于这个系列课程的介绍。为了便于快速了解课程大纲，画了一个思维导图如下（笔者主要关注的是 Rust 部分）： 上车，走吧接下来，笔者将按照 Talent Plan 安排的课程循序渐进地学习，并在学习中做一些笔记，以便随时复习，欢迎围观交流~ 参考 PingCAP 官网 TiDB in Action 我们是如何设计 Rust &amp; 分布式存储教程的？ | Talent Plan 背后的故事]]></content>
@@ -254,8 +266,8 @@
         <category>系统设计</category>
       </categories>
       <tags>
-        <tag>事务</tag>
         <tag>《数据密集型应用设计》</tag>
+        <tag>事务</tag>
       </tags>
   </entry>
   <entry>

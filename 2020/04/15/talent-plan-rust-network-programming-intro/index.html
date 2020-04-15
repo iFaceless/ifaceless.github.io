@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Rust,系统编,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言本节将开始「Talent Plan 之 Rust 网络编程实践」系列课程学习啦，该系列课程的最终目标是使用 Rust 语言编写一个高性能的单机日志类型（log-structured） key/value 存储服务，分为客户端和服务端两个部分，并使用自定义的协议进行通信，能够使用命令行进行操作。 需要注意的是，该系列课程并非面向初级编程爱好者。参与该系列课程学习和实践前，最好已经有过其它语言编程">
+<meta name="keywords" content="Rust,系统编">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Talent Plan 之 Rust 网络编程实践入门">
+<meta property="og:url" content="http://ifaceless.space/2020/04/15/talent-plan-rust-network-programming-intro/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言本节将开始「Talent Plan 之 Rust 网络编程实践」系列课程学习啦，该系列课程的最终目标是使用 Rust 语言编写一个高性能的单机日志类型（log-structured） key/value 存储服务，分为客户端和服务端两个部分，并使用自定义的协议进行通信，能够使用命令行进行操作。 需要注意的是，该系列课程并非面向初级编程爱好者。参与该系列课程学习和实践前，最好已经有过其它语言编程">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://pic2.zhimg.com/v2-5aba4ddbef921406caef406e0a03ca04.jpg">
+<meta property="og:image" content="https://pic4.zhimg.com/v2-70d3d483b71301424965477e588c2f9b.jpg">
+<meta property="og:image" content="https://pic4.zhimg.com/v2-7301528605ef12c77b1de47aabcc273a.jpg">
+<meta property="og:image" content="https://pic4.zhimg.com/v2-164ce2e487a7dc66404363f10f875fc0.jpg">
+<meta property="og:image" content="https://pic2.zhimg.com/v2-49c9a51d574b00d4f27ade589fd6ca4b.jpg">
+<meta property="og:updated_time" content="2020-04-15T08:12:10.642Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Talent Plan 之 Rust 网络编程实践入门">
+<meta name="twitter:description" content="引言本节将开始「Talent Plan 之 Rust 网络编程实践」系列课程学习啦，该系列课程的最终目标是使用 Rust 语言编写一个高性能的单机日志类型（log-structured） key/value 存储服务，分为客户端和服务端两个部分，并使用自定义的协议进行通信，能够使用命令行进行操作。 需要注意的是，该系列课程并非面向初级编程爱好者。参与该系列课程学习和实践前，最好已经有过其它语言编程">
+<meta name="twitter:image" content="https://pic2.zhimg.com/v2-5aba4ddbef921406caef406e0a03ca04.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://ifaceless.space/2020/04/15/talent-plan-rust-network-programming-intro/">
+
+
+
+
+
+  <title>Talent Plan 之 Rust 网络编程实践入门 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2020/04/15/talent-plan-rust-network-programming-intro/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Talent Plan 之 Rust 网络编程实践入门</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-15T11:35:00+08:00">
+                2020-04-15
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Rust/" itemprop="url" rel="index">
+                    <span itemprop="name">Rust</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.4k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  5
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>本节将开始「Talent Plan 之 Rust 网络编程实践」系列课程学习啦，该系列课程的最终目标是使用 Rust 语言编写一个高性能的单机日志类型（log-structured） key/value 存储服务，分为客户端和服务端两个部分，并使用自定义的协议进行通信，能够使用命令行进行操作。</p>
+<p><em>需要注意的是，该系列课程并非面向初级编程爱好者。参与该系列课程学习和实践前，最好已经有过其它语言编程经验，并且对 Rust 语言有基本了解，写过一些 Rust 代码。笔者强烈建议阅读 The Rust Book 或者《Rust 编程之道》这样的书籍来打好基础。Rust 中引入的<strong>所有权、生命周期</strong>等概念需要转变思维来理解它，才能更好地领悟到这门语言的精髓。</em></p>
+<h1 id="大纲"><a href="#大纲" class="headerlink" title="大纲"></a>大纲</h1><p>以下是 Rust 网络编程实践课程大纲，总共分为六个部分（最后一个部分还没完成），循序渐进地引导 Rust 爱好者阅读一些博客，掌握最佳编程实践，通过不断实践来加深对这门语言的理解。</p>
+<p><img src="https://pic2.zhimg.com/v2-5aba4ddbef921406caef406e0a03ca04.jpg" alt="课程大纲"></p>
+<h1 id="学习姿势"><a href="#学习姿势" class="headerlink" title="学习姿势"></a>学习姿势</h1><p>GitHub <a href="https://github.com/pingcap/talent-plan/" target="_blank" rel="noopener">talent-plan</a> 仓库中存放了课程中安排的编程项目，位于 <code>/rust/projects</code> 目录下。这里的每一个项目都是基于前一个项目进行改造的，在每个项目中都会增量应用一些新的 Rust 知识，比如学习引入第三方 crates，使用标准网络库，使用多线程编程改进服务性能等。</p>
+<p>在进行每个项目实践之前，会有一个针对性的 Building Block，可以看成是一些预备知识。在预备知识中，会针对和接下来要实践的项目有关的话题，提供一些阅读材料和练习题，在阅读完成后可以通过练习题巩固下学习到的知识，这样在进行项目实践时会更加得心应手，提升效率。</p>
+<h1 id="开发环境准备"><a href="#开发环境准备" class="headerlink" title="开发环境准备"></a>开发环境准备</h1><p>我们可以通过 <code>rustup</code> 管理 Rust 版本及相关的工具链。如果还没有安装 Rust 编译器，可以通过下面的命令行完成（Linux 或者 macOS 环境）：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> curl https://sh.rustup.rs -sSf | sh</span><br></pre></td></tr></table></figure>
+<p><code>rustup</code> 工具会为我们安装最新稳定版本的 Rust 编译器。之后也可以通过 <code>rustup update</code> 进行版本更新，或者使用 <code>rustup self uninstall</code> 完成 Rust 编译器和 <code>rustup</code> 卸载。详细操作不再赘述，可参见 <a href="https://doc.rust-lang.org/book/ch01-00-getting-started.html" target="_blank" rel="noopener">Rust Getting Started</a>。</p>
+<p>下面笔者将要安利两款神器级插件，便于提升 Rust 编程体验。早期的 Rust IDE 支持比较差，明显没有其它语言在 IDE 中编程的体验舒服（笔者曾经在 Clion 中尝试 Rust 插件，但是效果欠佳）。不过社区一直都在努力改进这一点，下面介绍下笔者的开发环境，仅供参考，目前用起来还挺舒服的。</p>
+<ol>
+<li>代码编辑器：Visual Studio Code</li>
+<li>插件：<ol>
+<li><a href="https://github.com/rust-analyzer/rust-analyzer" target="_blank" rel="noopener">rust-analyzer</a>：这个是用来替代 RLS（Rust Language Server）的实验产品，目标是提供更加优秀的 IDE 功能支持。目前虽然处于 alpha 阶段，不过相对已有的其它插件，已经非常实用了。支持代码自动补齐、文档提示、函数实现跳转、<code>main</code> 函数识别、单元测试识别等。推荐使用~</li>
+<li><a href="https://www.tabnine.com/" target="_blank" rel="noopener">TabNine</a>：这是一款智能代码自动补全工具，采用深度学习技术加速代码编写，支持主流编程语言。值得一提的是，TabNine 本身是使用 Rust 编写，所以它的很多付费功能都是对 Rust 语言开放的，所以尽管使用吧。</li>
+</ol>
+</li>
+</ol>
+<p><img src="https://pic4.zhimg.com/v2-70d3d483b71301424965477e588c2f9b.jpg" alt="开发环境"></p>
+<h1 id="关于调试"><a href="#关于调试" class="headerlink" title="关于调试"></a>关于调试</h1><p>掌握调试技能，对于排查程序问题非常有帮助。那么如何在 Visual Studio Code 中调试我们的 Rust 项目呢？下面将以一个简单的例子来演示下如何进行调试。</p>
+<p>首先，在工程目录下新建一个示例项目 <code>cargo new miao</code>，然后输入如下代码，然后执行 <code>cargo build</code>，生成的可执行文件位于 <code>target/debug</code> 目录下。</p>
+<figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    <span class="built_in">assert_eq!</span>(binary_search(<span class="built_in">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">8</span>], <span class="number">10</span>), -<span class="number">1</span>);</span><br><span class="line">    <span class="built_in">assert_eq!</span>(binary_search(<span class="built_in">vec!</span>[<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">8</span>], <span class="number">1</span>), <span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">binary_search</span></span>(nums: <span class="built_in">Vec</span>&lt;<span class="built_in">i32</span>&gt;, target: <span class="built_in">i32</span>) -&gt; <span class="built_in">i32</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> nums.len() == <span class="number">0</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> left = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> right = nums.len() - <span class="number">1</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">while</span> left &lt; right &#123;</span><br><span class="line">        <span class="keyword">let</span> mid = left + (right - left) / <span class="number">2</span>;</span><br><span class="line">        <span class="keyword">if</span> nums[mid] == target &#123;</span><br><span class="line">            <span class="keyword">return</span> mid <span class="keyword">as</span> <span class="built_in">i32</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> nums[mid] &lt; target &#123;</span><br><span class="line">            left = mid + <span class="number">1</span>;</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            right = mid - <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    -<span class="number">1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>接下来，点击 vscode 左侧工具栏中的「调试」按钮，并且点击「create a launch.json file」按钮，创建启动配置文件。在弹出的候选框中选择「C++ (GDB/LLDB)」。<br><img src="https://pic4.zhimg.com/v2-7301528605ef12c77b1de47aabcc273a.jpg" alt="create launch json"></p>
+<p>紧接着，编辑生成的 <code>.vscode/launch.json</code> 文件，修改其中的程序启动配置，即 <code>configurations.program</code> 指向可执行文件 <code>${workspaceFolder}/target/debug/miao</code>。<br><img src="https://pic4.zhimg.com/v2-164ce2e487a7dc66404363f10f875fc0.jpg" alt="edit launch json"></p>
+<p>接下来，在代码中添加断点，然后执行 <code>cargo build</code>（默认会以 debug 模式构建），最后启动调试即可。</p>
+<p><img src="https://pic2.zhimg.com/v2-49c9a51d574b00d4f27ade589fd6ca4b.jpg" alt=""></p>
+<p>当然，也可以使用命令行工具 <code>rust-lldb</code> 执行调试，感兴趣的话，可以前往 <a href="http://blog.dreamfever.me/2019/01/13/rust-lldb-debug-guide/" target="_blank" rel="noopener">Rust LLDB 调试入门指北</a> 了解更多细节。</p>
+<h1 id="小节"><a href="#小节" class="headerlink" title="小节"></a>小节</h1><p>本节对「Talent Plan 之 Rust 网络编程实践」系列课程进行了简单介绍，了解课程的具体安排，并在最后给出了 Rust 开发环境搭建的一些参考。从下一节开始，将按照上述大纲，从第一部分开始学习~</p>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="http://ifaceless.space/2020/04/15/talent-plan-rust-network-programming-intro/" title="Talent Plan 之 Rust 网络编程实践入门">http://ifaceless.space/2020/04/15/talent-plan-rust-network-programming-intro/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Rust/" rel="tag"><i class="fa fa-tag"></i> Rust</a>
+          
+            <a href="/tags/系统编/" rel="tag"><i class="fa fa-tag"></i> 系统编</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/13/talent-plan-summary/" rel="next" title="PingCAP Talent Plan 课程介绍">
+                <i class="fa fa-chevron-left"></i> PingCAP Talent Plan 课程介绍
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">41</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">71</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me#ifaceless.space" target="_blank" title="邮箱">
+                      邮箱</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://zhuanlan.zhihu.com/0xe8551ccb" target="_blank" title="专栏">
+                      专栏</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://draveness.me/" title="Draveness's Blog" target="_blank">Draveness's Blog</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#大纲"><span class="nav-number">2.</span> <span class="nav-text">大纲</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#学习姿势"><span class="nav-number">3.</span> <span class="nav-text">学习姿势</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#开发环境准备"><span class="nav-number">4.</span> <span class="nav-text">开发环境准备</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#关于调试"><span class="nav-number">5.</span> <span class="nav-text">关于调试</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小节"><span class="nav-number">6.</span> <span class="nav-text">小节</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>
