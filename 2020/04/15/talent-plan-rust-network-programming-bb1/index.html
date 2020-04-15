@@ -76,7 +76,7 @@
 
 
 
-  <meta name="keywords" content="TiDB,">
+  <meta name="keywords" content="Rust,网络,">
 
 
 
@@ -89,20 +89,21 @@
 
 
 
-<meta name="description" content="引言TiDB Academy 提供了 TiDB 的视频学习资源，方便了解这个全新的数据库。在学习过程中，做了这个系列的笔记，方便后期回顾。">
-<meta name="keywords" content="TiDB">
+<meta name="description" content="引言如何编写命令行（CLI）程序Write a Good CLI Program 一文中讲解在使用 Rust 编写命令行程序的最佳实践，核心知识点包括：  使用 clap crates 编写可以接收复杂参数的命令行程序； 使用 .env 编写应用配置，使用 dotenv 读取环境变量； 错误处理： panic 会导致程序直接退出，退出没有错误码，适合在脚本中使用； 函数返回 Result，可以根据">
+<meta name="keywords" content="Rust,网络">
 <meta property="og:type" content="article">
-<meta property="og:title" content="TiDB 学习笔记（二）">
-<meta property="og:url" content="http://ifaceless.space/2018/12/02/tidb-academy-learning-notes-part-two/index.html">
+<meta property="og:title" content="talent-plan-rust-network-programming-bb1">
+<meta property="og:url" content="http://ifaceless.space/2020/04/15/talent-plan-rust-network-programming-bb1/index.html">
 <meta property="og:site_name" content="黑白之院">
-<meta property="og:description" content="引言TiDB Academy 提供了 TiDB 的视频学习资源，方便了解这个全新的数据库。在学习过程中，做了这个系列的笔记，方便后期回顾。">
+<meta property="og:description" content="引言如何编写命令行（CLI）程序Write a Good CLI Program 一文中讲解在使用 Rust 编写命令行程序的最佳实践，核心知识点包括：  使用 clap crates 编写可以接收复杂参数的命令行程序； 使用 .env 编写应用配置，使用 dotenv 读取环境变量； 错误处理： panic 会导致程序直接退出，退出没有错误码，适合在脚本中使用； 函数返回 Result，可以根据">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://pingcap.com/images/docs-cn/tidb-architecture.png">
-<meta property="og:updated_time" content="2019-06-24T00:49:40.533Z">
+<meta property="og:image" content="https://pic2.zhimg.com/v2-a698281fe54bda54f57384136240d31f.jpg">
+<meta property="og:image" content="https://pic1.zhimg.com/v2-45af0e6f82aaed8d96e23e3674469a6a.jpg">
+<meta property="og:updated_time" content="2020-04-15T10:22:29.716Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="TiDB 学习笔记（二）">
-<meta name="twitter:description" content="引言TiDB Academy 提供了 TiDB 的视频学习资源，方便了解这个全新的数据库。在学习过程中，做了这个系列的笔记，方便后期回顾。">
-<meta name="twitter:image" content="https://pingcap.com/images/docs-cn/tidb-architecture.png">
+<meta name="twitter:title" content="talent-plan-rust-network-programming-bb1">
+<meta name="twitter:description" content="引言如何编写命令行（CLI）程序Write a Good CLI Program 一文中讲解在使用 Rust 编写命令行程序的最佳实践，核心知识点包括：  使用 clap crates 编写可以接收复杂参数的命令行程序； 使用 .env 编写应用配置，使用 dotenv 读取环境变量； 错误处理： panic 会导致程序直接退出，退出没有错误码，适合在脚本中使用； 函数返回 Result，可以根据">
+<meta name="twitter:image" content="https://pic2.zhimg.com/v2-a698281fe54bda54f57384136240d31f.jpg">
 
 
 
@@ -132,13 +133,13 @@
 
 
 
-  <link rel="canonical" href="http://ifaceless.space/2018/12/02/tidb-academy-learning-notes-part-two/">
+  <link rel="canonical" href="http://ifaceless.space/2020/04/15/talent-plan-rust-network-programming-bb1/">
 
 
 
 
 
-  <title>TiDB 学习笔记（二） | 黑白之院</title>
+  <title>talent-plan-rust-network-programming-bb1 | 黑白之院</title>
   
 
 
@@ -285,7 +286,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2018/12/02/tidb-academy-learning-notes-part-two/">
+    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2020/04/15/talent-plan-rust-network-programming-bb1/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -302,7 +303,7 @@
 
         
         
-          <h2 class="post-title" itemprop="name headline">TiDB 学习笔记（二）</h2>
+          <h2 class="post-title" itemprop="name headline">talent-plan-rust-network-programming-bb1</h2>
         
 
         <div class="post-meta">
@@ -314,8 +315,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2018-12-02T14:49:44+08:00">
-                2018-12-02
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-15T17:00:54+08:00">
+                2020-04-15
               </time>
             
 
@@ -337,8 +338,8 @@
               
               
                 <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
-                  <a href="/categories/数据库/" itemprop="url" rel="index">
-                    <span itemprop="name">数据库</span>
+                  <a href="/categories/Rust/" itemprop="url" rel="index">
+                    <span itemprop="name">Rust</span>
                   </a>
                 </span>
 
@@ -370,7 +371,7 @@
                   <span class="post-meta-item-text">字数统计&#58;</span>
                 
                 <span title="字数统计">
-                  846
+                  446
                 </span>
               
 
@@ -386,7 +387,7 @@
                   <span class="post-meta-item-text">阅读时长 &asymp;</span>
                 
                 <span title="阅读时长">
-                  3
+                  1
                 </span>
               
             </div>
@@ -407,55 +408,31 @@
       
 
       
-        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p><a href="https://pingcap.com/tidb-academy" target="_blank" rel="noopener">TiDB Academy</a> 提供了 TiDB 的视频学习资源，方便了解这个全新的数据库。在学习过程中，做了这个系列的笔记，方便后期回顾。</p>
-<a id="more"></a>
-<h1 id="TiDB-平台"><a href="#TiDB-平台" class="headerlink" title="TiDB 平台"></a>TiDB 平台</h1><p><img src="https://pingcap.com/images/docs-cn/tidb-architecture.png" alt="TiDB Arch"></p>
-<p>虽说 TiDB 在上层实现了 MySQL 协议，但并不代表它们使用的是相同的源码。之所叫做 TiDB 平台，是因为它是由三个核心部分构成：</p>
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><h1 id="如何编写命令行（CLI）程序"><a href="#如何编写命令行（CLI）程序" class="headerlink" title="如何编写命令行（CLI）程序"></a>如何编写命令行（CLI）程序</h1><p><a href="https://qiita.com/tigercosmos/items/678f39b1209e60843cc3" target="_blank" rel="noopener">Write a Good CLI Program</a> 一文中讲解在使用 Rust 编写命令行程序的最佳实践，核心知识点包括：</p>
 <ol>
-<li><p><strong>TiKV</strong>: </p>
-<ol>
-<li>兼容 ACID 的存储层</li>
-<li>支持分布式 Key Value 存储</li>
-<li>支持横向扩展、原生多副本机制保证高可用</li>
-<li>自动基于范围分区，每个范围都称为一个 <code>Region</code>。<code>Region</code> 会根据需要自动调整，默认最大为 96MB</li>
-<li>每个 <code>Region</code> 默认有三分拷贝，使用 Raft 保证一致性</li>
-<li>当然，实际上 TiKV 也可以独立部署，并直接使用它的 KV API 访问数据</li>
+<li>使用 <code>clap crates</code> 编写可以接收复杂参数的命令行程序；</li>
+<li>使用 <code>.env</code> 编写应用配置，使用 <code>dotenv</code> 读取环境变量；</li>
+<li>错误处理：<ol>
+<li>panic 会导致程序直接退出，退出没有错误码，适合在脚本中使用；</li>
+<li>函数返回 <code>Result</code>，可以根据是否为 <code>Error</code> 来决定后续操作；</li>
+<li>可以为自定义 <code>Error</code> 实现 <code>fmt::Display</code> trait，方便格式化输出错误消息。</li>
 </ol>
 </li>
-<li><p><strong>TiDB</strong>:</p>
-<ol>
-<li>支持 MySQL 协议，自动转换成分布式请求到 TiKV</li>
-<li>无状态、不存储数据</li>
-<li>易于水平扩展，高可用</li>
-<li>类似一个 Translator，但是这里面的协同处理很有意思</li>
+<li>使用 <code>println!()</code> 会打印到标准输出中，而使用 <code>eprintln!()</code> 则是标准错误；</li>
+<li>使用 <code>std::process::exit(1)</code> 设置程序退出码（Exit Code）。</li>
 </ol>
-</li>
-<li><p><strong>Placement Driver (PD)</strong>:</p>
-<ol>
-<li>集群管理器，就是整个平台的大脑</li>
-<li>管理 TiKV Region 负载均衡（比如热点检查、Region 合并）</li>
-<li>元数据管理（如 SQL DDL）</li>
-<li>时间同步（分布式事务中很关键的一点就是准确的时间）</li>
-</ol>
-</li>
-<li><p><strong>可选组件：TiSpark</strong>:</p>
-<ol>
-<li>越过 SQL 层，让 Apache Spark 直接与 TiKV 连接</li>
-<li>方便执行复杂的 OLAP 查询、机器学习任务</li>
-</ol>
-</li>
-</ol>
-<p>从 TiDB 平台这种组件化的架构设计可以看到，你可以直接通过不同的方式（Spark、MySQL 协议、Key-Value API 等）访问同样的数据（位于 TiKV 中），而无需走传统的 ETL (Extract-Transform-Load) 那套。</p>
-<p>有了 TiDB 平台，就可以同时支持 OLAP 和 OLTP 场景了（传说中的混合模式 HATP）。这样，原先我们用 MySQL 应付 OLTP 场景，用 Hadoop, HBase 或者 Cassandra 等应付 OLAP 场景，都可以在 TiDB 这一个平台完成，从而简化设计和维护工作（真的吗？）。</p>
-<h1 id="KOST-技术栈"><a href="#KOST-技术栈" class="headerlink" title="KOST 技术栈"></a>KOST 技术栈</h1><p>KOST 是指：<strong>Kubernetes</strong>, <strong>Operator</strong>, <strong>Spark</strong> 和 <strong>TiDB</strong>。K8S 可以帮助我们一步到位搞定 TiDB 平台部署。</p>
-<h1 id="在-GKE-上部署-TiDB"><a href="#在-GKE-上部署-TiDB" class="headerlink" title="在 GKE 上部署 TiDB"></a>在 GKE 上部署 TiDB</h1><p>直接看这个<a href="https://console.cloud.google.com/cloudshell/open?git_repo=https://github.com/pingcap/tidb-academy-labs&amp;tutorial=1-tidb-overview.md" target="_blank" rel="noopener">部署教程</a>。</p>
-<p>一些提示：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">1. Watch tidb-cluster up and running</span><br><span class="line">   watch kubectl get pods --namespace tidb -l app.kubernetes.io/instance=tidb -o wide</span><br><span class="line">2. List services in the tidb-cluster</span><br><span class="line">   kubectl get services --namespace tidb -l app.kubernetes.io/instance=tidb</span><br><span class="line">3. Wait until tidb-initializer pod becomes completed</span><br><span class="line">   watch kubectl get po --namespace tidb  -l app.kubernetes.io/component=tidb-initializer</span><br><span class="line">4. Get the TiDB password</span><br><span class="line">   PASSWORD=$(kubectl get secret -n tidb demo-tidb -o jsonpath="&#123;.data.password&#125;" | base64 -d | awk '&#123;print $6&#125;')</span><br><span class="line">   echo $&#123;PASSWORD&#125;</span><br><span class="line">5. Access tidb-cluster using the MySQL client</span><br><span class="line">   kubectl port-forward -n tidb svc/demo-tidb 4000:4000 &amp;</span><br><span class="line">   mysql -h 127.0.0.1 -P 4000 -u root -D test -p</span><br><span class="line">6. View monitor dashboard for TiDB cluster</span><br><span class="line">   kubectl port-forward -n tidb svc/demo-grafana 3000:3000</span><br><span class="line">   Open browser at http://localhost:3000. The default username and password is admin/admin.</span><br></pre></td></tr></table></figure>
-<p>使用 MySQL 客户端连接：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">kubectl run -n tidb mysql-client --rm \</span><br><span class="line">    -i --tty --image mysql -- mysql \</span><br><span class="line">    -P 4000 -u root -h $(kubectl get \</span><br><span class="line">    svc demo-tidb -n tidb --output \</span><br><span class="line">    json | jq -r &apos;.spec.clusterIP&apos;)</span><br></pre></td></tr></table></figure>
-<p>或者建立隧道：</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">kubectl -n tidb port-forward \</span><br><span class="line">    demo-tidb-0 4000:4000 &amp;&gt;/dev/null \</span><br><span class="line">    &amp;</span><br><span class="line"></span><br><span class="line">sudo apt-get install -y mysql-client \</span><br><span class="line">    &amp;&amp;</span><br><span class="line">mysql -h 127.0.0.1 -u root -P 4000</span><br></pre></td></tr></table></figure>
-<p>貌似现在根本连接不上了，总是提示需要密码，但是默认不是不需要密码的吗？看来需要重建集群，然后首次进入就设置好密码。用户管理参考：<a href="https://github.com/pingcap/docs/blob/master/sql/user-account-management.md" target="_blank" rel="noopener">TiDB User Account Management</a></p>
+<p>所谓的命令行程序（Command Line Interface, CLI）就是指在终端中运行的程序，没有图形界面。比如 <code>ls</code>, <code>ps</code> 等。在 <a href="https://github.com/agarrharr/awesome-cli-apps" target="_blank" rel="noopener">awesome-cli-apps</a> 中收集了很多比较优质的命令行程序。</p>
+<p>题外话：作者安利了一个叫作 <a href="https://github.com/ogham/exa" target="_blank" rel="noopener">exa</a> 命令行程序，使用 Rust 语言实现，可以替代 <code>ls</code> 命令。笔者试用了一下，体验不错。</p>
+<p><img src="https://pic2.zhimg.com/v2-a698281fe54bda54f57384136240d31f.jpg" alt="exa"></p>
+<h2 id="命令行程序长什么样"><a href="#命令行程序长什么样" class="headerlink" title="命令行程序长什么样"></a>命令行程序长什么样</h2><p>一般而言，命令行程序使用形式如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$./program [args] [flags] [options]</span><br></pre></td></tr></table></figure>
+<p>可以通过 <code>-h</code> 或 <code>--help</code> 查看更多帮助信息。</p>
+<p><img src="https://pic1.zhimg.com/v2-45af0e6f82aaed8d96e23e3674469a6a.jpg" alt="exa-help"></p>
+<h2 id="动手实践"><a href="#动手实践" class="headerlink" title="动手实践"></a>动手实践</h2><p>大神 Linus Torvalds 曾言「Talk is cheap, show me the code」。那么，接下来就通过一个简单的示例把 <a href="https://qiita.com/tigercosmos/items/678f39b1209e60843cc3" target="_blank" rel="noopener">Write a Good CLI Program</a> 中提到的内容实践一遍。</p>
+<p>笔者曾经使用 Rust 实现过一个小工具 <a href="https://github.com/iFaceless/gic" target="_blank" rel="noopener">gic</a>，它可以生成风格一致的 git commit message，还算实用。接下来实现一个简单版本 <code>gitc</code> 仅供参考。</p>
+<h3 id="核心源码"><a href="#核心源码" class="headerlink" title="核心源码"></a>核心源码</h3><figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="配置文件"><a href="#配置文件" class="headerlink" title="配置文件"></a>配置文件</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
+<h3 id="运行示例"><a href="#运行示例" class="headerlink" title="运行示例"></a>运行示例</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"></span><br></pre></td></tr></table></figure>
 
       
     </div>
@@ -476,7 +453,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://ifaceless.space/2018/12/02/tidb-academy-learning-notes-part-two/" title="TiDB 学习笔记（二）">http://ifaceless.space/2018/12/02/tidb-academy-learning-notes-part-two/</a>
+    <a href="http://ifaceless.space/2020/04/15/talent-plan-rust-network-programming-bb1/" title="talent-plan-rust-network-programming-bb1">http://ifaceless.space/2020/04/15/talent-plan-rust-network-programming-bb1/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -491,7 +468,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/TiDB/" rel="tag"><i class="fa fa-tag"></i> TiDB</a>
+            <a href="/tags/Rust/" rel="tag"><i class="fa fa-tag"></i> Rust</a>
+          
+            <a href="/tags/网络/" rel="tag"><i class="fa fa-tag"></i> 网络</a>
           
         </div>
       
@@ -504,8 +483,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2018/12/02/tidb-academy-learning-notes-part-one/" rel="next" title="TiDB 学习笔记（一）">
-                <i class="fa fa-chevron-left"></i> TiDB 学习笔记（一）
+              <a href="/2020/04/15/talent-plan-rust-network-programming-intro/" rel="next" title="Talent Plan 之 Rust 网络编程实践入门">
+                <i class="fa fa-chevron-left"></i> Talent Plan 之 Rust 网络编程实践入门
               </a>
             
           </div>
@@ -513,10 +492,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2018/12/02/thoughts-about-writing-restful-api-in-go/" rel="prev" title="Go 语言编写 RESTful API 的一些思考">
-                Go 语言编写 RESTful API 的一些思考 <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
@@ -704,7 +679,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TiDB-平台"><span class="nav-number">2.</span> <span class="nav-text">TiDB 平台</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#KOST-技术栈"><span class="nav-number">3.</span> <span class="nav-text">KOST 技术栈</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#在-GKE-上部署-TiDB"><span class="nav-number">4.</span> <span class="nav-text">在 GKE 上部署 TiDB</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何编写命令行（CLI）程序"><span class="nav-number">2.</span> <span class="nav-text">如何编写命令行（CLI）程序</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#命令行程序长什么样"><span class="nav-number">2.1.</span> <span class="nav-text">命令行程序长什么样</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动手实践"><span class="nav-number">2.2.</span> <span class="nav-text">动手实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#核心源码"><span class="nav-number">2.2.1.</span> <span class="nav-text">核心源码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#配置文件"><span class="nav-number">2.2.2.</span> <span class="nav-text">配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#运行示例"><span class="nav-number">2.2.3.</span> <span class="nav-text">运行示例</span></a></li></ol></li></ol></li></ol></div>
             
 
           </div>
