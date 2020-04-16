@@ -101,7 +101,7 @@
 <meta property="og:image" content="https://pic1.zhimg.com/v2-45af0e6f82aaed8d96e23e3674469a6a.jpg">
 <meta property="og:image" content="https://pic3.zhimg.com/v2-e741a4abc0867427cd6820286e12d969.jpg">
 <meta property="og:image" content="https://pic1.zhimg.com/v2-d173912444db3aa0126d574d5d3b26c9.jpg">
-<meta property="og:updated_time" content="2020-04-16T10:34:18.297Z">
+<meta property="og:updated_time" content="2020-04-16T10:45:42.718Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Talent Plan 之 Rust 网络编程实践（一）：预备知识">
 <meta name="twitter:description" content="引言今天开始「Rust 网络编程实践」的第一部分中的预备知识学习，并最终能编写出一个简单的命令行工具。以下材料是今天需要阅读的：  The Cargo manifest format：了解 Cargo mainfest 文件格式； Cargo environment variables：了解 Cargo 环境变量； Rust API Guidelines: Documentation：了解 Rus">
@@ -418,6 +418,7 @@
 <li><a href="https://qiita.com/tigercosmos/items/678f39b1209e60843cc3" target="_blank" rel="noopener">Write a Good CLI Program</a>：学习如何编写命令行程序。</li>
 </ul>
 <p>接下来我们将依次完成上述材料学习，着重记录一些知识点，并在最后编写一个简单的命令行程序。</p>
+<a id="more"></a>
 <h1 id="Cargo-Manifest-文件格式"><a href="#Cargo-Manifest-文件格式" class="headerlink" title="Cargo Manifest 文件格式"></a>Cargo Manifest 文件格式</h1><p> 在使用 <code>cargo</code> 命令创建的项目中，都会存在一个 <code>cargo.toml</code> 文件，这也就是所谓的 manifest。一个简单的示例如下：</p>
  <figure class="highlight toml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">[package]</span></span><br><span class="line"><span class="attr">name</span> = <span class="string">"app"</span></span><br><span class="line"><span class="attr">version</span> = <span class="string">"0.1.0"</span></span><br><span class="line"><span class="attr">authors</span> = [<span class="string">"0xE8551CCB &lt;user@host&gt;"</span>]</span><br><span class="line"><span class="attr">edition</span> = <span class="string">"2018"</span></span><br><span class="line"></span><br><span class="line"><span class="section">[dependencies]</span></span><br><span class="line"><span class="attr">clap</span> = &#123;version = <span class="string">"2.33.0"</span>, features = [<span class="string">"yaml"</span>]&#125;</span><br><span class="line"><span class="attr">maplit</span> = <span class="string">"1.0.2"</span></span><br><span class="line"><span class="attr">lazy_static</span> = <span class="string">"1.4.0"</span></span><br><span class="line"><span class="attr">yaml-rust</span> = <span class="string">"0.3.5"</span></span><br></pre></td></tr></table></figure>
 <p><code>cargo.toml</code> 是由多个部分配置组成的，主要包括如下几个部分（详细定义请参考文档）：</p>
