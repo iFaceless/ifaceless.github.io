@@ -3,7 +3,7 @@
   <entry>
     <title><![CDATA[Talent Plan 之 Rust 网络编程实践（二）：预备知识]]></title>
     <url>%2F2020%2F04%2F21%2Ftalent-plan-rust-network-programming-bb2%2F</url>
-    <content type="text"><![CDATA[引言 材料阅读炫酷算法之日志结构存储Damn Cool Algorithms: Log structured storage 日志结构文件系统设计与实现Bitcask，高性能 &amp; 基于日志结构的 Key/Value 存储Rust 中的错误处理std::collections 文档学习std::io 文档学习练习题使用 serde 序列化和反序列化数据结构（JSON）使用 serde 序列化和反序列化数据结构（RON）使用 serde 序列化反序列化 1000 个数据结构（BSON）小结参考 PNA Rust — Building Blocks 2 What’s rustdoc]]></content>
+    <content type="text"><![CDATA[引言 材料阅读炫酷算法之日志结构存储Damn Cool Algorithms: Log structured storage 日志结构文件系统设计与实现Bitcask，高性能 &amp; 基于日志结构的 Key/Value 存储Rust 中的错误处理std::collections 文档学习std::io 文档学习练习题使用 serde 序列化和反序列化数据结构（JSON）使用 serde 序列化和反序列化数据结构（RON）使用 serde 序列化反序列化 1000 个数据结构（BSON）小结参考 PNA Rust — Building Blocks 2 What’s rustdoc 延伸阅读 What is the difference between a journaling vs a log structured file system? Journaling and Log-structured file systems]]></content>
       <categories>
         <category>Rust</category>
       </categories>
