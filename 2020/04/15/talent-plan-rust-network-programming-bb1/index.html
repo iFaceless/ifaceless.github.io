@@ -76,7 +76,7 @@
 
 
 
-  <meta name="keywords" content="Rust,网络,">
+  <meta name="keywords" content="Rust,网络编程,">
 
 
 
@@ -90,7 +90,7 @@
 
 
 <meta name="description" content="引言今天开始「Rust 网络编程实践」的第一部分中的预备知识学习，并最终能编写出一个简单的命令行工具。以下材料是今天需要阅读的：  The Cargo manifest format：了解 Cargo mainfest 文件格式； Cargo environment variables：了解 Cargo 环境变量； Rust API Guidelines: Documentation：了解 Rus">
-<meta name="keywords" content="Rust,网络">
+<meta name="keywords" content="Rust,网络编程">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Talent Plan 之 Rust 网络编程实践（一）：预备知识">
 <meta property="og:url" content="http://ifaceless.space/2020/04/15/talent-plan-rust-network-programming-bb1/index.html">
@@ -101,7 +101,7 @@
 <meta property="og:image" content="https://pic1.zhimg.com/v2-45af0e6f82aaed8d96e23e3674469a6a.jpg">
 <meta property="og:image" content="https://pic3.zhimg.com/v2-e741a4abc0867427cd6820286e12d969.jpg">
 <meta property="og:image" content="https://pic1.zhimg.com/v2-d173912444db3aa0126d574d5d3b26c9.jpg">
-<meta property="og:updated_time" content="2020-04-16T10:45:42.718Z">
+<meta property="og:updated_time" content="2020-04-21T03:17:02.232Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Talent Plan 之 Rust 网络编程实践（一）：预备知识">
 <meta name="twitter:description" content="引言今天开始「Rust 网络编程实践」的第一部分中的预备知识学习，并最终能编写出一个简单的命令行工具。以下材料是今天需要阅读的：  The Cargo manifest format：了解 Cargo mainfest 文件格式； Cargo environment variables：了解 Cargo 环境变量； Rust API Guidelines: Documentation：了解 Rus">
@@ -496,6 +496,9 @@
 <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> yml = load_yaml!(<span class="string">"cli.yml"</span>);</span><br><span class="line">    <span class="keyword">let</span> matches = make_cli_app(yml).get_matches();</span><br><span class="line">    <span class="keyword">let</span> commit_config = CommitConfig::from_cli_arg_matches(&amp;matches);</span><br><span class="line">    <span class="keyword">match</span> do_git_commit(&amp;commit_config) &#123;</span><br><span class="line">        <span class="literal">Ok</span>(_) =&gt; (),</span><br><span class="line">        <span class="literal">Err</span>(e) =&gt; &#123;</span><br><span class="line">            eprintln!(<span class="string">"Error: &#123;&#125;"</span>, e);</span><br><span class="line">            process::exit(<span class="number">1</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 <p>完成后，使用 <code>cargo build</code> 可以生成可执行文件，运行效果如下：<br><img src="https://pic3.zhimg.com/v2-e741a4abc0867427cd6820286e12d969.jpg" alt="gitc-help"><br><img src="https://pic1.zhimg.com/v2-d173912444db3aa0126d574d5d3b26c9.jpg" alt="gic-run"></p>
 <h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>本节预备知识主要学习了与 Cargo 有关的环境变量作用、<code>Cargo.toml</code> 中的元信息构成以及编写规范的 API 文档的方法，最后通过编写 <a href="https://github.com/iFaceless/talent-plan-projects/tree/master/gitc" target="_blank" rel="noopener">talent-plan-projects/gitc</a> 掌握了如何编写一个简单的命令行程序以及一些最佳实践。</p>
+<h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://github.com/pingcap/talent-plan/blob/master/rust/building-blocks/bb-1.md" target="_blank" rel="noopener">PNA Rust — Building Blocks 1</a></li>
+</ul>
 
       
     </div>
@@ -533,7 +536,7 @@
           
             <a href="/tags/Rust/" rel="tag"><i class="fa fa-tag"></i> Rust</a>
           
-            <a href="/tags/网络/" rel="tag"><i class="fa fa-tag"></i> 网络</a>
+            <a href="/tags/网络编程/" rel="tag"><i class="fa fa-tag"></i> 网络编程</a>
           
         </div>
       
@@ -555,6 +558,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/04/17/talent-plan-rust-network-programming-proj1/" rel="prev" title="Talent Plan 之 Rust 网络编程实践（二）：编写内存 KV 存储">
+                Talent Plan 之 Rust 网络编程实践（二）：编写内存 KV 存储 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -635,7 +642,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">42</span>
+                  <span class="site-state-item-count">44</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -657,7 +664,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">71</span>
+                  <span class="site-state-item-count">73</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>
@@ -742,7 +749,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cargo-Manifest-文件格式"><span class="nav-number">2.</span> <span class="nav-text">Cargo Manifest 文件格式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cargo-环境变量"><span class="nav-number">3.</span> <span class="nav-text">Cargo 环境变量</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Rust-程序文档编写"><span class="nav-number">4.</span> <span class="nav-text">Rust 程序文档编写</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何编写命令行（CLI）程序（Write-a-Good-CLI-Program）"><span class="nav-number">5.</span> <span class="nav-text">如何编写命令行（CLI）程序（Write a Good CLI Program）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#命令行程序长什么样"><span class="nav-number">5.1.</span> <span class="nav-text">命令行程序长什么样</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动手实践"><span class="nav-number">5.2.</span> <span class="nav-text">动手实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#定义命令行配置文件"><span class="nav-number">5.2.1.</span> <span class="nav-text">定义命令行配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注册-emoji-列表"><span class="nav-number">5.2.2.</span> <span class="nav-text">注册 emoji 列表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#构建命令行-App"><span class="nav-number">5.2.3.</span> <span class="nav-text">构建命令行 App</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#理解命令行参数并生成执行配置"><span class="nav-number">5.2.4.</span> <span class="nav-text">理解命令行参数并生成执行配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行-git-commit-命令"><span class="nav-number">5.2.5.</span> <span class="nav-text">执行 git commit 命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编写-main-函数"><span class="nav-number">5.2.6.</span> <span class="nav-text">编写 main 函数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小结"><span class="nav-number">6.</span> <span class="nav-text">小结</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cargo-Manifest-文件格式"><span class="nav-number">2.</span> <span class="nav-text">Cargo Manifest 文件格式</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Cargo-环境变量"><span class="nav-number">3.</span> <span class="nav-text">Cargo 环境变量</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Rust-程序文档编写"><span class="nav-number">4.</span> <span class="nav-text">Rust 程序文档编写</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#如何编写命令行（CLI）程序（Write-a-Good-CLI-Program）"><span class="nav-number">5.</span> <span class="nav-text">如何编写命令行（CLI）程序（Write a Good CLI Program）</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#命令行程序长什么样"><span class="nav-number">5.1.</span> <span class="nav-text">命令行程序长什么样</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#动手实践"><span class="nav-number">5.2.</span> <span class="nav-text">动手实践</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#定义命令行配置文件"><span class="nav-number">5.2.1.</span> <span class="nav-text">定义命令行配置文件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#注册-emoji-列表"><span class="nav-number">5.2.2.</span> <span class="nav-text">注册 emoji 列表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#构建命令行-App"><span class="nav-number">5.2.3.</span> <span class="nav-text">构建命令行 App</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#理解命令行参数并生成执行配置"><span class="nav-number">5.2.4.</span> <span class="nav-text">理解命令行参数并生成执行配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#执行-git-commit-命令"><span class="nav-number">5.2.5.</span> <span class="nav-text">执行 git commit 命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#编写-main-函数"><span class="nav-number">5.2.6.</span> <span class="nav-text">编写 main 函数</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小结"><span class="nav-number">6.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
