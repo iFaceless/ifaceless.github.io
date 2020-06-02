@@ -6,7 +6,7 @@
 
 
 <html class="theme-next mist use-motion" lang="zh-Hans">
-<head><meta name="generator" content="Hexo 3.8.0">
+<head><meta name="generator" content="Hexo 3.9.0">
   <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -93,7 +93,7 @@
 <meta name="keywords" content="Rust,网络编程,存储">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Talent Plan 之 Rust 网络编程实践（二）：编写内存 KV 存储">
-<meta property="og:url" content="http://ifaceless.space/2020/04/17/talent-plan-rust-network-programming-proj1/index.html">
+<meta property="og:url" content="/2020/04/17/talent-plan-rust-network-programming-proj1/index.html">
 <meta property="og:site_name" content="黑白之院">
 <meta property="og:description" content="引言经过 上一节 的学习，相信对于 Cargo、Rust API 文档编写规范、命令行工具编写都有了初步认识，没有掌握也没关系。本节将会继续深入学习和实践，我们将采用 测试驱动开发（Test-Driven Development, TDD） 的方式编写一个简单的内存 key-value 存储库，以及一个命令行工具用于接收和处理增删查命令，并且最终还要能够通过所有单元测试。">
 <meta property="og:locale" content="zh-Hans">
@@ -135,7 +135,7 @@
 
 
 
-  <link rel="canonical" href="http://ifaceless.space/2020/04/17/talent-plan-rust-network-programming-proj1/">
+  <link rel="canonical" href="/2020/04/17/talent-plan-rust-network-programming-proj1/">
 
 
 
@@ -288,7 +288,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2020/04/17/talent-plan-rust-network-programming-proj1/">
+    <link itemprop="mainEntityOfPage" href="/2020/04/17/talent-plan-rust-network-programming-proj1/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -410,7 +410,7 @@
       
 
       
-        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>经过 <a href="http://ifaceless.space/2020/04/15/talent-plan-rust-network-programming-bb1/">上一节</a> 的学习，相信对于 Cargo、Rust API 文档编写规范、命令行工具编写都有了初步认识，没有掌握也没关系。本节将会继续深入学习和实践，我们将采用 <a href="https://en.wikipedia.org/wiki/Test-driven_development" target="_blank" rel="noopener">测试驱动开发（Test-Driven Development, TDD）</a> 的方式编写一个简单的内存 key-value 存储库，以及一个命令行工具用于接收和处理增删查命令，并且最终还要能够通过所有单元测试。</p>
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>经过 <a href="http://ifaceless.space/2020/04/15/talent-plan-rust-network-programming-bb1/" target="_blank" rel="noopener">上一节</a> 的学习，相信对于 Cargo、Rust API 文档编写规范、命令行工具编写都有了初步认识，没有掌握也没关系。本节将会继续深入学习和实践，我们将采用 <a href="https://en.wikipedia.org/wiki/Test-driven_development" target="_blank" rel="noopener">测试驱动开发（Test-Driven Development, TDD）</a> 的方式编写一个简单的内存 key-value 存储库，以及一个命令行工具用于接收和处理增删查命令，并且最终还要能够通过所有单元测试。</p>
 <a id="more"></a>
 <p><strong>关键词</strong>：单元测试、<code>clap</code> 和 <code>structopt</code> crate、Cargo 环境变量、<code>clippy</code> 和 <code>rustfmt</code> 工具</p>
 <p><strong>目标</strong>：</p>
@@ -547,7 +547,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://ifaceless.space/2020/04/17/talent-plan-rust-network-programming-proj1/" title="Talent Plan 之 Rust 网络编程实践（二）：编写内存 KV 存储">http://ifaceless.space/2020/04/17/talent-plan-rust-network-programming-proj1/</a>
+    <a href="/2020/04/17/talent-plan-rust-network-programming-proj1/" title="Talent Plan 之 Rust 网络编程实践（二）：编写内存 KV 存储">/2020/04/17/talent-plan-rust-network-programming-proj1/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -672,7 +672,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">44</span>
+                  <span class="site-state-item-count">45</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -694,7 +694,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">73</span>
+                  <span class="site-state-item-count">75</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

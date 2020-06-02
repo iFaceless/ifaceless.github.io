@@ -6,7 +6,7 @@
 
 
 <html class="theme-next mist use-motion" lang="zh-Hans">
-<head><meta name="generator" content="Hexo 3.8.0">
+<head><meta name="generator" content="Hexo 3.9.0">
   <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -93,19 +93,19 @@
 <meta name="keywords" content="Go,标准库,源码学习,Context">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go 源码学习之 Context">
-<meta property="og:url" content="http://ifaceless.space/2019/08/02/go-context-intro/index.html">
+<meta property="og:url" content="/2019/08/02/go-context-intro/index.html">
 <meta property="og:site_name" content="黑白之院">
 <meta property="og:description" content="引言在一次排查某 HTTP 接口请求频繁因 context canceled 错误导致请求处理失败的问题期间，深入了解了下 Go 语言的 Context 实现。本文将首先介绍我们是如何排查诡异的 context canceled 产生原因（也就是在哪儿因为什么而导致取消的）；接下来将深入介绍 Context 诞生的目的、源码解析及应用场景等，便于更进一步加深对它的理解；最后我们也会谈及使用 Con">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://ifaceless.space/2019/08/02/go-context-intro/context-log.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/02/go-context-intro/context-tree.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/02/go-context-intro/conn-close-error.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/02/go-context-intro/context-cancel.png">
+<meta property="og:image" content="/2019/08/02/go-context-intro/context-log.png">
+<meta property="og:image" content="/2019/08/02/go-context-intro/context-tree.png">
+<meta property="og:image" content="/2019/08/02/go-context-intro/conn-close-error.png">
+<meta property="og:image" content="/2019/08/02/go-context-intro/context-cancel.png">
 <meta property="og:updated_time" content="2019-12-08T07:04:53.530Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Go 源码学习之 Context">
 <meta name="twitter:description" content="引言在一次排查某 HTTP 接口请求频繁因 context canceled 错误导致请求处理失败的问题期间，深入了解了下 Go 语言的 Context 实现。本文将首先介绍我们是如何排查诡异的 context canceled 产生原因（也就是在哪儿因为什么而导致取消的）；接下来将深入介绍 Context 诞生的目的、源码解析及应用场景等，便于更进一步加深对它的理解；最后我们也会谈及使用 Con">
-<meta name="twitter:image" content="http://ifaceless.space/2019/08/02/go-context-intro/context-log.png">
+<meta name="twitter:image" content="/2019/08/02/go-context-intro/context-log.png">
 
 
 
@@ -135,7 +135,7 @@
 
 
 
-  <link rel="canonical" href="http://ifaceless.space/2019/08/02/go-context-intro/">
+  <link rel="canonical" href="/2019/08/02/go-context-intro/">
 
 
 
@@ -288,7 +288,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/08/02/go-context-intro/">
+    <link itemprop="mainEntityOfPage" href="/2019/08/02/go-context-intro/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -488,7 +488,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://ifaceless.space/2019/08/02/go-context-intro/" title="Go 源码学习之 Context">http://ifaceless.space/2019/08/02/go-context-intro/</a>
+    <a href="/2019/08/02/go-context-intro/" title="Go 源码学习之 Context">/2019/08/02/go-context-intro/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -615,7 +615,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">44</span>
+                  <span class="site-state-item-count">45</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -637,7 +637,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">73</span>
+                  <span class="site-state-item-count">75</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

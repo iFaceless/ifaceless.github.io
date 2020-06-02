@@ -6,7 +6,7 @@
 
 
 <html class="theme-next mist use-motion" lang="zh-Hans">
-<head><meta name="generator" content="Hexo 3.8.0">
+<head><meta name="generator" content="Hexo 3.9.0">
   <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -76,7 +76,7 @@
 
 
 
-  <meta name="keywords" content="《数据密集型应用设计》,事务,">
+  <meta name="keywords" content="事务,《数据密集型应用设计》,">
 
 
 
@@ -90,22 +90,22 @@
 
 
 <meta name="description" content="引言由于数据存储期间，可能发生错误、故障的点特别多，比如网络中断、磁盘写满等，面对这些复杂的情况，应用层应付起来非常困难。所以就有了事务的概念，说道事务，我们最先能想到的就是：可以一次事务中将很多读写入操作打包成一个逻辑操作单元，整个事务不成功（Committed）便成仁（Rollback）。如果失败，应用层可根据情况安全地重试，不用担心部分写入的问题。">
-<meta name="keywords" content="《数据密集型应用设计》,事务">
+<meta name="keywords" content="事务,《数据密集型应用设计》">
 <meta property="og:type" content="article">
 <meta property="og:title" content="野猪🐗书读书笔记之事务">
-<meta property="og:url" content="http://ifaceless.space/2019/08/24/ddia-transaction/index.html">
+<meta property="og:url" content="/2019/08/24/ddia-transaction/index.html">
 <meta property="og:site_name" content="黑白之院">
 <meta property="og:description" content="引言由于数据存储期间，可能发生错误、故障的点特别多，比如网络中断、磁盘写满等，面对这些复杂的情况，应用层应付起来非常困难。所以就有了事务的概念，说道事务，我们最先能想到的就是：可以一次事务中将很多读写入操作打包成一个逻辑操作单元，整个事务不成功（Committed）便成仁（Rollback）。如果失败，应用层可根据情况安全地重试，不用担心部分写入的问题。">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://ifaceless.space/2019/08/24/ddia-transaction/mvvc.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/24/ddia-transaction/write-skew.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/24/ddia-transaction/procedure.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/24/ddia-transaction/collision-detection.png">
+<meta property="og:image" content="/2019/08/24/ddia-transaction/mvvc.png">
+<meta property="og:image" content="/2019/08/24/ddia-transaction/write-skew.png">
+<meta property="og:image" content="/2019/08/24/ddia-transaction/procedure.png">
+<meta property="og:image" content="/2019/08/24/ddia-transaction/collision-detection.png">
 <meta property="og:updated_time" content="2019-11-24T09:45:59.904Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="野猪🐗书读书笔记之事务">
 <meta name="twitter:description" content="引言由于数据存储期间，可能发生错误、故障的点特别多，比如网络中断、磁盘写满等，面对这些复杂的情况，应用层应付起来非常困难。所以就有了事务的概念，说道事务，我们最先能想到的就是：可以一次事务中将很多读写入操作打包成一个逻辑操作单元，整个事务不成功（Committed）便成仁（Rollback）。如果失败，应用层可根据情况安全地重试，不用担心部分写入的问题。">
-<meta name="twitter:image" content="http://ifaceless.space/2019/08/24/ddia-transaction/mvvc.png">
+<meta name="twitter:image" content="/2019/08/24/ddia-transaction/mvvc.png">
 
 
 
@@ -135,7 +135,7 @@
 
 
 
-  <link rel="canonical" href="http://ifaceless.space/2019/08/24/ddia-transaction/">
+  <link rel="canonical" href="/2019/08/24/ddia-transaction/">
 
 
 
@@ -288,7 +288,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/08/24/ddia-transaction/">
+    <link itemprop="mainEntityOfPage" href="/2019/08/24/ddia-transaction/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -706,7 +706,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://ifaceless.space/2019/08/24/ddia-transaction/" title="野猪🐗书读书笔记之事务">http://ifaceless.space/2019/08/24/ddia-transaction/</a>
+    <a href="/2019/08/24/ddia-transaction/" title="野猪🐗书读书笔记之事务">/2019/08/24/ddia-transaction/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -721,9 +721,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/《数据密集型应用设计》/" rel="tag"><i class="fa fa-tag"></i> 《数据密集型应用设计》</a>
-          
             <a href="/tags/事务/" rel="tag"><i class="fa fa-tag"></i> 事务</a>
+          
+            <a href="/tags/《数据密集型应用设计》/" rel="tag"><i class="fa fa-tag"></i> 《数据密集型应用设计》</a>
           
         </div>
       
@@ -829,7 +829,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">44</span>
+                  <span class="site-state-item-count">45</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -851,7 +851,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">73</span>
+                  <span class="site-state-item-count">75</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

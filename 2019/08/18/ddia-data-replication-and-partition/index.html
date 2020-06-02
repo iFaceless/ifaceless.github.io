@@ -6,7 +6,7 @@
 
 
 <html class="theme-next mist use-motion" lang="zh-Hans">
-<head><meta name="generator" content="Hexo 3.8.0">
+<head><meta name="generator" content="Hexo 3.9.0">
   <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -93,29 +93,29 @@
 <meta name="keywords" content="分布式数据库,数据复制,数据分区">
 <meta property="og:type" content="article">
 <meta property="og:title" content="野猪🐗书读书笔记之数据复制和分区">
-<meta property="og:url" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/index.html">
+<meta property="og:url" content="/2019/08/18/ddia-data-replication-and-partition/index.html">
 <meta property="og:site_name" content="黑白之院">
 <meta property="og:description" content="引言完成第一部分的数据系统基础学习后，就开始进入分布式数据系统的世界了。前面学习的内容主要是针对单节点的情况；然而，在现实中，我们需要考虑到系统的扩展性、容错性以及延迟性等，这就引入了分布式系统。分布式系统中通常会有很多个节点，复杂度自然也上来了。这个部分将主要学习数据系统的复制、分区、事务、一致性共识算法、以及分布式系统设计时的一些挑战等，这些知识都比较硬核，也非常有趣。所以，「上车，走吧~」">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/master-slave-replication.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/data-sync.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/read-after-write.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/monotonic-read.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/prefix-read.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/multi-master-nodes.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/repair-on-read.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/partition.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/partition-with-hash.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/secondary-index-on-doc.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/secondary-index-on-terms.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/rebalance.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/route-policies.png">
-<meta property="og:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/zookeeper-save-meta.png">
+<meta property="og:image" content="/2019/08/18/ddia-data-replication-and-partition/master-slave-replication.png">
+<meta property="og:image" content="/2019/08/18/ddia-data-replication-and-partition/data-sync.png">
+<meta property="og:image" content="/2019/08/18/ddia-data-replication-and-partition/read-after-write.png">
+<meta property="og:image" content="/2019/08/18/ddia-data-replication-and-partition/monotonic-read.png">
+<meta property="og:image" content="/2019/08/18/ddia-data-replication-and-partition/prefix-read.png">
+<meta property="og:image" content="/2019/08/18/ddia-data-replication-and-partition/multi-master-nodes.png">
+<meta property="og:image" content="/2019/08/18/ddia-data-replication-and-partition/repair-on-read.png">
+<meta property="og:image" content="/2019/08/18/ddia-data-replication-and-partition/partition.png">
+<meta property="og:image" content="/2019/08/18/ddia-data-replication-and-partition/partition-with-hash.png">
+<meta property="og:image" content="/2019/08/18/ddia-data-replication-and-partition/secondary-index-on-doc.png">
+<meta property="og:image" content="/2019/08/18/ddia-data-replication-and-partition/secondary-index-on-terms.png">
+<meta property="og:image" content="/2019/08/18/ddia-data-replication-and-partition/rebalance.png">
+<meta property="og:image" content="/2019/08/18/ddia-data-replication-and-partition/route-policies.png">
+<meta property="og:image" content="/2019/08/18/ddia-data-replication-and-partition/zookeeper-save-meta.png">
 <meta property="og:updated_time" content="2019-11-24T09:45:59.823Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="野猪🐗书读书笔记之数据复制和分区">
 <meta name="twitter:description" content="引言完成第一部分的数据系统基础学习后，就开始进入分布式数据系统的世界了。前面学习的内容主要是针对单节点的情况；然而，在现实中，我们需要考虑到系统的扩展性、容错性以及延迟性等，这就引入了分布式系统。分布式系统中通常会有很多个节点，复杂度自然也上来了。这个部分将主要学习数据系统的复制、分区、事务、一致性共识算法、以及分布式系统设计时的一些挑战等，这些知识都比较硬核，也非常有趣。所以，「上车，走吧~」">
-<meta name="twitter:image" content="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/master-slave-replication.png">
+<meta name="twitter:image" content="/2019/08/18/ddia-data-replication-and-partition/master-slave-replication.png">
 
 
 
@@ -145,7 +145,7 @@
 
 
 
-  <link rel="canonical" href="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/">
+  <link rel="canonical" href="/2019/08/18/ddia-data-replication-and-partition/">
 
 
 
@@ -298,7 +298,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/">
+    <link itemprop="mainEntityOfPage" href="/2019/08/18/ddia-data-replication-and-partition/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -712,7 +712,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/" title="野猪🐗书读书笔记之数据复制和分区">http://ifaceless.space/2019/08/18/ddia-data-replication-and-partition/</a>
+    <a href="/2019/08/18/ddia-data-replication-and-partition/" title="野猪🐗书读书笔记之数据复制和分区">/2019/08/18/ddia-data-replication-and-partition/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -837,7 +837,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">44</span>
+                  <span class="site-state-item-count">45</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -859,7 +859,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">73</span>
+                  <span class="site-state-item-count">75</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

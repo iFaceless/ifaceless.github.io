@@ -6,7 +6,7 @@
 
 
 <html class="theme-next mist use-motion" lang="zh-Hans">
-<head><meta name="generator" content="Hexo 3.8.0">
+<head><meta name="generator" content="Hexo 3.9.0">
   <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -93,11 +93,11 @@
 <meta name="keywords" content="Rust,网络编程,Log-Structured">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Talent Plan 之 Rust 网络编程实践（二）：预备知识">
-<meta property="og:url" content="http://ifaceless.space/2020/04/21/talent-plan-rust-network-programming-bb2/index.html">
+<meta property="og:url" content="/2020/04/21/talent-plan-rust-network-programming-bb2/index.html">
 <meta property="og:site_name" content="黑白之院">
 <meta property="og:description" content="引言">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:updated_time" content="2020-04-21T06:33:53.408Z">
+<meta property="og:updated_time" content="2020-06-02T08:57:46.129Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Talent Plan 之 Rust 网络编程实践（二）：预备知识">
 <meta name="twitter:description" content="引言">
@@ -130,7 +130,7 @@
 
 
 
-  <link rel="canonical" href="http://ifaceless.space/2020/04/21/talent-plan-rust-network-programming-bb2/">
+  <link rel="canonical" href="/2020/04/21/talent-plan-rust-network-programming-bb2/">
 
 
 
@@ -283,7 +283,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2020/04/21/talent-plan-rust-network-programming-bb2/">
+    <link itemprop="mainEntityOfPage" href="/2020/04/21/talent-plan-rust-network-programming-bb2/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -408,7 +408,7 @@
         <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><a id="more"></a>
 <h1 id="材料阅读"><a href="#材料阅读" class="headerlink" title="材料阅读"></a>材料阅读</h1><h2 id="炫酷算法之日志结构存储"><a href="#炫酷算法之日志结构存储" class="headerlink" title="炫酷算法之日志结构存储"></a>炫酷算法之日志结构存储</h2><p><a href="http://blog.notdot.net/2009/12/Damn-Cool-Algorithms-Log-structured-storage" target="_blank" rel="noopener">Damn Cool Algorithms: Log structured storage</a></p>
 <h2 id="日志结构文件系统设计与实现"><a href="#日志结构文件系统设计与实现" class="headerlink" title="日志结构文件系统设计与实现"></a>日志结构文件系统设计与实现</h2><h2 id="Bitcask，高性能-amp-基于日志结构的-Key-Value-存储"><a href="#Bitcask，高性能-amp-基于日志结构的-Key-Value-存储" class="headerlink" title="Bitcask，高性能 &amp; 基于日志结构的 Key/Value 存储"></a>Bitcask，高性能 &amp; 基于日志结构的 Key/Value 存储</h2><h2 id="Rust-中的错误处理"><a href="#Rust-中的错误处理" class="headerlink" title="Rust 中的错误处理"></a>Rust 中的错误处理</h2><h2 id="std-collections-文档学习"><a href="#std-collections-文档学习" class="headerlink" title="std::collections 文档学习"></a><code>std::collections</code> 文档学习</h2><h2 id="std-io-文档学习"><a href="#std-io-文档学习" class="headerlink" title="std::io 文档学习"></a><code>std::io</code> 文档学习</h2><h1 id="练习题"><a href="#练习题" class="headerlink" title="练习题"></a>练习题</h1><h2 id="使用-serde-序列化和反序列化数据结构（JSON）"><a href="#使用-serde-序列化和反序列化数据结构（JSON）" class="headerlink" title="使用 serde 序列化和反序列化数据结构（JSON）"></a>使用 <code>serde</code> 序列化和反序列化数据结构（JSON）</h2><h2 id="使用-serde-序列化和反序列化数据结构（RON）"><a href="#使用-serde-序列化和反序列化数据结构（RON）" class="headerlink" title="使用 serde 序列化和反序列化数据结构（RON）"></a>使用 <code>serde</code> 序列化和反序列化数据结构（RON）</h2><h2 id="使用-serde-序列化反序列化-1000-个数据结构（BSON）"><a href="#使用-serde-序列化反序列化-1000-个数据结构（BSON）" class="headerlink" title="使用 serde 序列化反序列化 1000 个数据结构（BSON）"></a>使用 <code>serde</code> 序列化反序列化 1000 个数据结构（BSON）</h2><h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
-<li><a href="https://github.com/pingcap/talent-plan/blob/master/rust/building-blocks/bb-2.md" target="_blank" rel="noopener">PNA Rust — Building Blocks 2</a></li>
+<li><a href="https://github.com/pingcap/talent-plan/blob/master/courses/rust/building-blocks/bb-2.md" target="_blank" rel="noopener">PNA Rust — Building Blocks 2</a></li>
 <li><a href="https://doc.rust-lang.org/rustdoc/what-is-rustdoc.html" target="_blank" rel="noopener">What’s rustdoc</a></li>
 </ul>
 <h1 id="延伸阅读"><a href="#延伸阅读" class="headerlink" title="延伸阅读"></a>延伸阅读</h1><ul>
@@ -435,7 +435,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://ifaceless.space/2020/04/21/talent-plan-rust-network-programming-bb2/" title="Talent Plan 之 Rust 网络编程实践（二）：预备知识">http://ifaceless.space/2020/04/21/talent-plan-rust-network-programming-bb2/</a>
+    <a href="/2020/04/21/talent-plan-rust-network-programming-bb2/" title="Talent Plan 之 Rust 网络编程实践（二）：预备知识">/2020/04/21/talent-plan-rust-network-programming-bb2/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -476,6 +476,10 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/06/02/rust-error-handling/" rel="prev" title="Rust 错误处理">
+                Rust 错误处理 <i class="fa fa-chevron-right"></i>
+              </a>
             
           </div>
         </div>
@@ -556,7 +560,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">44</span>
+                  <span class="site-state-item-count">45</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -578,7 +582,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">73</span>
+                  <span class="site-state-item-count">75</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

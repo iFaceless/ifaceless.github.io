@@ -6,7 +6,7 @@
 
 
 <html class="theme-next mist use-motion" lang="zh-Hans">
-<head><meta name="generator" content="Hexo 3.8.0">
+<head><meta name="generator" content="Hexo 3.9.0">
   <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
@@ -93,7 +93,7 @@
 <meta name="keywords" content="Go,Redis,字典">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Go 语言实现 Redis 字典">
-<meta property="og:url" content="http://ifaceless.space/2019/12/17/implement-redis-dict-in-go/index.html">
+<meta property="og:url" content="/2019/12/17/implement-redis-dict-in-go/index.html">
 <meta property="og:site_name" content="黑白之院">
 <meta property="og:description" content="引言 字典在 Redis 中是一个非常重要的数据结构，因为 Redis 本身就是一个键值数据库。我们先来回顾下在 Redis 源码学习之基本数据结构  中提到的 Redis 字典实现的一些特点：  支持海量 &amp;lt;key, value&amp;gt; 存储； 使用渐进式 Rehash 策略，避免因为需要迁移的 buckets 太多导致阻塞时间过久（Redis 核心处理逻辑是单线程模型）； 默认使用 Si">
 <meta property="og:locale" content="zh-Hans">
@@ -132,7 +132,7 @@
 
 
 
-  <link rel="canonical" href="http://ifaceless.space/2019/12/17/implement-redis-dict-in-go/">
+  <link rel="canonical" href="/2019/12/17/implement-redis-dict-in-go/">
 
 
 
@@ -285,7 +285,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://ifaceless.space/2019/12/17/implement-redis-dict-in-go/">
+    <link itemprop="mainEntityOfPage" href="/2019/12/17/implement-redis-dict-in-go/">
 
     <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
       <meta itemprop="name" content="iFaceless">
@@ -408,7 +408,7 @@
 
       
         <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p><img src="https://pic3.zhimg.com/80/v2-c3ed9fd26f9d28528282d51827b76e91.png" alt=""></p>
-<p>字典在 Redis 中是一个非常重要的数据结构，因为 Redis 本身就是一个键值数据库。我们先来回顾下在 <a href="https://ifaceless.space/2019/12/15/redis-low-level-data-structures/">Redis 源码学习之基本数据结构</a>  中提到的 Redis 字典实现的一些特点：</p>
+<p>字典在 Redis 中是一个非常重要的数据结构，因为 Redis 本身就是一个键值数据库。我们先来回顾下在 <a href="https://ifaceless.space/2019/12/15/redis-low-level-data-structures/" target="_blank" rel="noopener">Redis 源码学习之基本数据结构</a>  中提到的 Redis 字典实现的一些特点：</p>
 <ol>
 <li>支持海量 <code>&lt;key, value&gt;</code> 存储；</li>
 <li>使用渐进式 Rehash 策略，避免因为需要迁移的 buckets 太多导致阻塞时间过久（Redis 核心处理逻辑是单线程模型）；</li>
@@ -468,7 +468,7 @@
   </li>
   <li class="post-copyright-link">
     <strong>本文链接：</strong>
-    <a href="http://ifaceless.space/2019/12/17/implement-redis-dict-in-go/" title="Go 语言实现 Redis 字典">http://ifaceless.space/2019/12/17/implement-redis-dict-in-go/</a>
+    <a href="/2019/12/17/implement-redis-dict-in-go/" title="Go 语言实现 Redis 字典">/2019/12/17/implement-redis-dict-in-go/</a>
   </li>
   <li class="post-copyright-license">
     <strong>版权声明： </strong>
@@ -593,7 +593,7 @@
               
                 <a href="/archives/">
               
-                  <span class="site-state-item-count">44</span>
+                  <span class="site-state-item-count">45</span>
                   <span class="site-state-item-name">日志</span>
                 </a>
               </div>
@@ -615,7 +615,7 @@
               
               <div class="site-state-item site-state-tags">
                 <a href="/tags/index.html">
-                  <span class="site-state-item-count">73</span>
+                  <span class="site-state-item-count">75</span>
                   <span class="site-state-item-name">标签</span>
                 </a>
               </div>

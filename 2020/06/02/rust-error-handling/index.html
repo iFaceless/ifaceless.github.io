@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Rust,Error Handling,翻译,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言 本文内容主要翻译自 Andrew Gallant 的文章 Error Handling in Rust。  如同大多数的编程语言，Rust 中也需要通过特定的方式处理错误。众所周知，目前常见的错误处理方式主要分为两种：  异常机制（C#/Java/Python 等）； 返回错误（Go/Rust 等）。  本文将会综合全面地介绍 Rust 中的错误处理，通过循序渐进地引导，带领初学者扎实地掌握">
+<meta name="keywords" content="Rust,Error Handling,翻译">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Rust 错误处理">
+<meta property="og:url" content="/2020/06/02/rust-error-handling/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言 本文内容主要翻译自 Andrew Gallant 的文章 Error Handling in Rust。  如同大多数的编程语言，Rust 中也需要通过特定的方式处理错误。众所周知，目前常见的错误处理方式主要分为两种：  异常机制（C#/Java/Python 等）； 返回错误（Go/Rust 等）。  本文将会综合全面地介绍 Rust 中的错误处理，通过循序渐进地引导，带领初学者扎实地掌握">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://i.loli.net/2020/06/02/6dBfsiZ9czGNCQT.png">
+<meta property="og:image" content="https://i.loli.net/2020/06/02/ZqkoAClh2pSiMrd.png">
+<meta property="og:updated_time" content="2020-06-02T09:39:26.832Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Rust 错误处理">
+<meta name="twitter:description" content="引言 本文内容主要翻译自 Andrew Gallant 的文章 Error Handling in Rust。  如同大多数的编程语言，Rust 中也需要通过特定的方式处理错误。众所周知，目前常见的错误处理方式主要分为两种：  异常机制（C#/Java/Python 等）； 返回错误（Go/Rust 等）。  本文将会综合全面地介绍 Rust 中的错误处理，通过循序渐进地引导，带领初学者扎实地掌握">
+<meta name="twitter:image" content="https://i.loli.net/2020/06/02/6dBfsiZ9czGNCQT.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="/2020/06/02/rust-error-handling/">
+
+
+
+
+
+  <title>Rust 错误处理 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="/2020/06/02/rust-error-handling/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Rust 错误处理</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-02T15:19:45+08:00">
+                2020-06-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Rust/" itemprop="url" rel="index">
+                    <span itemprop="name">Rust</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  1.3k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  4
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><blockquote>
+<p>本文内容主要翻译自 Andrew Gallant 的文章 <a href="https://blog.burntsushi.net/rust-error-handling/" target="_blank" rel="noopener">Error Handling in Rust</a>。</p>
+</blockquote>
+<p>如同大多数的编程语言，Rust 中也需要通过特定的方式处理错误。众所周知，目前常见的错误处理方式主要分为两种：</p>
+<ol>
+<li>异常机制（C#/Java/Python 等）；</li>
+<li>返回错误（Go/Rust 等）。</li>
+</ol>
+<p>本文将会综合全面地介绍 Rust 中的错误处理，通过循序渐进地引导，带领初学者扎实地掌握这块知识。如果我们不熟悉标准库的话，我们可能会使用较为愚蠢的方式处理错误，这种会比较繁琐，产生很多样板代码。所以本文会演示如何借助标准库让错误处理<strong>更加优雅和简洁</strong>。</p>
+<p><img src="https://i.loli.net/2020/06/02/6dBfsiZ9czGNCQT.png" alt="Rust 错误处理"></p>
+<h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>本文的代码放在作者的 <a href="https://github.com/BurntSushi/blog/tree/master/code/rust-error-handling" target="_blank" rel="noopener">博客仓库</a>。<br><a href="https://doc.rust-lang.org/book/ch09-00-error-handling.html" target="_blank" rel="noopener">Rust Book, Error Handling</a> 中也有关于错误处理的部分，可以参照阅读。</p>
+<p>本文篇幅巨长，主要是因为写了很多关于 Sum Types 和组合子（Combinators）的内容作为开头，逐步讲解 Rust 错误处理方式的改进。因此，如果你认为没有必要的话，也可以略过。以下是作者提供的简要指南：</p>
+<ol>
+<li>如果你是 Rust 新手，对于系统编程和富类型系统（expressive type systems）不太熟悉的话，推荐你从头开始阅读（如果是完全没有了解过 Rust 的童鞋，推荐先阅读下 [Rust Book](<a href="https://doc.rust-lang.org/book/title-page.html）；" target="_blank" rel="noopener">https://doc.rust-lang.org/book/title-page.html）；</a></li>
+<li>如果你从来没有了解过 Rust，但是对于函数式语言很熟悉（看到「代数数据类型（algebaric data types）」和「组合子（combinators）」不会让你感到陌生），那也许可以直接跳过基础部分，从「多错误类型」部分开始阅读，然后阅读「标准库中的 error traits」部分;</li>
+<li>如果你已经拥有 Rust 编程经验，并且只想了解下错误处理的方式，那么可以直接跳到最后，看看作者给出的案例研究（当然，还有译者给出的实际案例）。</li>
+</ol>
+<h1 id="运行代码"><a href="#运行代码" class="headerlink" title="运行代码"></a>运行代码</h1><p>如果想要直接运行样例代码，可以参考下面的操作：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">$</span> git clone git://github.com/BurntSushi/blog</span><br><span class="line"><span class="meta">$</span> cd blog/code/rust-error-handling</span><br><span class="line"><span class="meta">$</span> cargo run --bin NAME-OF-CODE-SAMPLE [ args ... ]</span><br></pre></td></tr></table></figure>
+<h1 id="TL-TR"><a href="#TL-TR" class="headerlink" title="TL;TR"></a>TL;TR</h1><p>文章太长，如果没耐心阅读的话，我们可以先来看看关于 Rust 错误处理的一些总结。以下是作者提供的「经验法则」，仅供参考，我们可以从中获得一些启发。</p>
+<ul>
+<li>如果你正在编写简短的示例代码，并且可能会有不少错误处理的负担，这种场景下可以考虑使用 <code>unwrap</code>（比如 <code>Result::unwrap</code>, <code>Option::unwrap</code> 或者 <code>Option::expect</code> 等）。阅读你代码的人应该知道如何以优雅的姿势处理错误（如果 TA 不会，把这篇文章甩给 TA 看）；</li>
+<li>如果你正在写一个类似临时脚本一样的程序（<a href="https://www.computerhope.com/jargon/q/qad.htm" target="_blank" rel="noopener">quick-n-dirty program</a>），直接用 <code>unwrap</code> 也不用觉得羞愧。不过需要注意的是：如果别人接收你这个程序，那可能是要不爽的哦（毕竟没有特别丰富的错误消息）；</li>
+<li>对于👆的场景，如果你觉得直接用 <code>unwrap</code> 不太好（毕竟出错会直接 panic 掉），那么可以考虑使用 <code>Box&lt;dyn Error&gt;</code> 或者 <a href="anyhow"><code>anyhow::Error</code></a> 类型作为函数的错误返回类型。如果使用了 <code>anyhow</code> crate，当使用 nightly 版本的 Rust 时，错误会自动拥有关联的 backtrace；</li>
+<li>要是上面的方法还不行，那么可以考虑自定义错误类型，并且实现 <code>From</code> 和 <code>Error</code> trait，从而可以顺利地使用 <code>?</code> 操作符，让错误处理更加优雅（要是你连 <code>From</code> 和 <code>Error</code> trait 也不愿意动手实现的话，可以使用 <a href="https://docs.rs/thiserror/1.0.19/thiserror/" target="_blank" rel="noopener">thiserror</a> 来自动生成）；</li>
+<li>如果你正在编写一个库，并且可能会产生错误，推荐你自定义错误类型，并且实现 <code>std::error::Error</code> trait，并且实现合适的 <code>From</code> trait，从而方便库的调用者编写代码（因为基于 Rust 的相干性原则（coherence rules），调用者不能为库中定义的错误类型实现 <code>From</code>，因此这是库作者的职责）；</li>
+<li>学会使用 <code>Option</code> 和 <code>Result</code> 中定义的组合子，有时候只是使用它们可能比较索然无味，但是可以通过合理地组合使用 <code>?</code> 操作符合组合子来改善代码。<code>and_then</code>, <code>map</code> 和 <code>unwrap_or</code> 是作者比较喜欢的几个组合子。</li>
+</ul>
+<p>总结一下流程如下：<br><img src="https://i.loli.net/2020/06/02/ZqkoAClh2pSiMrd.png" alt="错误定义流程"></p>
+<h1 id="基础知识"><a href="#基础知识" class="headerlink" title="基础知识"></a>基础知识</h1><h2 id="Unwrap-详解"><a href="#Unwrap-详解" class="headerlink" title="Unwrap 详解"></a>Unwrap 详解</h2><h2 id="Option-类型"><a href="#Option-类型" class="headerlink" title="Option 类型"></a><code>Option</code> 类型</h2><h3 id="Option-lt-T-gt"><a href="#Option-lt-T-gt" class="headerlink" title="Option&lt;T&gt;"></a><code>Option&lt;T&gt;</code></h3><h2 id="Result-类型"><a href="#Result-类型" class="headerlink" title="Result 类型"></a><code>Result</code> 类型</h2><h3 id="解析整数"><a href="#解析整数" class="headerlink" title="解析整数"></a>解析整数</h3><h3 id="Result-类型别名"><a href="#Result-类型别名" class="headerlink" title="Result 类型别名"></a><code>Result</code> 类型别名</h3><h2 id="小插曲：unwrap-并非邪恶"><a href="#小插曲：unwrap-并非邪恶" class="headerlink" title="小插曲：unwrap 并非邪恶"></a>小插曲：<code>unwrap</code> 并非邪恶</h2><h1 id="处理多种错误类型"><a href="#处理多种错误类型" class="headerlink" title="处理多种错误类型"></a>处理多种错误类型</h1><h2 id="组合-Option-和-Result"><a href="#组合-Option-和-Result" class="headerlink" title="组合 Option 和 Result"></a>组合 <code>Option</code> 和 <code>Result</code></h2><h2 id="组合子的限制"><a href="#组合子的限制" class="headerlink" title="组合子的限制"></a>组合子的限制</h2><h2 id="提前返回"><a href="#提前返回" class="headerlink" title="提前返回"></a>提前返回</h2><h2 id="使用-try-宏或者-操作符"><a href="#使用-try-宏或者-操作符" class="headerlink" title="使用 try! 宏或者 ? 操作符"></a>使用 <code>try!</code> 宏或者 <code>?</code> 操作符</h2><h2 id="自定义错误类型"><a href="#自定义错误类型" class="headerlink" title="自定义错误类型"></a>自定义错误类型</h2><h1 id="标准库中的错误处理-trait"><a href="#标准库中的错误处理-trait" class="headerlink" title="标准库中的错误处理 trait"></a>标准库中的错误处理 trait</h1><h2 id="Error-trait"><a href="#Error-trait" class="headerlink" title="Error trait"></a><code>Error</code> trait</h2><h2 id="From-trait"><a href="#From-trait" class="headerlink" title="From trait"></a><code>From</code> trait</h2><h2 id="try-和-内部实现"><a href="#try-和-内部实现" class="headerlink" title="try! 和 ? 内部实现"></a><code>try!</code> 和 <code>?</code> 内部实现</h2><h2 id="组合自定义错误类型"><a href="#组合自定义错误类型" class="headerlink" title="组合自定义错误类型"></a>组合自定义错误类型</h2><h2 id="给库作者的一些建议"><a href="#给库作者的一些建议" class="headerlink" title="给库作者的一些建议"></a>给库作者的一些建议</h2><h1 id="案例研究：阅读人口数据的小程序"><a href="#案例研究：阅读人口数据的小程序" class="headerlink" title="案例研究：阅读人口数据的小程序"></a>案例研究：阅读人口数据的小程序</h1><h2 id="它在-GitHub-上"><a href="#它在-GitHub-上" class="headerlink" title="它在 GitHub 上"></a>它在 GitHub 上</h2><h2 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h2><h2 id="参数解析"><a href="#参数解析" class="headerlink" title="参数解析"></a>参数解析</h2><h2 id="编写业务逻辑"><a href="#编写业务逻辑" class="headerlink" title="编写业务逻辑"></a>编写业务逻辑</h2><h2 id="使用-Box-lt-dyn-Error-gt-处理错误"><a href="#使用-Box-lt-dyn-Error-gt-处理错误" class="headerlink" title="使用 Box&lt;dyn Error&gt; 处理错误"></a>使用 <code>Box&lt;dyn Error&gt;</code> 处理错误</h2><h2 id="从-stdin-中读取"><a href="#从-stdin-中读取" class="headerlink" title="从 stdin 中读取"></a>从 <code>stdin</code> 中读取</h2><h2 id="使用自定义错误类型"><a href="#使用自定义错误类型" class="headerlink" title="使用自定义错误类型"></a>使用自定义错误类型</h2><h2 id="添加功能"><a href="#添加功能" class="headerlink" title="添加功能"></a>添加功能</h2><h1 id="独创案例研究：新冠数据查询"><a href="#独创案例研究：新冠数据查询" class="headerlink" title="独创案例研究：新冠数据查询"></a>独创案例研究：新冠数据查询</h1><h1 id="原文"><a href="#原文" class="headerlink" title="原文"></a>原文</h1><ul>
+<li><a href="https://blog.burntsushi.net/rust-error-handling/" target="_blank" rel="noopener">Error Handling in Rust</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="/2020/06/02/rust-error-handling/" title="Rust 错误处理">/2020/06/02/rust-error-handling/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Rust/" rel="tag"><i class="fa fa-tag"></i> Rust</a>
+          
+            <a href="/tags/Error-Handling/" rel="tag"><i class="fa fa-tag"></i> Error Handling</a>
+          
+            <a href="/tags/翻译/" rel="tag"><i class="fa fa-tag"></i> 翻译</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/04/21/talent-plan-rust-network-programming-bb2/" rel="next" title="Talent Plan 之 Rust 网络编程实践（二）：预备知识">
+                <i class="fa fa-chevron-left"></i> Talent Plan 之 Rust 网络编程实践（二）：预备知识
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">45</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me#ifaceless.space" target="_blank" title="邮箱">
+                      邮箱</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://zhuanlan.zhihu.com/0xe8551ccb" target="_blank" title="专栏">
+                      专栏</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://draveness.me/" title="Draveness's Blog" target="_blank">Draveness's Blog</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#说明"><span class="nav-number">2.</span> <span class="nav-text">说明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#运行代码"><span class="nav-number">3.</span> <span class="nav-text">运行代码</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#TL-TR"><span class="nav-number">4.</span> <span class="nav-text">TL;TR</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#基础知识"><span class="nav-number">5.</span> <span class="nav-text">基础知识</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Unwrap-详解"><span class="nav-number">5.1.</span> <span class="nav-text">Unwrap 详解</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Option-类型"><span class="nav-number">5.2.</span> <span class="nav-text">Option 类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Option-lt-T-gt"><span class="nav-number">5.2.1.</span> <span class="nav-text">Option&lt;T&gt;</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Result-类型"><span class="nav-number">5.3.</span> <span class="nav-text">Result 类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#解析整数"><span class="nav-number">5.3.1.</span> <span class="nav-text">解析整数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Result-类型别名"><span class="nav-number">5.3.2.</span> <span class="nav-text">Result 类型别名</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#小插曲：unwrap-并非邪恶"><span class="nav-number">5.4.</span> <span class="nav-text">小插曲：unwrap 并非邪恶</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#处理多种错误类型"><span class="nav-number">6.</span> <span class="nav-text">处理多种错误类型</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#组合-Option-和-Result"><span class="nav-number">6.1.</span> <span class="nav-text">组合 Option 和 Result</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组合子的限制"><span class="nav-number">6.2.</span> <span class="nav-text">组合子的限制</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#提前返回"><span class="nav-number">6.3.</span> <span class="nav-text">提前返回</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-try-宏或者-操作符"><span class="nav-number">6.4.</span> <span class="nav-text">使用 try! 宏或者 ? 操作符</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#自定义错误类型"><span class="nav-number">6.5.</span> <span class="nav-text">自定义错误类型</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#标准库中的错误处理-trait"><span class="nav-number">7.</span> <span class="nav-text">标准库中的错误处理 trait</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Error-trait"><span class="nav-number">7.1.</span> <span class="nav-text">Error trait</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#From-trait"><span class="nav-number">7.2.</span> <span class="nav-text">From trait</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#try-和-内部实现"><span class="nav-number">7.3.</span> <span class="nav-text">try! 和 ? 内部实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#组合自定义错误类型"><span class="nav-number">7.4.</span> <span class="nav-text">组合自定义错误类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#给库作者的一些建议"><span class="nav-number">7.5.</span> <span class="nav-text">给库作者的一些建议</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#案例研究：阅读人口数据的小程序"><span class="nav-number">8.</span> <span class="nav-text">案例研究：阅读人口数据的小程序</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#它在-GitHub-上"><span class="nav-number">8.1.</span> <span class="nav-text">它在 GitHub 上</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置"><span class="nav-number">8.2.</span> <span class="nav-text">配置</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参数解析"><span class="nav-number">8.3.</span> <span class="nav-text">参数解析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#编写业务逻辑"><span class="nav-number">8.4.</span> <span class="nav-text">编写业务逻辑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-Box-lt-dyn-Error-gt-处理错误"><span class="nav-number">8.5.</span> <span class="nav-text">使用 Box&lt;dyn Error&gt; 处理错误</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#从-stdin-中读取"><span class="nav-number">8.6.</span> <span class="nav-text">从 stdin 中读取</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用自定义错误类型"><span class="nav-number">8.7.</span> <span class="nav-text">使用自定义错误类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#添加功能"><span class="nav-number">8.8.</span> <span class="nav-text">添加功能</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#独创案例研究：新冠数据查询"><span class="nav-number">9.</span> <span class="nav-text">独创案例研究：新冠数据查询</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#原文"><span class="nav-number">10.</span> <span class="nav-text">原文</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>
