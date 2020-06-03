@@ -99,7 +99,7 @@
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://i.loli.net/2020/06/02/6dBfsiZ9czGNCQT.png">
 <meta property="og:image" content="https://i.loli.net/2020/06/02/ZqkoAClh2pSiMrd.png">
-<meta property="og:updated_time" content="2020-06-03T07:23:08.813Z">
+<meta property="og:updated_time" content="2020-06-03T07:25:17.648Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Rust 错误处理">
 <meta name="twitter:description" content="引言 本文内容主要翻译自 Andrew Gallant 的文章 Error Handling in Rust。  如同大多数的编程语言，Rust 中也需要通过特定的方式处理错误。众所周知，目前常见的错误处理方式主要分为两种：  异常机制（C#/Java/Python 等）； 返回错误（Go/Rust 等）。  本文将会综合全面地介绍 Rust 中的错误处理，通过循序渐进地引导，带领初学者扎实地掌握">
@@ -418,6 +418,7 @@
 </ol>
 <p>本文将会综合全面地介绍 Rust 中的错误处理，通过循序渐进地引导，带领初学者扎实地掌握这块知识。如果我们不熟悉标准库的话，我们可能会使用较为愚蠢的方式处理错误，这种会比较繁琐，产生很多样板代码。所以本文会演示如何借助标准库让错误处理<strong>更加优雅和简洁</strong>。</p>
 <p><img src="https://i.loli.net/2020/06/02/6dBfsiZ9czGNCQT.png" alt="Rust 错误处理"></p>
+<a id="more"></a>
 <h1 id="说明"><a href="#说明" class="headerlink" title="说明"></a>说明</h1><p>本文的代码放在作者的 <a href="https://github.com/BurntSushi/blog/tree/master/code/rust-error-handling" target="_blank" rel="noopener">博客仓库</a>。<br><a href="https://doc.rust-lang.org/book/ch09-00-error-handling.html" target="_blank" rel="noopener">Rust Book, Error Handling</a> 中也有关于错误处理的部分，可以参照阅读。</p>
 <p>本文篇幅巨长，主要是因为写了很多关于 Sum Types 和组合子（Combinators）的内容作为开头，逐步讲解 Rust 错误处理方式的改进。因此，如果你认为没有必要的话，也可以略过。以下是作者提供的简要指南：</p>
 <ol>

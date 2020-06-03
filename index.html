@@ -408,15 +408,16 @@
 
       
         
-          
-          引言
-本文内容主要翻译自 Andrew Gallant 的文章 Error Handling in Rust。
-
-如同大多数的编程语言，Rust 中也需要通过特定的方式处理错误。众所周知，目前常见的错误处理方式主要分为两种：
-
-异常机制（C#/Java/Python 等）；
-返回错误（Go/Rust
-          ...
+          <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><blockquote>
+<p>本文内容主要翻译自 Andrew Gallant 的文章 <a href="https://blog.burntsushi.net/rust-error-handling/" target="_blank" rel="noopener">Error Handling in Rust</a>。</p>
+</blockquote>
+<p>如同大多数的编程语言，Rust 中也需要通过特定的方式处理错误。众所周知，目前常见的错误处理方式主要分为两种：</p>
+<ol>
+<li>异常机制（C#/Java/Python 等）；</li>
+<li>返回错误（Go/Rust 等）。</li>
+</ol>
+<p>本文将会综合全面地介绍 Rust 中的错误处理，通过循序渐进地引导，带领初学者扎实地掌握这块知识。如果我们不熟悉标准库的话，我们可能会使用较为愚蠢的方式处理错误，这种会比较繁琐，产生很多样板代码。所以本文会演示如何借助标准库让错误处理<strong>更加优雅和简洁</strong>。</p>
+<p><img src="https://i.loli.net/2020/06/02/6dBfsiZ9czGNCQT.png" alt="Rust 错误处理"></p>
           <!--noindex-->
           <div class="post-button text-center">
             <a class="btn" href="/2020/06/02/rust-error-handling/" rel="contents">
