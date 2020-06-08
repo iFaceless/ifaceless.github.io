@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.9.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+<meta name="referrer" content="no-referrer">
+
+
+
+  
+  
+    
+    
+  <script src="/lib/pace/pace.min.js?v=1.0.2"></script>
+  <link href="/lib/pace/pace-theme-center-atom.min.css?v=1.0.2" rel="stylesheet">
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/favicon.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.jpg?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.jpg?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="Rust,网络编程,Log-Structured,">
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="黑白之院" type="application/atom+xml">
+
+
+
+
+
+
+<meta name="description" content="引言惭愧，时隔两个月继续本系列课程的学习，之前因为一些工作上的事情耽搁了很久。本节课程的学习素材非常丰富，也有很多是我们在编写 key-value 数据库前需要掌握的思想。 在资料学习部分，我们首先需要了解下什么是日志结构存储（Log structured storage），接下来需要掌握在 Rust 中如何以优雅的方式处理错误，最后还需要学习下 std::collections 中的一些数据结构">
+<meta name="keywords" content="Rust,网络编程,Log-Structured">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Talent Plan 之 Rust 网络编程实践（二）：预备知识">
+<meta property="og:url" content="/2020/06/07/talent-plan-rust-network-programming-bb2/index.html">
+<meta property="og:site_name" content="黑白之院">
+<meta property="og:description" content="引言惭愧，时隔两个月继续本系列课程的学习，之前因为一些工作上的事情耽搁了很久。本节课程的学习素材非常丰富，也有很多是我们在编写 key-value 数据库前需要掌握的思想。 在资料学习部分，我们首先需要了解下什么是日志结构存储（Log structured storage），接下来需要掌握在 Rust 中如何以优雅的方式处理错误，最后还需要学习下 std::collections 中的一些数据结构">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://i.loli.net/2020/06/08/qpVUduGcaR3YI8C.png">
+<meta property="og:image" content="https://i.loli.net/2020/06/08/VNpGobJzd94iXrg.png">
+<meta property="og:image" content="https://i.loli.net/2020/06/08/unloF1fpcPJ2BNQ.png">
+<meta property="og:image" content="https://i.loli.net/2020/06/08/5PEt7aore2HlQ68.png">
+<meta property="og:updated_time" content="2020-06-08T11:02:11.317Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Talent Plan 之 Rust 网络编程实践（二）：预备知识">
+<meta name="twitter:description" content="引言惭愧，时隔两个月继续本系列课程的学习，之前因为一些工作上的事情耽搁了很久。本节课程的学习素材非常丰富，也有很多是我们在编写 key-value 数据库前需要掌握的思想。 在资料学习部分，我们首先需要了解下什么是日志结构存储（Log structured storage），接下来需要掌握在 Rust 中如何以优雅的方式处理错误，最后还需要学习下 std::collections 中的一些数据结构">
+<meta name="twitter:image" content="https://i.loli.net/2020/06/08/qpVUduGcaR3YI8C.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":false,"scrollpercent":true,"onmobile":true},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="/2020/06/07/talent-plan-rust-network-programming-bb2/">
+
+
+
+
+
+  <title>Talent Plan 之 Rust 网络编程实践（二）：预备知识 | 黑白之院</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope="" itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope="" itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">黑白之院</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <h1 class="site-subtitle" itemprop="description">Valar Morghulis</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br>
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-收藏">
+          <a href="/collection" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-star"></i> <br>
+            
+            收藏
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope="" itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="/2020/06/07/talent-plan-rust-network-programming-bb2/">
+
+    <span hidden itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="iFaceless">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/images/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope="" itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="黑白之院">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h2 class="post-title" itemprop="name headline">Talent Plan 之 Rust 网络编程实践（二）：预备知识</h2>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-06-07T18:04:30+08:00">
+                2020-06-07
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope="" itemtype="http://schema.org/Thing">
+                  <a href="/categories/Rust/" itemprop="url" rel="index">
+                    <span itemprop="name">Rust</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+            <div class="post-wordcount">
+              
+                
+                  <span class="post-meta-divider">|</span>
+                
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-file-word-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">字数统计&#58;</span>
+                
+                <span title="字数统计">
+                  2.7k
+                </span>
+              
+
+              
+                <span class="post-meta-divider">|</span>
+              
+
+              
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-clock-o"></i>
+                </span>
+                
+                  <span class="post-meta-item-text">阅读时长 &asymp;</span>
+                
+                <span title="阅读时长">
+                  9
+                </span>
+              
+            </div>
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h1><p>惭愧，时隔两个月继续本系列课程的学习，之前因为一些工作上的事情耽搁了很久。本节课程的学习素材非常丰富，也有很多是我们在编写 key-value 数据库前需要掌握的思想。</p>
+<p>在资料学习部分，我们首先需要了解下什么是<strong>日志结构存储（Log structured storage）</strong>，接下来需要掌握在 Rust 中如何以优雅的方式处理错误，最后还需要学习下 <code>std::collections</code> 中的一些数据结构和 <code>std::io</code> 中的常用函数。</p>
+<p>在练习题部分，我们还将接触 Rust 中特别常用的序列化和反序列化框架 <code>serde</code>，并使用该框架完成 <code>json</code>, <code>ron</code> 和 <code>bson</code> 相关的练习，掌握它的基本用法。</p>
+<a id="more"></a>
+<h1 id="材料阅读"><a href="#材料阅读" class="headerlink" title="材料阅读"></a>材料阅读</h1><h2 id="日志结构存储技术简介"><a href="#日志结构存储技术简介" class="headerlink" title="日志结构存储技术简介"></a>日志结构存储技术简介</h2><p><a href="http://blog.notdot.net/2009/12/Damn-Cool-Algorithms-Log-structured-storage" target="_blank" rel="noopener">Damn Cool Algorithms: Log structured storage</a> 对于日志结构存储（Log-Structured Storage，以下简称 LSS）技术的基本原理做了简要介绍，我们把作者讲解的知识点进行了梳理，仅供参考。</p>
+<p>当我们要设计类似文件系统、数据库等存储系统时，我们的主要目标当然是要将数据存储到磁盘上。此时，我们会面临这么几个问题：</p>
+<ol>
+<li>为新的记录分配存储空间；</li>
+<li>存储和更新索引数据；</li>
+<li>当需要扩展已有的存储对象时，需要考虑碎片化的问题（当新的对象替换旧的对象存储空间时）。</li>
+</ol>
+<p>LSS 就是用来解决上述问题的技术之一，早期它被尝试应用在文件系统中，不过因为存在一些缺陷，而没有得到广泛使用。但是在数据库存储引擎领域，这种结构化存储技术却得到了越来越多的青睐，因为相对于在文件系统中的应用，在数据库存储引擎领域，使用 LSS 技术面临的问题更少，并且还带来了很多优势，让存储管理变得更加简单。</p>
+<p>简单来说，日志结构存储系统可以看成是一系列仅追加（append only）的数据条目（data entries）。所以，当需要写入新的数据时，只需要追加的日志结尾，而不需要查找到具体的写入位置，这样可以大大提高写入吞吐量。在写入记录的同时，也会更新索引数据（metadata）。索引数据也是追加到日志结尾的。</p>
+<p>我们接下来看一个简单的例子（假设日志中仅包含一条数据，以及一个引用该数据的索引节点（index node））:</p>
+<p><img src="https://i.loli.net/2020/06/08/qpVUduGcaR3YI8C.png" alt="image.png"></p>
+<p>接下来我们新增一个元素到日志结尾，然后更新下索引条目，并将更新后的版本追加至日志结尾：</p>
+<p><img src="https://i.loli.net/2020/06/08/VNpGobJzd94iXrg.png" alt="image.png"></p>
+<p>可以看到，原有的索引条目（A）还在日志文件中，不过不能使用了，因为我们现在要使用 A’ 来指向原有的数据条目了。</p>
+<p>那我们怎么读取文件系统呢？首先，我们需要查找到索引的根节点，最笨的办法自然是读取日志文件的最后一块。然而，这里是可能有并发读写的问题。这里提供一种方案来避免并发读写的问题：可以在日志文件的开头放一个单独的块，用来存储当前根节点的指针。这样，每当我们更新日志，就更新一下第一个节点，保证永远指向最新的根节点。</p>
+<p>好啦，接下来看看怎么更新数据。假设需要更新 <code>Foo</code> 为 <code>Foo&#39;</code>：</p>
+<p><img src="https://i.loli.net/2020/06/08/unloF1fpcPJ2BNQ.png" alt="image.png"></p>
+<p>首先我们将 <code>Foo</code> 拷贝到日志的结尾，然后更新索引节点并写入到日志结尾。此时，旧的 <code>Foo</code> 虽然还在日志文件中，但已经没有任何索引引用它了。</p>
+<p>看起来还不错，不过还有一个问题需要关注，那就是空间需要及时释放，否则最终会导致没有可用存储空间了。</p>
+<p>这里我们分别考虑文件系统和数据层存储引擎对于存储空间回收方面的问题：</p>
+<ol>
+<li><strong>对于文件系统</strong>：可以将磁盘当作环形缓冲区，这样旧的未被引用的数据可以直接被覆盖，这样可以做到空间复用。不过对于常规的文件系统而言，当磁盘越来越满时，花费在 GC 上的时间就会越多，并且还要将大量数据写入到日志的开头。一旦达到 80% 的磁盘空间使用量，文件系统将因为不堪重负而难以提供服务了。</li>
+<li><strong>对于数据库引擎</strong>：我们可以借助文件系统，将数据库拆分成多个固定长度的分片。当我们需要回收空间时，只需要选择某个分片，将其中活跃的数据写入到新的分片，然后删除旧的分片即可。<br> <img src="https://i.loli.net/2020/06/08/5PEt7aore2HlQ68.png" alt="image.png"></li>
+</ol>
+<p>接下来我们来梳理下，在数据库引擎中，我们使用 LSS 的优势：</p>
+<ol>
+<li>无需总是优先删除最旧的段；</li>
+<li>在何时回收空间上有更多的灵活性；</li>
+<li>无需传统的 WAL（Write Ahead Log）来恢复数据了，因为此处的日志文件就扮演了这样的角色；</li>
+<li>关于写入方面的优化，我们可以在内存中维护索引，并定期写入到磁盘。只要我们可以区分完整和非完整事务，我们就可以通过恢复机制完成受损数据的重建；</li>
+<li>备份更加轻松：只需要连续不断地把已完成的日志段（log segment）拷贝到新的设备中即可；</li>
+<li>关于并发和事务机制，我们可以使用 MVCC（Multiversion Concurrency Control）机制实现无锁读取；还可以采用乐观事务（Optimistic concurrency）模型提交写操作。</li>
+</ol>
+<h2 id="日志结构文件系统设计与实现"><a href="#日志结构文件系统设计与实现" class="headerlink" title="日志结构文件系统设计与实现"></a>日志结构文件系统设计与实现</h2><p><a href="https://people.eecs.berkeley.edu/~brewer/cs262/LFS.pdf" target="_blank" rel="noopener">LFS</a> 是关于日志结构文件系统的论文。在该文件系统中，日志是仅有的磁盘数据结构，同时包含了索引信息，方便高效读取。作者所在的团队开发了日志结构文件系统原型 Sprite LFS，整体上来说，对于小文件，写入性能是要比那时的 Unix 文件系统快上一个数量级。而在读取和大块写入性能上，和 Unix 文件系统相当或者更好。</p>
+<p>在写入场景下，Sprite LFS 能够利用 70% 的磁盘带宽，而 Unix 文件系统只能用到磁盘带宽的 5%~10%。</p>
+<p>根据论文的描述，在 Sprite LFS 中，日志是被拆分成多段维护的，并且还有段清理程序压缩高度碎片化段中的有效数据。论文篇幅较长，此处不再赘述，感兴趣的同学可以直接阅读原文。</p>
+<h2 id="Bitcask"><a href="#Bitcask" class="headerlink" title="Bitcask"></a>Bitcask</h2><p>在说 <a href="https://github.com/basho/bitcask/blob/develop/doc/bitcask-intro.pdf" target="_blank" rel="noopener">Bitcask</a> 之前，先来简单认识下 <a href="https://docs.riak.com/riak/kv/latest/index.html" target="_blank" rel="noopener">riakkv</a>，它是一个分布式的 NoSQL 数据库。而 <a href="https://github.com/basho/bitcask/blob/develop/doc/bitcask-intro.pdf" target="_blank" rel="noopener">Bitcask</a> 则是 <a href="https://docs.riak.com/riak/kv/latest/index.html" target="_blank" rel="noopener">riakkv</a> 支持的后端单机 KV 存储引擎之一。此外，它还支持 <a href="https://docs.riak.com/riak/kv/2.2.3/setup/planning/backend/leveldb.1.html" target="_blank" rel="noopener">LevelDB</a> 以及纯内存的 <a href="https://docs.riak.com/riak/kv/2.2.3/setup/planning/backend/memory.1.html" target="_blank" rel="noopener">Memory</a> 存储引擎。</p>
+<p><a href="https://github.com/basho/bitcask/blob/develop/doc/bitcask-intro.pdf" target="_blank" rel="noopener">Bitcask</a> 是一款高性能、基于日志结构的 Key/Value 存储。</p>
+<h3 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h3><ul>
+<li><strong>读写低延迟</strong>。得益于其 write-once, append-only 特性；</li>
+<li><strong>高吞吐</strong>。写操作基本可以打满磁盘带宽，性能非常强悍。主要原因有两点：<ol>
+<li>数据在磁盘上无需有序；</li>
+<li>采用日志结构存储设计，写入时磁盘移动幅度小；</li>
+</ol>
+</li>
+<li><strong>可以处理超出 RAM 容量的数据集</strong>。数据访问需要先从内存 Hash 表中找到日志文件偏移，再访问磁盘，即使数据集很大，访问依然高效；</li>
+<li><strong>只需要单次磁盘 Seek 即可定位数据</strong>。在内存的 Hash 表中记录了数据在磁盘上的位置，所以通常我们最多只需要一次磁盘访问即可查找到想要的数据，考虑到文件系统的缓存能力，有时候甚至不需要读盘；</li>
+<li><strong>查找和写入性能可预测</strong>。读取时，只需要读一次内存找到磁盘位置，再读盘至多一次即可找到数据；写入类似，只要找到当前打开文件的末尾即可追加数据；</li>
+<li><strong>快速、有界的崩溃恢复能力</strong>。考虑到日志结构存储的特性，只有最后打开的文件尾部可能有部分写入的情况。恢复操作只需要查看最后几次写入，检查 CRC 确认数据是否一致；</li>
+<li><strong>备份简单</strong>。任何基于磁盘块顺序打包或者拷贝文件的工具都可以用来备份 Bitcask 数据库。</li>
+</ul>
+<h3 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h3><ul>
+<li><strong>所有的键必须能够放入到内存</strong>。</li>
+</ul>
+<h3 id="实现细节"><a href="#实现细节" class="headerlink" title="实现细节"></a>实现细节</h3><p>每个 Bitcask 实例就是一个目录，任意时刻只能有一个操作系统进程会负责数据写入。我们可以把这个进程看作「数据库服务器」。任意时刻，目录中只有一个活跃文件可以写入，一旦该文件超过阈值，Bitcask 服务器则会关闭该文件，并新建一个文件继续写入。任何关闭（不管是正常关闭还是因为异常退出而关闭）的文件都是不可改变的（immutable），不可再被写入。</p>
+<h2 id="Rust-中的错误处理"><a href="#Rust-中的错误处理" class="headerlink" title="Rust 中的错误处理"></a>Rust 中的错误处理</h2><p>错误处理是我们在使用任何语言编写程序时都需要考虑的事情，如果我们没有比较优雅的方式应对错误处理，很有可能导致代码结构不够清晰，降低可读性和可维护性。所以我们学习 Rust，也同样要学习地道的错误处理方式。</p>
+<p><a href="https://blog.burntsushi.net/rust-error-handling/" target="_blank" rel="noopener">Andrew Gallant, Error Handling in Rust</a> 是非常值得阅读的文章，作者提供了非常丰富的示例，循序渐进地引导我们掌握 Rust 中的错误处理方式，并给出了一些经验法则。</p>
+<p>当然，笔者也对上述文章进行了翻译，参见 <a href="https://ifaceless.github.io/2020/06/02/rust-error-handling/" target="_blank" rel="noopener">Rust 错误处理</a>，感兴趣的同学可以直接阅读这篇文章。</p>
+<p><a href="https://ifaceless.github.io/2020/06/07/rust-py-go-error-handling/" target="_blank" rel="noopener">Rust &amp; Python &amp; Go 错误处理对比</a> 则借助一个小例子，对比了三种语言错误处理的方式，感兴趣的话，也可以阅读~</p>
+<h2 id="std-collections-文档学习"><a href="#std-collections-文档学习" class="headerlink" title="std::collections 文档学习"></a><code>std::collections</code> 文档学习</h2><h2 id="std-io-文档学习"><a href="#std-io-文档学习" class="headerlink" title="std::io 文档学习"></a><code>std::io</code> 文档学习</h2><h1 id="练习题"><a href="#练习题" class="headerlink" title="练习题"></a>练习题</h1><h2 id="使用-serde-序列化和反序列化数据结构（JSON）"><a href="#使用-serde-序列化和反序列化数据结构（JSON）" class="headerlink" title="使用 serde 序列化和反序列化数据结构（JSON）"></a>使用 <code>serde</code> 序列化和反序列化数据结构（JSON）</h2><h2 id="使用-serde-序列化和反序列化数据结构（RON）"><a href="#使用-serde-序列化和反序列化数据结构（RON）" class="headerlink" title="使用 serde 序列化和反序列化数据结构（RON）"></a>使用 <code>serde</code> 序列化和反序列化数据结构（RON）</h2><h2 id="使用-serde-序列化反序列化-1000-个数据结构（BSON）"><a href="#使用-serde-序列化反序列化-1000-个数据结构（BSON）" class="headerlink" title="使用 serde 序列化反序列化 1000 个数据结构（BSON）"></a>使用 <code>serde</code> 序列化反序列化 1000 个数据结构（BSON）</h2><h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><h1 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h1><ul>
+<li><a href="https://github.com/pingcap/talent-plan/blob/master/courses/rust/building-blocks/bb-2.md" target="_blank" rel="noopener">PNA Rust — Building Blocks 2</a></li>
+<li><a href="https://doc.rust-lang.org/rustdoc/what-is-rustdoc.html" target="_blank" rel="noopener">What’s rustdoc</a></li>
+<li><a href="https://docs.riak.com/riak/kv/2.2.3/setup/planning/backend/bitcask.1.html" target="_blank" rel="noopener">Bitcask</a></li>
+</ul>
+<h1 id="延伸阅读"><a href="#延伸阅读" class="headerlink" title="延伸阅读"></a>延伸阅读</h1><ul>
+<li><a href="https://www.quora.com/What-is-the-difference-between-a-journaling-vs-a-log-structured-file-system" target="_blank" rel="noopener">What is the difference between a journaling vs a log structured file system?</a></li>
+<li><a href="https://people.kth.se/~johanmon/courses/id2206/lectures/journal-handout.pdf" target="_blank" rel="noopener">Journaling and Log-structured file systems</a></li>
+</ul>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+      <div>
+        <ul class="post-copyright">
+  <li class="post-copyright-author">
+    <strong>本文作者：</strong>
+    iFaceless
+  </li>
+  <li class="post-copyright-link">
+    <strong>本文链接：</strong>
+    <a href="/2020/06/07/talent-plan-rust-network-programming-bb2/" title="Talent Plan 之 Rust 网络编程实践（二）：预备知识">/2020/06/07/talent-plan-rust-network-programming-bb2/</a>
+  </li>
+  <li class="post-copyright-license">
+    <strong>版权声明： </strong>
+    本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/3.0/" rel="external nofollow" target="_blank">CC BY-NC-SA 3.0</a> 许可协议。转载请注明出处！
+  </li>
+</ul>
+
+      </div>
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Rust/" rel="tag"><i class="fa fa-tag"></i> Rust</a>
+          
+            <a href="/tags/网络编程/" rel="tag"><i class="fa fa-tag"></i> 网络编程</a>
+          
+            <a href="/tags/Log-Structured/" rel="tag"><i class="fa fa-tag"></i> Log-Structured</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2020/06/02/rust-error-handling/" rel="next" title="Rust 错误处理">
+                <i class="fa fa-chevron-left"></i> Rust 错误处理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2020/06/07/rust-py-go-error-handling/" rel="prev" title="Rust & Python & Go 错误处理对比">
+                Rust & Python & Go 错误处理对比 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+      <div id="sidebar-dimmer"></div>
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope="" itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/avatar.jpg" alt="iFaceless">
+            
+              <p class="site-author-name" itemprop="name">iFaceless</p>
+              <p class="site-description motion-element" itemprop="description"></p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives/">
+              
+                  <span class="site-state-item-count">46</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">16</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">75</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+            <div class="feed-link motion-element">
+              <a href="/atom.xml" rel="alternate">
+                <i class="fa fa-rss"></i>
+                RSS
+              </a>
+            </div>
+          
+
+          
+            <div class="links-of-author motion-element">
+                
+                  <span class="links-of-author-item">
+                    <a href="https://github.com/ifaceless" target="_blank" title="GitHub">
+                      GitHub</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="mailto:me#ifaceless.space" target="_blank" title="邮箱">
+                      邮箱</a>
+                  </span>
+                
+                  <span class="links-of-author-item">
+                    <a href="https://zhuanlan.zhihu.com/0xe8551ccb" target="_blank" title="专栏">
+                      专栏</a>
+                  </span>
+                
+            </div>
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                常用链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://xieyuanpeng.com" title="Lingering Fragments" target="_blank">Lingering Fragments</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://blog.acolyer.org/" title="The Morning Paper" target="_blank">The Morning Paper</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.freecodecamp.org" title="freeCodeCamp" target="_blank">freeCodeCamp</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://draveness.me/" title="Draveness's Blog" target="_blank">Draveness's Blog</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#材料阅读"><span class="nav-number">2.</span> <span class="nav-text">材料阅读</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#日志结构存储技术简介"><span class="nav-number">2.1.</span> <span class="nav-text">日志结构存储技术简介</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#日志结构文件系统设计与实现"><span class="nav-number">2.2.</span> <span class="nav-text">日志结构文件系统设计与实现</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Bitcask"><span class="nav-number">2.3.</span> <span class="nav-text">Bitcask</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#优点"><span class="nav-number">2.3.1.</span> <span class="nav-text">优点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#缺点"><span class="nav-number">2.3.2.</span> <span class="nav-text">缺点</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现细节"><span class="nav-number">2.3.3.</span> <span class="nav-text">实现细节</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Rust-中的错误处理"><span class="nav-number">2.4.</span> <span class="nav-text">Rust 中的错误处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#std-collections-文档学习"><span class="nav-number">2.5.</span> <span class="nav-text">std::collections 文档学习</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#std-io-文档学习"><span class="nav-number">2.6.</span> <span class="nav-text">std::io 文档学习</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#练习题"><span class="nav-number">3.</span> <span class="nav-text">练习题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-serde-序列化和反序列化数据结构（JSON）"><span class="nav-number">3.1.</span> <span class="nav-text">使用 serde 序列化和反序列化数据结构（JSON）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-serde-序列化和反序列化数据结构（RON）"><span class="nav-number">3.2.</span> <span class="nav-text">使用 serde 序列化和反序列化数据结构（RON）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用-serde-序列化反序列化-1000-个数据结构（BSON）"><span class="nav-number">3.3.</span> <span class="nav-text">使用 serde 序列化反序列化 1000 个数据结构（BSON）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小结"><span class="nav-number">4.</span> <span class="nav-text">小结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#延伸阅读"><span class="nav-number">6.</span> <span class="nav-text">延伸阅读</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; 2018 &mdash; <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">黑白之院（iFaceless）</span>
+
+  
+</div>
+
+
+  <div class="powered-by">由 <a class="theme-link" target="_blank" href="https://hexo.io">Hexo</a> 强力驱动</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">主题 &mdash; <a class="theme-link" target="_blank" href="https://github.com/iissnan/hexo-theme-next">NexT.Mist</a></div>
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+          <span id="scrollpercent"><span>0</span>%</span>
+        
+      </div>
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+<script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https') {
+        bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';        
+    }
+    else {
+        bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+    }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+  
+  
+
+  
+
+  
+  <script type="text/javascript" src="/js/src/js.cookie.js?v=5.1.4"></script>
+  <script type="text/javascript" src="/js/src/scroll-cookie.js?v=5.1.4"></script>
+
+
+  
+
+</body>
+</html>
