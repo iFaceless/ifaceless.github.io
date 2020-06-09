@@ -3,7 +3,7 @@
   <entry>
     <title><![CDATA[Talent Plan 之 Rust 网络编程（二）：日志结构文件 I/O]]></title>
     <url>%2F2020%2F06%2F09%2Ftalent-plan-rust-network-programming-prj2%2F</url>
-    <content type="text"><![CDATA[引言]]></content>
+    <content type="text"><![CDATA[引言 参考 Bincode]]></content>
       <categories>
         <category>Rust</category>
       </categories>
